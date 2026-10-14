@@ -11,6 +11,13 @@ does not assign risk scores or interpret an entitlement as proof of a vulnerabil
 audit, signature verification, Gatekeeper assessment, notarization check, or
 claim about effective permissions.
 
+## Download v0.1.1
+
+[Download the signed and notarized arm64 macOS app](https://github.com/jdotc1/EntitlementDiff/releases/download/v0.1.1/EntitlementDiff-0.1.1-macOS-arm64.zip) for Apple silicon Macs on macOS 14+.
+Extract the ZIP and move EntitlementDiff.app to Applications. v0.1.1 adds per-input
+Reload/Retry and Reload Both (Shift-Command-R), preserving explicit architecture
+and stale-result suppression. [Release notes and sanitized source](https://github.com/jdotc1/EntitlementDiff/releases/tag/v0.1.1).
+
 ## Build and run
 
 Requires macOS 14+ and a Swift 6 toolchain with macOS command-line developer tools.
@@ -162,8 +169,8 @@ passed focused checks and actual local app inspection. The latest affected check
 ran five new Reload/Retry methods. These are separate receipts, not a fresh full-suite run
 on the release snapshot. See `docs/RELEASE_VALIDATION.md` for evidence boundaries.
 
-Build locally using the commands above. This release does not include an installed
-app binary. Local builds are ad-hoc development signed, not Developer ID signed or
+Build locally using the commands above. This source archive does not include an installed
+app binary; download the notarized app ZIP separately from the release page. Local builds are ad-hoc development signed, not Developer ID signed or
 notarized. No distribution readiness or complete accessibility acceptance is claimed.
 `LICENSE` is MIT.
 
