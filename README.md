@@ -11,6 +11,14 @@ does not assign risk scores or interpret an entitlement as proof of a vulnerabil
 audit, signature verification, Gatekeeper assessment, notarization check, or
 claim about effective permissions.
 
+## Download the notarized macOS app
+
+For Apple silicon Macs on macOS 14+, download [EntitlementDiff-0.1.0-macOS-arm64.zip](https://github.com/jdotc1/EntitlementDiff/releases/download/v0.1.0/EntitlementDiff-0.1.0-macOS-arm64.zip), extract it and move EntitlementDiff.app to Applications.
+The app is Developer ID signed by Jeffrey Cooney (5HR49PU83V), uses hardened
+runtime and has an Apple notarization ticket. Intel-host support is not included.
+See the [v0.1.0 release](https://github.com/jdotc1/EntitlementDiff/releases/tag/v0.1.0)
+for distribution acceptance and scope. The source ZIP remains available.
+
 ## Build and run
 
 Requires macOS 14+ and a Swift 6 toolchain with macOS command-line developer tools.
@@ -156,7 +164,6 @@ passed focused checks and actual local app inspection. The latest affected check
 ran six inspector methods. These are separate receipts, not a fresh full-suite run
 on the release snapshot. See `docs/RELEASE_VALIDATION.md` for evidence boundaries.
 
-Build locally using the commands above. This release does not include an installed
-app binary. Local builds are ad-hoc development signed, not Developer ID signed or
-notarized. No distribution readiness or complete accessibility acceptance is claimed.
+Build locally using the commands above. The release also includes a Developer ID signed and notarized arm64 app ZIP.
+Local source builds remain ad-hoc development signed. No distribution readiness or complete accessibility acceptance is claimed.
 `LICENSE` is MIT.

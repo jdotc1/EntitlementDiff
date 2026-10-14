@@ -19,3 +19,15 @@ This summary is not a new test run, independent release audit or binary-distribu
 qualification. Accessibility work was explicitly stopped; complete acceptance is
 not claimed. AppKit sharing-indicator geometry faults were previously localized to
 system stacks; no product fix or fault-free-runtime claim follows.
+
+## Notarized arm64 distribution
+
+The v0.1.0 arm64 app was Developer ID signed with hardened runtime/timestamp,
+submitted through Xcode and marked Ready to distribute by Apple. The exported
+stapled ticket validated and Gatekeeper accepted Notarized Developer ID.
+The final ZIP's extracted copy launched with download quarantine under App
+Translocation on the development Mac; native input selection and JSON export
+passed. The published GitHub ZIP was subsequently downloaded in a browser and
+extracted successfully. Accepted signing/test receipts were reused, without a
+full-suite rerun. This is same-Mac focused acceptance, not clean-Mac, Intel-host,
+minimum-OS or accessibility qualification.
