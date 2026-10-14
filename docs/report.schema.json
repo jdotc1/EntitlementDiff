@@ -1,0 +1,329 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "EntitlementDiff comparison report v1",
+  "$comment": "Structural contract only. Unicode ordering, uniqueness, integer ranges and cross-snapshot consistency are application checks.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "tool": {
+      "const": "EntitlementDiff"
+    },
+    "scope": {
+      "type": "string"
+    },
+    "signatureValidation": {
+      "const": "notPerformed"
+    },
+    "gatekeeperAssessment": {
+      "const": "notPerformed"
+    },
+    "previous": {
+      "$ref": "#/$defs/snapshot"
+    },
+    "current": {
+      "$ref": "#/$defs/snapshot"
+    },
+    "changes": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/change"
+      }
+    },
+    "unchangedCount": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "notices": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "tool",
+    "scope",
+    "signatureValidation",
+    "gatekeeperAssessment",
+    "previous",
+    "current",
+    "changes",
+    "unchangedCount",
+    "notices"
+  ],
+  "$defs": {
+    "entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "type": "string"
+        },
+        "value": {
+          "$ref": "#/$defs/value"
+        }
+      },
+      "required": [
+        "key",
+        "value"
+      ]
+    },
+    "value": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "type": {
+              "const": "boolean"
+            },
+            "value": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "type": {
+              "const": "integer"
+            },
+            "value": {
+              "type": "string",
+              "pattern": "^-?(0|[1-9][0-9]*)$"
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "type": {
+              "const": "real"
+            },
+            "value": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "type": {
+              "const": "string"
+            },
+            "value": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "type": {
+              "const": "data-base64"
+            },
+            "value": {
+              "type": "string",
+              "contentEncoding": "base64"
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "type": {
+              "const": "date-reference-seconds"
+            },
+            "value": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "type": {
+              "const": "array"
+            },
+            "value": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/value"
+              }
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "type": {
+              "const": "dictionary"
+            },
+            "value": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/entry"
+              }
+            }
+          },
+          "required": [
+            "type",
+            "value"
+          ]
+        }
+      ]
+    },
+    "snapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "sourceName": {
+          "type": "string"
+        },
+        "signingIdentifier": {
+          "type": "string",
+          "minLength": 1
+        },
+        "architecture": {
+          "enum": [
+            "arm64",
+            "x86_64"
+          ]
+        },
+        "presence": {
+          "enum": [
+            "notPresent",
+            "dictionaryPresent"
+          ]
+        },
+        "origin": {
+          "enum": [
+            "extracted",
+            "syntheticExample"
+          ]
+        },
+        "entitlements": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/entry"
+          }
+        }
+      },
+      "required": [
+        "sourceName",
+        "signingIdentifier",
+        "architecture",
+        "presence",
+        "origin",
+        "entitlements"
+      ]
+    },
+    "change": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "key": {
+              "type": "string"
+            },
+            "kind": {
+              "const": "added"
+            },
+            "current": {
+              "$ref": "#/$defs/value"
+            }
+          },
+          "required": [
+            "key",
+            "kind",
+            "current"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "key": {
+              "type": "string"
+            },
+            "kind": {
+              "const": "removed"
+            },
+            "previous": {
+              "$ref": "#/$defs/value"
+            }
+          },
+          "required": [
+            "key",
+            "kind",
+            "previous"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "key": {
+              "type": "string"
+            },
+            "kind": {
+              "const": "changed"
+            },
+            "previous": {
+              "$ref": "#/$defs/value"
+            },
+            "current": {
+              "$ref": "#/$defs/value"
+            }
+          },
+          "required": [
+            "key",
+            "kind",
+            "previous",
+            "current"
+          ]
+        }
+      ]
+    }
+  }
+}

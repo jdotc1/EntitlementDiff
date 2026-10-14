@@ -1,0 +1,36 @@
+EntitlementDiff — complete comparison
+Previous: "Example-Before.app"
+Current: "Example-After.app"
+Requested architecture: arm64
+Scope: Requested architecture of the main executable only; nested code and other slices excluded.
+Signature validity: not checked. Gatekeeper/notarization: not checked.
+Previous signing identifier: "org.example.EntitlementDiffFixture"
+Current signing identifier: "org.example.EntitlementDiffFixture"
+Previous entitlement representation: dictionaryPresent
+Current entitlement representation: dictionaryPresent
+Changes: 5; unchanged keys: 1.
+
+Note: Extracted declarations are not effective permissions or a security verdict.
+Note: Unverified signatures may produce partial information. Inputs are not an atomic filesystem snapshot.
+Note: Reports omit source paths but include potentially sensitive names, identifiers and entitlement values.
+Note: Contains synthetic example data; not an inspection of installed applications.
+
+ADDED "com.apple.security.files.user-selected.read-only"
+  Previous: <absent>
+  Current: true
+
+REMOVED "com.apple.security.get-task-allow"
+  Previous: true
+  Current: <absent>
+
+CHANGED "com.apple.security.network.client"
+  Previous: true
+  Current: false
+
+CHANGED "example.feature-labels"
+  Previous: ["research", "local"]
+  Current: ["local", "research"]
+
+CHANGED "example.parser-version"
+  Previous: integer(1)
+  Current: integer(2)
