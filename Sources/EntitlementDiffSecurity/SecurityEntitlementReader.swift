@@ -76,6 +76,6 @@ public actor SecurityEntitlementReader: SnapshotReading {
                 .elementsEqual(location.executableURL.path.utf8) else { throw NativeInspectionError.executableMismatch }
         try Task.checkCancellation()
         return .init(sourceName: location.bundleURL.lastPathComponent, signingIdentifier: metadata.signingIdentifier,
-                     architecture: architecture, presence: metadata.presence, entitlements: metadata.entitlements)
+                     architecture: architecture, presence: metadata.presence, entitlements: metadata.entitlements, identity: location.identity)
     }
 }

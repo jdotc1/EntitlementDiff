@@ -51,6 +51,13 @@ final class AppActions {
         }
     }
 
+    func reveal(_ side: ComparisonSide) {
+        guard !isBusy, let url = model.selectedSourceURL(for: side) else { return }
+        let access = url.startAccessingSecurityScopedResource()
+        defer { if access { url.stopAccessingSecurityScopedResource() } }
+        NSWorkspace.shared.activateFileViewerSelecting([url])
+    }
+
     func reload(_ side: ComparisonSide? = nil) {
         guard !isBusy else { return }
         if let side {

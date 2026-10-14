@@ -71,10 +71,12 @@ struct ContentView: View {
             }
             HStack(alignment: .top, spacing: 14) {
                 SourcePane(side: .previous, state: model.previous, disabled: actions.isBusy,
+                           sourceURL: model.selectedSourceURL(for: .previous), reveal: { actions.reveal(.previous) },
                            canReload: model.canReload(.previous), reload: { actions.reload(.previous) },
                            choose: { actions.choose(.previous) }, clear: { actions.clear(.previous) },
                            drop: { actions.drop($0, side: .previous) })
                 SourcePane(side: .current, state: model.current, disabled: actions.isBusy,
+                           sourceURL: model.selectedSourceURL(for: .current), reveal: { actions.reveal(.current) },
                            canReload: model.canReload(.current), reload: { actions.reload(.current) },
                            choose: { actions.choose(.current) }, clear: { actions.clear(.current) },
                            drop: { actions.drop($0, side: .current) })

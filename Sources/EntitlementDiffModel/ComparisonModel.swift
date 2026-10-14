@@ -31,6 +31,12 @@ public final class ComparisonModel {
     /// In-memory only; never included in a report or persisted as history.
     public var selectedSourceURLs: [URL] { Array(requests.sourceURLs.values) }
 
+    /// Session-only original selection, never serialized into snapshots or reports.
+    public func selectedSourceURL(for side: ComparisonSide) -> URL? {
+        let state = side == .previous ? previous : current
+        return state.isEmpty ? nil : requests.sourceURLs[side]
+    }
+
     public var isLoading: Bool { previous.isLoading || current.isLoading }
     public var hasInputs: Bool { !previous.isEmpty || !current.isEmpty }
     public var canSwap: Bool { previous.snapshot != nil && current.snapshot != nil && !isLoading }

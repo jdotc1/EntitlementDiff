@@ -29,16 +29,23 @@ public struct EntitlementSnapshot: Sendable, Encodable {
     public let presence: EntitlementPresence
     public let origin: SnapshotOrigin
     public let entitlements: EntitlementDictionary
+    public let identity: AppIdentity?
+
+    // UI-only metadata must never change the report schema or expose local source state.
+    private enum CodingKeys: String, CodingKey {
+        case sourceName, signingIdentifier, architecture, presence, origin, entitlements
+    }
 
     public init(sourceName: String, signingIdentifier: String, architecture: Architecture,
                 presence: EntitlementPresence = .dictionaryPresent,
-                origin: SnapshotOrigin = .extracted, entitlements: EntitlementDictionary) {
+                origin: SnapshotOrigin = .extracted, entitlements: EntitlementDictionary, identity: AppIdentity? = nil) {
         self.sourceName = sourceName
         self.signingIdentifier = signingIdentifier
         self.architecture = architecture
         self.presence = presence
         self.origin = origin
         self.entitlements = entitlements
+        self.identity = identity
     }
 }
 

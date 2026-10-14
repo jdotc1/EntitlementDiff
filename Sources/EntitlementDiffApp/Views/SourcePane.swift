@@ -6,11 +6,14 @@ struct SourcePane: View {
     let side: ComparisonSide
     let state: InputState
     let disabled: Bool
+    let sourceURL: URL?
+    let reveal: () -> Void
     let canReload: Bool
     let reload: () -> Void
     let choose: () -> Void
     let clear: () -> Void
     let drop: ([URL]) -> Bool
+    @State private var showsDetails = false
     @State private var isDropTargeted = false
 
     var body: some View {
@@ -39,6 +42,13 @@ struct SourcePane: View {
                     .lineLimit(2)
                     .textSelection(.enabled)
                 stateDescription
+                if !state.isEmpty {
+                    Button("Input Details…") { showsDetails = true }
+                        .buttonStyle(.borderless)
+                        .popover(isPresented: $showsDetails) {
+                            InputDetailsView(state: state, sourceURL: sourceURL, disabled: disabled, reveal: reveal)
+                        }
+                }
                 Text("Drop one .app here to inspect or replace this input.")
                     .font(.caption).foregroundStyle(.secondary)
             }
@@ -55,6 +65,10 @@ struct SourcePane: View {
             return drop(urls)
         } isTargeted: { isDropTargeted = $0 }
         .accessibilityElement(children: .contain)
+    }
+
+    private func display(_ value: String?) -> String {
+        value.map { EntitlementValue.string($0).preview(maxCharacters: 256) } ?? "Unavailable"
     }
 
     @ViewBuilder private var stateDescription: some View {
@@ -74,6 +88,10 @@ struct SourcePane: View {
             .accessibilityLabel("Inspection failed: \(DisplayText.escaped(message))")
         case .ready(let snapshot):
             VStack(alignment: .leading, spacing: 3) {
+                if snapshot.origin == .extracted {
+                    Text("Version \(display(snapshot.identity?.version)) · Build \(display(snapshot.identity?.build))")
+                        .font(.caption).lineLimit(2).textSelection(.enabled)
+                }
                 Text("\(snapshot.entitlements.entries.count) keys · \(snapshot.architecture.rawValue) requested")
                     .font(.caption).monospacedDigit()
                 Text(DisplayText.escaped(snapshot.signingIdentifier))

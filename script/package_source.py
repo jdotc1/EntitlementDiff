@@ -47,13 +47,21 @@ def main():
     readme = DEST / "README.md"
     text = readme.read_text()
     start = text.index("## Current local validation")
-    text = text[:start] + """## Validation and distribution
+    text = text[:start] + """## Input Identity and Build Metadata
+
+Source panes show version/build. Input Details separates bundle and signing
+identifiers and shows the selected location, with Reveal in Finder. Optional fields
+are bounded and unverified. Locations stay session-only; report schema 1 and
+export bytes are unchanged.
+
+## Validation and distribution
 
 This source release reuses accepted local validation receipts. The baseline passed
 58 tests in both debug and release, including all eight native integration tests.
 Subsequent browser, drop, structured-inspector, inspector-navigation and Reload/Retry changes
-passed focused checks and actual local app inspection. The latest affected check
-ran five new Reload/Retry methods. These are separate receipts, not a fresh full-suite run
+passed focused checks and actual local app inspection. Input Identity and Build Metadata passed six new focused methods and native
+selection, details, Finder reveal, reload and Swap inspection. The latest affected
+checks preserve report schema 1 and unchanged report bytes. These are separate receipts, not a fresh full-suite run
 on the release snapshot. See `docs/RELEASE_VALIDATION.md` for evidence boundaries.
 
 Build locally using the commands above. This release does not include an installed
@@ -82,6 +90,10 @@ notarized. No distribution readiness or complete accessibility acceptance is cla
 - Structured inspector: three focused methods passed and local UI inspected.
 - Reload/Retry: five new focused methods passed; changed-fixture reload, failed
   input recovery and Reload Both were inspected in the actual development app.
+- Input identity: six new focused methods passed, including native metadata refresh,
+  bounds/type checks, unchanged report bytes/schema and stale-result continuity.
+  Same-named inputs, Finder reveal, changed/malformed metadata reload and Swap
+  were inspected in the actual development app.
 - Inspector navigation: six affected methods passed (three new, three existing),
   and rebuilt app search, paging, filtering and complete filtered JSON copy were
   inspected. No full-suite rerun occurred after the baseline.
@@ -94,7 +106,7 @@ not claimed. AppKit sharing-indicator geometry faults were previously localized 
 system stacks; no product fix or fault-free-runtime claim follows.
 """)
     design = DEST / "docs/DESIGN.md"
-    text = design.read_text().replace("RED_TEAM_REVIEW.md", "RELEASE_VALIDATION.md").replace("INSPECTOR_NAVIGATION.md", "RELEASE_VALIDATION.md")
+    text = design.read_text().replace("RED_TEAM_REVIEW.md", "RELEASE_VALIDATION.md").replace("INSPECTOR_NAVIGATION.md", "RELEASE_VALIDATION.md").replace("INPUT_IDENTITY.md", "RELEASE_VALIDATION.md")
     design.write_text(text)
     (DEST / ".gitattributes").write_text("* text=auto\n*.png binary\n*.car binary\n*.icns binary\n")
     patterns = {
@@ -118,7 +130,7 @@ system stacks; no product fix or fault-free-runtime claim follows.
     receipt = {"file_count": len(staged), "excluded": ["evidence/", "local Git history", "historical archives", "personal instructions", "workstation logs"],
                "scan": "No matches for configured credential markers or personal home paths; not a universal secret detector.",
                "validation": "Accepted build/test/runtime receipts reused; no tests, hashes or signing verification repeated."}
-    (ROOT / "evidence/95-v0.1.1-source-preparation.json").write_text(json.dumps(receipt, indent=2) + "\n")
+    (ROOT / f"evidence/112-v{VERSION}-source-preparation.json").write_text(json.dumps(receipt, indent=2) + "\n")
     print(f"Prepared {len(staged)} source files in {DEST.relative_to(ROOT)} and {ARCHIVE.relative_to(ROOT)}")
 
 

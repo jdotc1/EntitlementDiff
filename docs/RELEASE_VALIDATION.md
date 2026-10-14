@@ -11,6 +11,10 @@
 - Structured inspector: three focused methods passed and local UI inspected.
 - Reload/Retry: five new focused methods passed; changed-fixture reload, failed
   input recovery and Reload Both were inspected in the actual development app.
+- Input identity: six new focused methods passed, including native metadata refresh,
+  bounds/type checks, unchanged report bytes/schema and stale-result continuity.
+  Same-named inputs, Finder reveal, changed/malformed metadata reload and Swap
+  were inspected in the actual development app.
 - Inspector navigation: six affected methods passed (three new, three existing),
   and rebuilt app search, paging, filtering and complete filtered JSON copy were
   inspected. No full-suite rerun occurred after the baseline.

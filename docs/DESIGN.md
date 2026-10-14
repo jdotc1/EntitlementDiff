@@ -158,3 +158,12 @@ suspension. Failed inspections retain source URLs for explicit retry; synthetic
 examples have none. Generation checks/cancellation suppress superseded results.
 UI disables refresh while reading or presenting/writing a report. No persistent
 history or monitoring. See RELOAD_INPUTS.md.
+
+## UI input identity metadata
+
+Optional bundle identifier, version and build are bounded display information from
+the existing validated Info.plist preflight. They accompany the accepted snapshot
+but are excluded from Codable report fields. Selected URLs remain session-only.
+Input Details separates bundle/signing identifiers and reveals the selected item
+in Finder. Metadata is unverified; requested architecture and main-executable-only
+inspection remain explicit. See RELEASE_VALIDATION.md.

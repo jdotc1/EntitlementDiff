@@ -11,13 +11,6 @@ does not assign risk scores or interpret an entitlement as proof of a vulnerabil
 audit, signature verification, Gatekeeper assessment, notarization check, or
 claim about effective permissions.
 
-## Download v0.1.1
-
-[Download the signed and notarized arm64 macOS app](https://github.com/jdotc1/EntitlementDiff/releases/download/v0.1.1/EntitlementDiff-0.1.1-macOS-arm64.zip) for Apple silicon Macs on macOS 14+.
-Extract the ZIP and move EntitlementDiff.app to Applications. v0.1.1 adds per-input
-Reload/Retry and Reload Both (Shift-Command-R), preserving explicit architecture
-and stale-result suppression. [Release notes and sanitized source](https://github.com/jdotc1/EntitlementDiff/releases/tag/v0.1.1).
-
 ## Build and run
 
 Requires macOS 14+ and a Swift 6 toolchain with macOS command-line developer tools.
@@ -160,18 +153,26 @@ Decoder budgets do not bound Apple's earlier parser allocations, and cancellatio
 cannot forcibly interrupt a synchronous operating-system call. This release is
 intended for developer-controlled builds, not bulk malware triage.
 
+## Input Identity and Build Metadata
+
+Source panes show version/build. Input Details separates bundle and signing
+identifiers and shows the selected location, with Reveal in Finder. Optional fields
+are bounded and unverified. Locations stay session-only; report schema 1 and
+export bytes are unchanged.
+
 ## Validation and distribution
 
 This source release reuses accepted local validation receipts. The baseline passed
 58 tests in both debug and release, including all eight native integration tests.
 Subsequent browser, drop, structured-inspector, inspector-navigation and Reload/Retry changes
-passed focused checks and actual local app inspection. The latest affected check
-ran five new Reload/Retry methods. These are separate receipts, not a fresh full-suite run
+passed focused checks and actual local app inspection. Input Identity and Build Metadata passed six new focused methods and native
+selection, details, Finder reveal, reload and Swap inspection. The latest affected
+checks preserve report schema 1 and unchanged report bytes. These are separate receipts, not a fresh full-suite run
 on the release snapshot. See `docs/RELEASE_VALIDATION.md` for evidence boundaries.
 
-Build locally using the commands above. This source archive does not include an installed
-app binary; download the notarized app ZIP separately from the release page. Local builds are ad-hoc development signed, not Developer ID signed or
+Build locally using the commands above. This release does not include an installed
+app binary. Local builds are ad-hoc development signed, not Developer ID signed or
 notarized. No distribution readiness or complete accessibility acceptance is claimed.
 `LICENSE` is MIT.
 
-Notarized arm64 app downloads and source releases: https://github.com/jdotc1/EntitlementDiff/releases/tag/v0.1.1
+Notarized arm64 app downloads and source releases: https://github.com/jdotc1/EntitlementDiff/releases/tag/v0.1.2

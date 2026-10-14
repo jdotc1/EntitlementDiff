@@ -3,7 +3,7 @@
 The source release contains SwiftPM sources/tests, examples, license, selected
 technical documentation, editable/compiled icon resources and local build tools.
 Run `python3 script/package_source.py` to create an allowlisted source tree and ZIP
-under dist/. Existing outputs are preserved; packaging refuses to overwrite them.
+under dist/ using the Info.plist version in each source tree/ZIP name. Existing outputs are preserved; packaging refuses to overwrite them.
 The staging scan detects configured credential markers and personal home paths,
 including in compiled icon resources. It is not a universal secret detector.
 
@@ -13,9 +13,11 @@ RELEASE_VALIDATION summary distinguish accepted baseline and later focused evide
 No old checks are rerun by packaging. The normal app build reuses compiled icon
 resources; no icon compilation, dependency install or signing identity is needed.
 
-Publish the staged tree from a clean root commit, not the local development history.
-Confirm the destination repository and visibility before creating it. Push only
-the sanitized publication branch. Create a source-only release with the prepared
-ZIP and state the development-signature/distribution limitations explicitly.
-Do not upload dist/EntitlementDiff.app as a notarized/Developer ID product: no such
-qualification is established. Never bypass protections to run a downloaded build.
+Publish the staged tree with only sanitized publication history as its parent,
+never the private local development history. Push only that publication branch.
+A downloadable app release requires the separate Developer ID, Apple notarization,
+stapling and distribution acceptance workflow. Keep source and app version/build
+aligned. Never bypass protections to run a downloaded build.
+
+Current source staging receipts are versioned under evidence/ and excluded from
+the publication payload.

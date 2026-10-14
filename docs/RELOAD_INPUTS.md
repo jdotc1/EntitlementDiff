@@ -1,3 +1,14 @@
+v0.1.1 released and installed (2026-10-14): Reload/Retry shipped as 0.1.1 build 2.
+Sanitized source commit 7d737fd, public README follow-up dcb20f9. Both source and
+notarized arm64 ZIPs published to GitHub v0.1.1. Developer ID Jeffrey Cooney,
+team 5HR49PU83V; Apple submission 09A8C0D9-817C-4513-A02D-F06A9EA15BBD Ready to distribute.
+First new-artifact ticket/Gatekeeper checks passed. Published ZIP downloaded and
+installed in /Applications; About confirms 0.1.1 (2), window open. v0.1.0 preserved
+under dist/installed-backups. See evidence/94–103. Accepted 87–93 feature checks
+reused; no full suite or unchanged verification repeated. Accessibility stopped.
+Private local evidence/history remains unpushed. Earlier v0.1.0-only/local-feature
+statements below are historical and superseded.
+
 # Reload Inputs and Retry Inspection — 2026-10-14
 
 Each live source pane has Reload; an inspection failure labels that action Retry.

@@ -27,6 +27,7 @@ public enum BundleInputError: Error, Sendable, Equatable, LocalizedError {
 public struct AppBundleLocation: Sendable {
     public let bundleURL: URL
     public let executableURL: URL
+    public let identity: AppIdentity
 }
 
 /// Conventional bundle layout preflight; not a Mach-O parser, signature check,
@@ -81,7 +82,7 @@ public enum AppBundlePreflight {
             [0xCA, 0xFE, 0xBA, 0xBF], [0xBF, 0xBA, 0xFE, 0xCA]
         ]
         guard signatures.contains(Array(prefix)) else { throw BundleInputError.machORequired }
-        return .init(bundleURL: root, executableURL: executable)
+        return .init(bundleURL: root, executableURL: executable, identity: .init(infoPlist: plist))
     }
 
     private static func contains(_ child: URL, in root: URL) -> Bool {
