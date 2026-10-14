@@ -51,6 +51,20 @@ final class AppActions {
         }
     }
 
+    func reload(_ side: ComparisonSide? = nil) {
+        guard !isBusy else { return }
+        if let side {
+            let state = side == .previous ? model.previous : model.current
+            guard model.canReload(side), !state.isLoading else { return }
+            statusMessage = ""
+            model.reload(side)
+        } else {
+            guard model.canReloadBoth, !model.isLoading else { return }
+            statusMessage = ""
+            model.reloadBoth()
+        }
+    }
+
     func setArchitecture(_ architecture: Architecture) {
         guard !isBusy else { return }
         statusMessage = ""

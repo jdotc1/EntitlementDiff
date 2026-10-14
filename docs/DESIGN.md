@@ -149,3 +149,12 @@ shows 50 rows, with Previous Page / Reveal More and explicit incomplete-search
 notices. Key/value previews are capped at 256 scalars; composite path previews at
 512. Selected JSON remains complete and tagged. These supersede the historical
 flat 16,000-scalar detail description above. See RELEASE_VALIDATION.md.
+
+## Explicit input refresh
+
+Live inputs support Reload/Retry through the same load path and selected architecture.
+Reload Both captures both source URLs and invalidates both prior snapshots without
+suspension. Failed inspections retain source URLs for explicit retry; synthetic
+examples have none. Generation checks/cancellation suppress superseded results.
+UI disables refresh while reading or presenting/writing a report. No persistent
+history or monitoring. See RELOAD_INPUTS.md.

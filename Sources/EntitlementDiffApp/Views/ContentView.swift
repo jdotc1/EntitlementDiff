@@ -30,6 +30,8 @@ struct ContentView: View {
         }
         .toolbar {
             ToolbarItemGroup {
+                Button { actions.reload() } label: { Label("Reload Both", systemImage: "arrow.clockwise") }
+                    .disabled(!model.canReloadBoth || model.isLoading || actions.isBusy)
                 Button { actions.swap() } label: { Label("Swap", systemImage: "arrow.left.arrow.right") }
                     .disabled(!model.canSwap || actions.isBusy)
                 Button { actions.copyReport() } label: { Label("Copy Report", systemImage: "doc.on.doc") }
@@ -69,9 +71,11 @@ struct ContentView: View {
             }
             HStack(alignment: .top, spacing: 14) {
                 SourcePane(side: .previous, state: model.previous, disabled: actions.isBusy,
+                           canReload: model.canReload(.previous), reload: { actions.reload(.previous) },
                            choose: { actions.choose(.previous) }, clear: { actions.clear(.previous) },
                            drop: { actions.drop($0, side: .previous) })
                 SourcePane(side: .current, state: model.current, disabled: actions.isBusy,
+                           canReload: model.canReload(.current), reload: { actions.reload(.current) },
                            choose: { actions.choose(.current) }, clear: { actions.clear(.current) },
                            drop: { actions.drop($0, side: .current) })
             }

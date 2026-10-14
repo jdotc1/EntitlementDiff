@@ -6,6 +6,8 @@ struct SourcePane: View {
     let side: ComparisonSide
     let state: InputState
     let disabled: Bool
+    let canReload: Bool
+    let reload: () -> Void
     let choose: () -> Void
     let clear: () -> Void
     let drop: ([URL]) -> Bool
@@ -17,6 +19,11 @@ struct SourcePane: View {
                 HStack {
                     Text(side.label).font(.headline)
                     Spacer()
+                    if canReload {
+                        Button(state.errorMessage == nil ? "Reload" : "Retry", action: reload)
+                            .disabled(disabled || state.isLoading)
+                            .help("Read this selected app again using the selected architecture.")
+                    }
                     if !state.isEmpty {
                         Button("Clear", action: clear).buttonStyle(.borderless)
                             .disabled(disabled)

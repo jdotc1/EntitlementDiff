@@ -36,6 +36,9 @@ struct EntitlementDiffApp: App {
                 Button("Load Synthetic Example") { actions.loadExample() }
                     .keyboardShortcut("d", modifiers: [.command, .shift])
                     .disabled(actions.isBusy)
+                Button("Reload Both Inputs") { actions.reload() }
+                    .keyboardShortcut("r", modifiers: [.command, .shift])
+                    .disabled(!model.canReloadBoth || model.isLoading || actions.isBusy)
                 Button("Swap Previous and Current") { actions.swap() }
                     .keyboardShortcut("x", modifiers: [.command, .shift])
                     .disabled(!model.canSwap || actions.isBusy)

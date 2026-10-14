@@ -35,6 +35,28 @@ public final class ComparisonModel {
     public var hasInputs: Bool { !previous.isEmpty || !current.isEmpty }
     public var canSwap: Bool { previous.snapshot != nil && current.snapshot != nil && !isLoading }
 
+    /// Only live selections can be reread. State access keeps UI observation explicit.
+    public func canReload(_ side: ComparisonSide) -> Bool {
+        let state = side == .previous ? previous : current
+        return !state.isEmpty && requests.sourceURLs[side] != nil
+    }
+
+    public var canReloadBoth: Bool { canReload(.previous) && canReload(.current) }
+
+    /// Uses the same architecture, scoped reader and generation invalidation as replacement.
+    @discardableResult
+    public func reload(_ side: ComparisonSide) -> Task<Void, Never>? {
+        guard let url = requests.sourceURLs[side] else { return nil }
+        return load(url, side: side)
+    }
+
+    @discardableResult
+    public func reloadBoth() -> [Task<Void, Never>] {
+        guard let old = requests.sourceURLs[.previous], let new = requests.sourceURLs[.current] else { return [] }
+        // Capture both URLs before mutation. No suspension between invalidating both inputs.
+        return [load(old, side: .previous), load(new, side: .current)]
+    }
+
     /// Replacing an input invalidates its old result before the new read begins.
     /// Returned tasks support deterministic tests; UI callers may ignore them.
     @discardableResult

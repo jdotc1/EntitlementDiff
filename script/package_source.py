@@ -2,17 +2,22 @@
 """Stage an allowlisted source release without local evidence or historical archives."""
 from pathlib import Path
 import json
+import plistlib
 import re
 import shutil
 import subprocess
 import zipfile
 
 ROOT = Path(__file__).resolve().parent.parent
-DEST = ROOT / "dist" / "EntitlementDiff-Source"
-ARCHIVE = ROOT / "dist" / "EntitlementDiff-Source.zip"
+with (ROOT / "Resources/Info.plist").open("rb") as metadata_file:
+    VERSION = plistlib.load(metadata_file)["CFBundleShortVersionString"]
+if not re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", VERSION):
+    raise SystemExit("Invalid source release version")
+DEST = ROOT / "dist" / f"EntitlementDiff-{VERSION}-Source"
+ARCHIVE = ROOT / "dist" / f"EntitlementDiff-{VERSION}-Source.zip"
 DOCS = {
     "docs/DESIGN.md", "docs/REPORT_FORMAT.md", "docs/report.schema.json",
-    "docs/SOURCES.md", "docs/PUBLISHING.md",
+    "docs/SOURCES.md", "docs/PUBLISHING.md", "docs/RELOAD_INPUTS.md",
 }
 ROOT_FILES = {"Package.swift", "LICENSE", "README.md", ".gitignore", ".gitattributes"}
 
@@ -46,9 +51,9 @@ def main():
 
 This source release reuses accepted local validation receipts. The baseline passed
 58 tests in both debug and release, including all eight native integration tests.
-Subsequent browser, drop, structured-inspector and inspector-navigation changes
+Subsequent browser, drop, structured-inspector, inspector-navigation and Reload/Retry changes
 passed focused checks and actual local app inspection. The latest affected check
-ran six inspector methods. These are separate receipts, not a fresh full-suite run
+ran five new Reload/Retry methods. These are separate receipts, not a fresh full-suite run
 on the release snapshot. See `docs/RELEASE_VALIDATION.md` for evidence boundaries.
 
 Build locally using the commands above. This release does not include an installed
@@ -57,6 +62,7 @@ notarized. No distribution readiness or complete accessibility acceptance is cla
 `LICENSE` is MIT.
 """
     text = text.replace("The Codex **Run** action calls the same script.", "")
+    text += f"\nNotarized arm64 app downloads and source releases: https://github.com/jdotc1/EntitlementDiff/releases/tag/v{VERSION}\n"
     readme.write_text(text)
     icon_readme = DEST / "Resources/Icon/README.md"
     text = icon_readme.read_text()
@@ -74,6 +80,8 @@ notarized. No distribution readiness or complete accessibility acceptance is cla
   were observed. Native multiple-file gesture and held-hover outline were not
   separately accepted; multiple-input rejection has focused test coverage.
 - Structured inspector: three focused methods passed and local UI inspected.
+- Reload/Retry: five new focused methods passed; changed-fixture reload, failed
+  input recovery and Reload Both were inspected in the actual development app.
 - Inspector navigation: six affected methods passed (three new, three existing),
   and rebuilt app search, paging, filtering and complete filtered JSON copy were
   inspected. No full-suite rerun occurred after the baseline.
@@ -110,7 +118,7 @@ system stacks; no product fix or fault-free-runtime claim follows.
     receipt = {"file_count": len(staged), "excluded": ["evidence/", "local Git history", "historical archives", "personal instructions", "workstation logs"],
                "scan": "No matches for configured credential markers or personal home paths; not a universal secret detector.",
                "validation": "Accepted build/test/runtime receipts reused; no tests, hashes or signing verification repeated."}
-    (ROOT / "evidence/64-source-publication-preparation.json").write_text(json.dumps(receipt, indent=2) + "\n")
+    (ROOT / "evidence/95-v0.1.1-source-preparation.json").write_text(json.dumps(receipt, indent=2) + "\n")
     print(f"Prepared {len(staged)} source files in {DEST.relative_to(ROOT)} and {ARCHIVE.relative_to(ROOT)}")
 
 
