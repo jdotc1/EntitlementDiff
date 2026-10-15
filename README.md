@@ -1,15 +1,64 @@
 # EntitlementDiff
 
-A lightweight Swift library and native SwiftUI macOS app for comparing embedded
-app entitlements between builds.
+EntitlementDiff is a lightweight Swift library and native SwiftUI macOS application
+for comparing embedded entitlement declarations between builds. It helps developers
+review changes in declared application capabilities without launching the inspected
+application.
 
 Choose a previous and current `.app`, select **arm64** or **x86_64**, and inspect
-added, removed, and changed declarations. Unknown keys remain visible; the tool
-does not assign risk scores or interpret an entitlement as proof of a vulnerability.
+added, removed, changed, and unchanged entitlements. Unknown keys remain visible;
+the tool does not assign risk scores or interpret an entitlement as proof of a
+vulnerability.
 
 **Scope:** the requested architecture of the main executable only. No nested-code
 audit, signature verification, Gatekeeper assessment, notarization check, or
 claim about effective permissions.
+
+## Reviewing entitlement changes
+
+EntitlementDiff preserves property-list types rather than flattening values into
+strings. Booleans, numbers, strings, arrays, and dictionaries remain distinct; an
+absent entitlement is not treated as equivalent to an explicit `false` value.
+Nested values can be inspected side by side.
+
+Structured JSON exports include both snapshots and the complete comparison,
+regardless of the current interface filters. Reports provide a record of the
+declared changes for release reviews, build investigations, and subsequent
+analysis—not an automated security verdict.
+
+### Example review workflow
+
+The following is an illustrative workflow, not a reported finding.
+
+Compare two builds of an application you control, using the same architecture for
+both. Suppose the newer build contains an additional entitlement or changes an
+existing Boolean declaration from `false` to `true`.
+
+Review the exact key and typed values, then investigate whether the difference
+corresponds to an intended feature, a build-configuration change, or a
+signing-configuration change. Record the explanation alongside the exported
+comparison.
+
+The difference establishes that the extracted declarations changed. It does not,
+by itself, establish that the application gained an effective permission,
+exercised a capability, or introduced a vulnerability. Those questions require
+separate investigation.
+
+## Downloads and development builds
+
+[Version 0.1.2](https://github.com/jdotc1/EntitlementDiff/releases/tag/v0.1.2)
+provides a Developer ID–signed, hardened-runtime, Apple-notarized and stapled
+application for Apple silicon running macOS 14 or later, alongside a source
+archive containing the Swift package, tests, examples, and resources.
+
+- [Download the Apple-silicon app](https://github.com/jdotc1/EntitlementDiff/releases/download/v0.1.2/EntitlementDiff-0.1.2-macOS-arm64.zip)
+- [Download the source archive](https://github.com/jdotc1/EntitlementDiff/releases/download/v0.1.2/EntitlementDiff-0.1.2-Source.zip)
+
+Local builds created with the development scripts are ad-hoc signed and should
+not be confused with the published notarized application. The signing and
+notarization of EntitlementDiff's published app do not mean that the tool verifies
+the signature or notarization of an application it inspects. See the validation
+section below and `docs/RELEASE_VALIDATION.md` for the documented evidence limits.
 
 ## Build and run
 
@@ -24,7 +73,7 @@ access are required for the development build.
 
 The second command builds the executable, stages and ad-hoc signs a real
 `dist/EntitlementDiff.app`, and opens it. Do not launch this GUI using a raw
-`swift run` executable. 
+`swift run` executable.
 
 `./script/build_and_run.sh --build-only` stages without launching;
 `--verify` checks that this checkout's process appeared after launch, not that
@@ -79,9 +128,8 @@ app. It produces five changes and one unchanged key. The example is labelled in
 the UI and exports and is not a recommended entitlement configuration.
 
 **Copy Report** copies the full change report. **Export JSON** includes both full
-snapshots and every change, regardless of filters. Source file URLs are not
-exported, but names, signing identifiers, and entitlement values can be sensitive.
-Review reports before sharing. Export into a selected app bundle is rejected.
+snapshots and every change, regardless of filters. Export into a selected app
+bundle is rejected. See Reports and privacy below before sharing an export.
 
 The UI uses native semantic colors, standard controls, keyboard commands, and
 selectable monospaced values. Control/bidirectional-formatting characters are
@@ -137,21 +185,37 @@ of the signature/DER/XML encoding. It cannot recover normalization or informatio
 loss that occurred upstream. Library callers constructing values directly must
 provide finite real/date values; JSON encoding rejects nonfinite values.
 
-## Security and privacy boundaries
+## Security scope and limitations
+
+EntitlementDiff compares declarations; it does not verify the validity or trust
+of the inspected application's signature. Successful extraction **does not
+establish signature validity**. Apple's API can return partial information from
+unverified signing data. See `docs/SOURCES.md`. Declared entitlements are not a
+complete account of effective permissions or runtime behavior.
+
+Inspection is limited to the selected architecture of the main executable. The
+tool does not audit nested helpers, frameworks, extensions, or other embedded
+executables. It does not perform Gatekeeper assessments, check the inspected
+application's notarization status, assign risk scores, or classify entitlement
+changes as vulnerabilities.
 
 The production reader invokes public Security/CoreFoundation APIs directly; it
-contains no shell, subprocess, plug-in loader, or target-code execution. No custom
-history, telemetry, network client, updater, or background scanner is implemented.
-macOS may maintain its own panel/recent-location metadata; this tool does not
-promise forensic erasure or control system logging.
-
-Successful extraction **does not establish signature validity**. Apple's API can
-return partial information from unverified signing data. See `docs/SOURCES.md`.
+contains no shell, subprocess, plug-in loader, or target-code execution.
 Inspection is not an atomic filesystem snapshot and is not hardened isolation for
 actively hostile inputs. A concurrent writer can defeat filesystem preflights.
 Decoder budgets do not bound Apple's earlier parser allocations, and cancellation
 cannot forcibly interrupt a synchronous operating-system call. This release is
 intended for developer-controlled builds, not bulk malware triage.
+
+## Reports and privacy
+
+Exported reports omit source file URLs but retain application names, signing
+identifiers, and entitlement values. Review this information before sharing a
+report, particularly when inspecting internal or unreleased applications.
+
+No custom history, telemetry, network client, updater, or background scanner is
+implemented. macOS may maintain its own panel/recent-location metadata; this tool
+does not promise forensic erasure or control system logging.
 
 ## Input Identity and Build Metadata
 
@@ -160,7 +224,7 @@ identifiers and shows the selected location, with Reveal in Finder. Optional fie
 are bounded and unverified. Locations stay session-only; report schema 1 and
 export bytes are unchanged.
 
-## Validation and distribution
+## Validation
 
 This source release reuses accepted local validation receipts. The baseline passed
 58 tests in both debug and release, including all eight native integration tests.
@@ -170,9 +234,21 @@ selection, details, Finder reveal, reload and Swap inspection. The latest affect
 checks preserve report schema 1 and unchanged report bytes. These are separate receipts, not a fresh full-suite run
 on the release snapshot. See `docs/RELEASE_VALIDATION.md` for evidence boundaries.
 
-Build locally using the commands above. This release does not include an installed
-app binary. Local builds are ad-hoc development signed, not Developer ID signed or
-notarized. No distribution readiness or complete accessibility acceptance is claimed.
-`LICENSE` is MIT.
+The [v0.1.2 release notes](https://github.com/jdotc1/EntitlementDiff/releases/tag/v0.1.2)
+document stapled-ticket validation, Gatekeeper assessment, and native release-app
+inspection on the same Apple-silicon Mac. This is not clean-Mac or Intel-host
+acceptance. Complete accessibility acceptance is not claimed.
 
-Notarized arm64 app downloads and source releases: https://github.com/jdotc1/EntitlementDiff/releases/tag/v0.1.2
+## About the developer
+
+I'm a physician-scientist and independent developer focused on medical imaging
+and software security. I build and modernize medical-imaging and scientific
+software for Apple silicon and native macOS, with particular attention to
+security hardening, reliable data handling, and binary analysis.
+
+EntitlementDiff applies that focus to a specific developer workflow: reviewing
+and documenting changes in declared application capabilities.
+
+## License
+
+`LICENSE` is MIT.
