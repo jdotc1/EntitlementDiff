@@ -365,3 +365,8 @@ strings and data; see FOCUSED_VALUE.md for the implementation/evidence635–643.
 String entries retain original scalar identities and separate Previous/Current
 UTF-8 positions. Replay restores the exact captured detail/highlight coordinate;
 completion and scan frontier stay separate from the displayed historical result.
+
+Jump to a Found Difference now directly selects retained string/data ordinals;
+see FOCUSED_VALUE.md for bounded parsing, unchanged frontier and evidence656–665.
+String selection restores both original UTF-8 coordinates and exact scalar details.
+The taller focused sheet and minimum viewport fix the confirmed added-row clipping.

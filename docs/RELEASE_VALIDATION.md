@@ -1,3 +1,7 @@
+v0.1.28 (29) — Jump to a Found Difference
+
+Direct retained-difference navigation preserves exact Unicode and byte contexts, bounded history, frontier continuation and stale-result suppression. Invalid numbers leave the selection unchanged. The focused string window now has room for its complete controls and viewport. Five focused regression methods and final native jump/layout checks passed during development; their accepted evidence is reused for release without rerunning tests. Distribution signing, notarization and installed acceptance are recorded separately.
+
 v0.1.27 (build28) packages Previous Found Difference in Focused Values. Six new focused methods and native string/data replay, completed-state replay, retention notice, frontier resume and restart are accepted. One corrected injected-runner method passed separately; other results reused. No tests rerun for release or accessibility work. Distribution and installation have separate receipts.
 
 v0.1.26 (build27) packages Find Next Difference in Focused String Values. Fourteen affected focused methods are accepted, including the single corrected renderer-expectation test. Native continuation, independent UTF-8 positions, later-page reveal, EOF, completion and restart are accepted. Unchanged checks reused; no tests rerun for release or accessibility work. Distribution and installation have separate receipts.

@@ -283,3 +283,56 @@ comparison/data/Unicode checks594/614/615, fixed context575, renderer453/456/457
 complete copy139–144, page378–383 and parser/report receipts reused. No suite rerun,
 accessibility, performance sweep, unchanged hashes/signatures, release or push.
 Installed/public v0.1.26 unchanged; this is development acceptance only.
+
+## Jump to a Found Difference — 2026-10-17
+
+Both string/data sheets offer Go to found difference with Go and Return. The
+visible Found differences A–B is the retained discovered range, not a total count.
+A valid ordinal directly restores its captured result, exact UTF-8/byte metadata,
+page reveal/highlight and fixed data context. No comparison scan is triggered.
+Next replays remaining records before resuming the frontier. Completed-frontier
+jumps restore finished, while older records remain navigable. History stays64.
+
+Parsing reads at most21 UTF-8 bytes before validation, accepts1–20 ASCII digits,
+rejects overflow and bounds to retained ordinals. Field input is bounded to a
+21-byte UTF-8 prefix with safe decoding. Signs, whitespace, non-ASCII digits,
+zero, future and discarded ordinals are invalid. Failure shows the valid range
+without changing the current position/revision. Existing eviction guidance explains
+how to restart for older results. Successful jump uses a fresh generation and
+cancellation; running/paused work rejects navigation. Restart clears input/error
+and history. Existing value fidelity, comparison/render budgets, copies and reports
+are unchanged.
+
+Evidence:
+-656: `swift test --filter FoundDifferenceJumpTests -Xswiftc -warnings-as-errors`
+ passed five new methods. Covers strict/bounded parsing and overflow, evicted range
+7–70, first/middle/last direct selection, invalid nonmutation, both session caps,
+exact independent UTF-8 offsets, data context/EOF, finished-frontier restoration,
+runner-call count proving no jump scan, next frontier resumption, reset and late
+computed publication after restart. Existing accepted tests were not rerun.
+-657/658: initial real build and native string jump passed coordinate/detail checks
+but showed a clipped string viewport after adding the new row. Screenshot658 is
+pre-fix evidence, not accepted final appearance.
+-659: failing native regression UI-JUMP-01 recorded before the layout fix, with
+fixture/actions/expected readable text and observed clipping. No compiler-only
+claim or fabricated automated geometry assertion. The fix increases the sheet
+from560 to680 points and guarantees an80-point minimum string viewport.
+-660: `./script/build_and_run.sh` built/staged/launched final app without warnings.
+No model tests repeated after this view-only layout change;656 remains applicable.
+-661: final native jump3→2 restores Previous byte2/Current byte5, exact Unicode
+details and highlight; readable original text, page/search/copy controls fit.
+Screenshot inspected. UI-JUMP-01 passes on corrected layout.
+-662: future4 rejected while retained1–3; result2 and coordinates unchanged.
+Guidance and readable viewport fit together; screenshot inspected.
+-663: Return jumped to3, Next resumed to EOF/finished; jumps2→4 restored finished
+without a scan, Next disabled at completed frontier.
+-664: data jump4→2 restored original00/01 and bounded hex context. Screenshot inspected.
+-665: Return selected data1; invalid5 left result1, then restart cleared error and
+reset found range to1–1 with Previous disabled.
+
+Fixture reused: dist/found-history-acceptance/History.json. Existing64-entry history
+635/636 and boundary641, comparison594/614/615, fixed context575, renderer453/456/457,
+copy139–144, page378–383 and parser/report receipts reused for unchanged boundaries.
+No suite rerun, accessibility, broad appearance campaign, timing/corpus sweep,
+unchanged hashes/signatures, release or push. Current ambient dark appearance was
+observed without changing system settings. Installed/public v0.1.27 unchanged.

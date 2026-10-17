@@ -392,3 +392,7 @@ Previous Found Difference revisits up to64 discovered string/data differences.
 Next replays saved results before resuming the frontier scan. Retention limits
 are explicit, and restart/dismissal clears history. Saved Unicode/byte details,
 page reveal and bounded data hex context remain exact.
+
+Go to found difference jumps directly to a retained string/data result by ordinal.
+The displayed range includes only discovered, retained results. Invalid or discarded
+ordinals leave the current result unchanged; Next preserves the original frontier.

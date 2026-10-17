@@ -356,3 +356,17 @@ Previous/Next require settled phases; paused/running work cannot navigate histor
 Every navigation/new request invalidates old generations and cancels prior work;
 accepted new results alone populate history. Restart/dismissal replaces history.
 No report, copy, parser, architecture, dependency or source-value contracts change.
+
+FoundDifferenceHistory.select validates retained ordinals, not source positions:
+read at most21 UTF-8 bytes, accept1–20 ASCII digits only, require nonoverflowing
+Int and retained inclusive range before direct bounded index selection. Invalid
+input never changes the displayed result or reveal revision. The field stores a
+bounded21-byte UTF-8 prefix (decoding invalid cut boundaries safely); zero, signs,
+whitespace, non-ASCII digits, discarded and future ordinals are rejected.
+Both sessions expose actual found range and settled-state Go; valid jump cancels
+old work/changes generation and reuses exact result restoration. One frontier
+cursor and completed state remain untouched. Go/Return share the same method.
+A narrow FoundDifferenceJumpView owns only binding/presentation inputs. The
+focused sheet is680 points high with at least80 points for the string viewport,
+preventing added navigation/validation rows clipping original text. No report,
+clipboard, parser, history-cap, architecture or minimum-platform contract changes.

@@ -11,6 +11,8 @@ final class FocusedDataDifference {
     private(set) var position: DataFirstDifference.Position?
     private(set) var previousContext: DataDifferenceContext?
     private(set) var currentContext: DataDifferenceContext?
+    private(set) var jumpInput = ""
+    private(set) var jumpError: String?
     private(set) var revision = UUID()
     private var history = FoundDifferenceHistory<DataFirstDifference.Position>()
     private var frontierFinished = false
@@ -24,6 +26,21 @@ final class FocusedDataDifference {
     var canPrevious: Bool { (phase == .different || phase == .finished) && history.canPrevious }
     var canNext: Bool { (phase == .different || phase == .finished) && (history.canNext || !frontierFinished) }
     var historyNotice: String? { history.notice }
+    var foundRange: String? { history.rangeLabel }
+    var canJump: Bool { (phase == .different || phase == .finished) && position != nil }
+    func setJumpInput(_ value: String) {
+        jumpInput = String(decoding: value.utf8.prefix(21), as: UTF8.self)
+        jumpError = nil
+    }
+    func jumpToFound() {
+        guard canJump else { return }
+        guard let entry = history.select(input: jumpInput) else {
+            jumpError = "Enter a found difference from " + (history.validRange ?? "the retained range") + "."
+            return
+        }
+        generation = UUID(); work?.cancel(); work = nil
+        restore(entry)
+    }
 
     var message: String {
         switch phase {
@@ -53,7 +70,7 @@ final class FocusedDataDifference {
     deinit { work?.cancel() }
     func cancel() {
         generation = UUID(); work?.cancel(); work = nil
-        history = .init(); frontierFinished = false
+        history = .init(); frontierFinished = false; jumpInput = ""; jumpError = nil
         cursor = nil; differenceCount = 0; position = nil; previousContext = nil; currentContext = nil; phase = .ready
     }
     @discardableResult
@@ -81,6 +98,7 @@ final class FocusedDataDifference {
     private func restore(_ entry: FoundDifferenceHistory<DataFirstDifference.Position>.Entry) {
         previousContext = DataDifferenceContext(data: previous, byteOffset: entry.position.byteOffset)
         currentContext = DataDifferenceContext(data: current, byteOffset: entry.position.byteOffset)
+        jumpInput = String(entry.ordinal); jumpError = nil
         differenceCount = entry.ordinal; position = entry.position; revision = UUID()
         phase = frontierFinished && history.isAtFrontier ? .finished : .different
     }

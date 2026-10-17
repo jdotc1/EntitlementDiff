@@ -41,6 +41,11 @@ struct FocusedValueView: View {
                     }
                     if difference.phase == .running { ProgressView().controlSize(.small) }
                 }
+                if let range = difference.foundRange {
+                    FoundDifferenceJumpView(input: Binding(get: { difference.jumpInput }, set: { difference.setJumpInput($0) }),
+                                            range: range, error: difference.jumpError, enabled: difference.canJump,
+                                            go: { difference.jumpToFound() })
+                }
                 if let notice = difference.historyNotice { Text(notice).font(.caption).foregroundStyle(.secondary) }
                 Text(difference.message).font(.caption).foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -57,6 +62,11 @@ struct FocusedValueView: View {
                         Button("Reveal Difference") { dataDifference.reveal() }
                     }
                     if dataDifference.phase == .running { ProgressView().controlSize(.small) }
+                }
+                if let range = dataDifference.foundRange {
+                    FoundDifferenceJumpView(input: Binding(get: { dataDifference.jumpInput }, set: { dataDifference.setJumpInput($0) }),
+                                            range: range, error: dataDifference.jumpError, enabled: dataDifference.canJump,
+                                            go: { dataDifference.jumpToFound() })
                 }
                 if let notice = dataDifference.historyNotice { Text(notice).font(.caption).foregroundStyle(.secondary) }
                 Text(dataDifference.message).font(.caption).foregroundStyle(.secondary)
@@ -83,7 +93,7 @@ struct FocusedValueView: View {
             }
         }
         .padding(20)
-        .frame(width: 880, height: 560)
+        .frame(width: 880, height: 680)
         .interactiveDismissDisabled(actions.isWritingReport)
         .task(id: selection.id) {
             difference?.cancel(); dataDifference?.cancel()
@@ -139,6 +149,7 @@ private struct LeafValuePane: View {
                 if let page = stringPage(document) {
                     HighlightedStringPageView(page: page, pageIndex: navigation.index,
                                               revealRevision: showingDifference ? differenceRevision : search?.matchRevision)
+                        .frame(minHeight: 80)
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .background(.quaternary.opacity(0.3), in: RoundedRectangle(cornerRadius: 6))
                     if page.continuesBefore || page.continuesAfter {
@@ -300,5 +311,27 @@ private struct DataHexContextView: View {
             .textSelection(.enabled)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
+
+private struct FoundDifferenceJumpView: View {
+    @Binding var input: String
+    let range: String
+    let error: String?
+    let enabled: Bool
+    let go: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            HStack {
+                Text("Go to found difference")
+                TextField("Difference number", text: $input)
+                    .textFieldStyle(.roundedBorder).frame(width: 90).onSubmit(go)
+                Button("Go", action: go)
+                Text(verbatim: range).font(.caption).foregroundStyle(.secondary)
+            }
+            .disabled(!enabled)
+            if let error { Text(verbatim: error).font(.caption).foregroundStyle(.secondary) }
+        }
     }
 }
