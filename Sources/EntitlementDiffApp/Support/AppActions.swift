@@ -22,11 +22,20 @@ final class AppActions {
     private(set) var findRevealRevision = UUID()
     var isBusy: Bool { isFindingEntitlement || isPresentingPanel || isWritingReport || isReadingSavedReport || focusedValue != nil || savedReport != nil }
 
+    @ObservationIgnored private let readSavedReport: @Sendable (URL) async throws -> SavedReport
     @ObservationIgnored private let writeExactKey: (String) -> Bool
     var canCopyExactKey: Bool { !isBusy && model.browser.selectedRow != nil }
 
-    init(model: ComparisonModel, writeExactKey: ((String) -> Bool)? = nil) {
+    init(model: ComparisonModel, writeExactKey: ((String) -> Bool)? = nil,
+         readSavedReport: (@Sendable (URL) async throws -> SavedReport)? = nil) {
         self.model = model
+        self.readSavedReport = readSavedReport ?? { url in
+            try await Task.detached(priority: .userInitiated) {
+                let access = url.startAccessingSecurityScopedResource()
+                defer { if access { url.stopAccessingSecurityScopedResource() } }
+                return try SavedReport.read(at: url)
+            }.value
+        }
         self.writeExactKey = writeExactKey ?? { key in
             let clipboard = NSPasteboard.general
             clipboard.clearContents()
@@ -73,16 +82,28 @@ final class AppActions {
         let result = panel.runModal()
         isPresentingPanel = false
         guard result == .OK, let url = panel.url else { return }
+        _ = receiveSavedReportURLs([url])
+    }
+
+    /// Finder/Launch Services and the picker share one read/review boundary.
+    /// Busy requests are rejected, never queued to replace the session later.
+    @discardableResult
+    func receiveSavedReportURLs(_ urls: [URL]) -> Task<Void, Never>? {
+        guard !isBusy, errorMessage == nil else {
+            statusMessage = "Finish the current action, then open the saved report again."
+            return nil
+        }
+        guard urls.count == 1, let url = urls.first, url.isFileURL,
+              url.host == nil || url.host == "" || url.host == "localhost" else {
+            errorMessage = "Open exactly one local EntitlementDiff JSON report at a time."
+            return nil
+        }
         isReadingSavedReport = true
         statusMessage = "Reading saved report…"
-        Task {
+        return Task {
             defer { isReadingSavedReport = false }
             do {
-                let report = try await Task.detached(priority: .userInitiated) {
-                    let access = url.startAccessingSecurityScopedResource()
-                    defer { if access { url.stopAccessingSecurityScopedResource() } }
-                    return try SavedReport.read(at: url)
-                }.value
+                let report = try await readSavedReport(url)
                 savedReport = report
                 statusMessage = "Review saved snapshots before replacing this session."
             } catch {

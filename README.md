@@ -231,11 +231,19 @@ Show All Changes or Show All Keys changes only the necessary preferences. Combin
 restrictions are named explicitly. Recovery preserves counts and selection rules;
 complete schema-1 reports are independent of the view. Included in v0.1.10.
 
+## Open saved reports from Finder
+
+The app can receive a JSON report through Finder's Open With
+menu. It presents the existing saved-report review before replacing the session;
+Cancel and invalid input preserve the current comparison. Finish an active panel,
+export or review before opening another report. JSON is registered as an alternate
+viewer; this does not change the default application. Included in v0.1.11.
+
 ## Downloads and development builds
 
-The published release is **v0.1.10 (build 11)**, including Reload/Retry and Input
+The published release is **v0.1.11 (build 12)**, including Reload/Retry and Input
 Identity. The arm64 app is Developer ID signed and Apple notarized. Download the
-app or sanitized source from https://github.com/jdotc1/EntitlementDiff/releases/tag/v0.1.10.
+app or sanitized source from https://github.com/jdotc1/EntitlementDiff/releases/tag/v0.1.11.
 Local development builds are ad-hoc signed and are separate from that published app.
 The current local Phase 1 export/source-packaging, comparison/browser computation,
 focused-value viewer/copy, branch-navigation and All Keys changes are not in v0.1.2.

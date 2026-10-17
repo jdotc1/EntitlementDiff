@@ -195,3 +195,16 @@ zero-key saved snapshots retained provenance and offered no misleading action.
 Final count wording was refined and compiled without behavioral changes; accepted
 flows were reused. These receipts are reused for v0.1.10. Reader, parser, report
 encoding and export boundaries are unchanged. No full suite; accessibility stopped.
+
+## Finder report opening — accepted feature evidence
+
+Five new focused methods passed for explicit review/adoption, Cancel preserving
+report bytes/revision, busy read/review rejection, invalid/directory/oversized/schema
+errors, multiple/empty/remote inputs and bounded early-launch routing. Real app
+built/launched; cold and warm Finder Open With reached saved report review. Warm
+Cancel preserved the comparison; invalid and busy Launch Services requests retained
+the active session/review. JSON remained an alternate viewer, with Nova observed
+as the existing default. Cold post-review capture does not prove the intervening
+adoption action; native multiple gestures and closed-window reopening are untested.
+These receipts are reused for v0.1.11. Parser/type/generation/report checks reused;
+no full suite. Accessibility remains stopped.

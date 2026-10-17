@@ -14,7 +14,9 @@ struct EntitlementDiffApp: App {
     init() {
         let model = ComparisonModel(reader: SecurityEntitlementReader())
         _model = State(initialValue: model)
-        _actions = State(initialValue: AppActions(model: model))
+        let actions = AppActions(model: model)
+        _actions = State(initialValue: actions)
+        delegate.configure(actions: actions)
     }
 
     var body: some Scene {
@@ -67,6 +69,29 @@ struct EntitlementDiffApp: App {
 
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
+    private var actions: AppActions?
+    // Only the first early-launch event is retained, with at most two URLs to
+    // distinguish a single file from a rejected multiple-file request.
+    private var pendingURLs: [URL]?
+
+    func configure(actions: AppActions) {
+        self.actions = actions
+        if let pendingURLs {
+            self.pendingURLs = nil
+            actions.receiveSavedReportURLs(pendingURLs)
+        }
+    }
+
+    func application(_ application: NSApplication, open urls: [URL]) {
+        if let actions {
+            actions.receiveSavedReportURLs(urls)
+        } else if pendingURLs == nil {
+            pendingURLs = Array(urls.prefix(2))
+        }
+        application.activate(ignoringOtherApps: true)
+        application.windows.first(where: { $0.identifier?.rawValue == "comparison" })?.makeKeyAndOrderFront(nil)
+    }
+
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.regular)
         NSApp.activate(ignoringOtherApps: true)
