@@ -131,3 +131,12 @@ architecture and carries saved provenance through Swap. The development app
 built/launched; native report review, explicit snapshot selection/adoption, fresh
 Current selection, schema-1 path-free export and failed-import recovery passed.
 These focused receipts are reused for v0.1.4; no full suite was rerun.
+
+## Open Saved Comparison — accepted feature evidence
+
+Two new model methods passed, covering saved-pair adoption, pending-read suppression,
+architecture/navigation invalidation, counts, complete JSON fidelity, filtering,
+Swap, saved/live replacement and path-free schema 1. The real development app
+built/launched. Native review, opening both saved snapshots, array inspection and
+live Current replacement passed. Parser/Core encoder were unchanged. These focused
+receipts are reused for v0.1.5; no full suite was rerun. Accessibility remains stopped.

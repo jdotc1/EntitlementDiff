@@ -59,6 +59,13 @@ final class AppActions {
         statusMessage = "Saved baseline adopted. Choose a Current app for a fresh inspection."
     }
 
+    func openSavedComparison() {
+        guard let savedReport else { return }
+        model.openSavedComparison(savedReport)
+        self.savedReport = nil
+        statusMessage = "Saved comparison opened. Both snapshots are unverified saved metadata."
+    }
+
     func choose(_ side: ComparisonSide) {
         guard !isBusy else { return }
         isPresentingPanel = true

@@ -209,3 +209,11 @@ is a separate action; adoption clears live URLs and Current, invalidates pending
 reads and selects the saved architecture. Session provenance is excluded from
 snapshot CodingKeys and disclosed through the existing report notices field.
 See SAVED_BASELINE.md for exact limits and local acceptance boundaries.
+
+## Saved-pair adoption
+
+Open Saved Comparison adopts both snapshots from the validated bounded SavedReport,
+invalidates pending reads and live URLs, selects the saved architecture and creates
+a new report/navigation revision. Saved labels and report notices remain explicit;
+Reload/Reveal require a live URL. Parser and schema-1 encoding remain unchanged.
+See SAVED_COMPARISON.md.

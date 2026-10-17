@@ -151,6 +151,15 @@ public final class ComparisonModel {
         updateReport()
     }
 
+    /// Both snapshots have passed SavedReport's bounded schema/invariant validation.
+    public func openSavedComparison(_ saved: SavedReport) {
+        clear()
+        architecture = saved.previous.architecture
+        previous = .ready(saved.previous)
+        current = .ready(saved.current)
+        updateReport()
+    }
+
     public func loadExample(structured: Bool = false) {
         clear()
         let pair = structured ? ExampleSnapshots.structuredPair(architecture: architecture) : ExampleSnapshots.pair(architecture: architecture)

@@ -108,13 +108,20 @@ bounded; complete values remain in JSON. See `docs/DESIGN.md` for the layout.
 
 ## Saved baselines
 
-Open Saved Baseline… (Command-O) reviews a schema-1 JSON report and lets you choose
+Open Saved Report… (Command-O) reviews a schema-1 JSON report and lets you choose
 one saved snapshot as Previous. Adoption clears Current and selects the saved
 architecture; choose a Current app for a fresh inspection. Saved data is labelled
 unverified, has no retained file location or Reload action, and results are
 recomputed. Imports are bounded to 8 MiB, 96 JSON levels, 100,000 value nodes and
 1 MiB per decoded string. Schema-1 exports remain path-free and retain typed values.
 Open Saved Baseline is included in v0.1.4.
+
+## Saved comparisons
+
+The saved-report review also offers Open Saved Comparison, which opens both
+validated saved snapshots immediately. Both remain labelled unverified, with no
+Reload/Reveal or retained app paths. Either side can be replaced with a live app;
+reports remain complete, recomputed and schema 1. Open Saved Comparison is included in v0.1.5. See docs/SAVED_COMPARISON.md.
 
 ## Reusable libraries
 
@@ -183,9 +190,9 @@ intended for developer-controlled builds, not bulk malware triage.
 
 ## Downloads and development builds
 
-The published release is **v0.1.4 (build 5)**, including Reload/Retry and Input
+The published release is **v0.1.5 (build 6)**, including Reload/Retry and Input
 Identity. The arm64 app is Developer ID signed and Apple notarized. Download the
-app or sanitized source from https://github.com/jdotc1/EntitlementDiff/releases/tag/v0.1.4.
+app or sanitized source from https://github.com/jdotc1/EntitlementDiff/releases/tag/v0.1.5.
 Local development builds are ad-hoc signed and are separate from that published app.
 The current local Phase 1 export/source-packaging, comparison/browser computation,
 focused-value viewer/copy, branch-navigation and All Keys changes are not in v0.1.2.

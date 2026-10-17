@@ -27,11 +27,12 @@ struct ContentView: View {
         }
         .sheet(item: $actions.savedReport) { report in
             SavedBaselineView(report: report, adopt: actions.adoptSavedBaseline,
+                              openComparison: actions.openSavedComparison,
                               cancel: { actions.savedReport = nil })
         }
         .toolbar {
             ToolbarItemGroup {
-                Button { actions.openSavedReport() } label: { Label("Open Saved Baseline…", systemImage: "folder") }
+                Button { actions.openSavedReport() } label: { Label("Open Saved Report…", systemImage: "folder") }
                     .disabled(actions.isBusy)
                 Button { actions.reload() } label: { Label("Reload Both", systemImage: "arrow.clockwise") }
                     .disabled(!model.canReloadBoth || model.isLoading || actions.isBusy)
