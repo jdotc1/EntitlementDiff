@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="Resources/Icon/Previews/Default.png" alt="EntitlementDiff app icon" width="160" height="160">
+</p>
+
 # EntitlementDiff
 
 A lightweight Swift library and native SwiftUI macOS app for comparing embedded
