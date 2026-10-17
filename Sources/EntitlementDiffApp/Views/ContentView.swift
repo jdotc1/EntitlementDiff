@@ -128,13 +128,18 @@ struct ContentView: View {
                 ChangeTable(rows: visibleRows, selection: $model.browser.selection, sortOrder: $model.browser.sortOrder,
                             revealID: actions.findRevealID, revealRevision: actions.findRevealRevision)
                     .overlay {
-                        if visibleRows.isEmpty {
-                            VStack(spacing: 5) {
-                                Text(model.report?.changes.isEmpty == true && browser.filter == .allChanges && browser.query.isEmpty
-                                     ? "No entitlement-value changes in this scope."
-                                     : "No keys match the current filters.")
+                        if let guidance = browser.recoveryGuidance {
+                            VStack(spacing: 8) {
+                                Text(guidance.title).font(.headline)
+                                Text(guidance.message).font(.caption)
+                                if let action = guidance.action, let label = guidance.actionLabel {
+                                    Button(label) { model.browser.recover(action) }
+                                        .disabled(actions.isBusy)
+                                }
                                 Text("Exports always include the complete comparison.").font(.caption)
-                            }.foregroundStyle(.secondary).padding()
+                            }
+                            .multilineTextAlignment(.center)
+                            .foregroundStyle(.secondary).padding()
                         }
                     }
                     .frame(minHeight: 180, idealHeight: 260)

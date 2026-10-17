@@ -124,6 +124,24 @@ public struct ComparisonBrowser {
         }
     }
 
+    public var recoveryGuidance: BrowserRecoveryGuidance? {
+        guard hasStoredSource, visibleRows.isEmpty else { return nil }
+        return BrowserRecoveryGuidance(filter: filter, hasQuery: !query.isEmpty,
+                                       categoryCount: count(filter), keyCount: count(.allKeys),
+                                       changeCount: count(.allChanges))
+    }
+
+    /// Apply only the action appropriate to the current projection, never a stale button.
+    public mutating func recover(_ action: BrowserRecoveryGuidance.Action) {
+        guard recoveryGuidance?.action == action else { return }
+        switch action {
+        case .clearSearch: preferences.query = ""
+        case .showAllChanges: preferences.query = ""; preferences.filter = .allChanges
+        case .showAllKeys: preferences.query = ""; preferences.filter = .allKeys
+        }
+        refreshProjection()
+    }
+
     // Retain the stateless library helpers; the app uses the stored projection above.
     public func count(_ filter: BrowserFilter, in rows: [EntitlementChange]) -> Int {
         rows.filter { filter.includes($0.kind) }.count
