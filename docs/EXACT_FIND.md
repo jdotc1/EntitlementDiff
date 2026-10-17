@@ -1,3 +1,5 @@
+Input-boundary correction completed locally 2026-10-17; see UTF8_FIND_INPUT.md for native regression and repair. The original edit-clearing claim below was incomplete for canonically equivalent native edits and is superseded by this correction.
+
 # Find an Exact Entitlement Key
 
 Completed locally 2026-10-16 against release-record baseline 2264150. This document records feature evidence reused for v0.1.6 build 7;

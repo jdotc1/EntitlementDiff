@@ -232,3 +232,15 @@ UTF-8 cleared the old match and found the correct side. Missing lookup preserved
 page; Swap reset captured branch state. Branch content scrolls together in short
 panes. These accepted receipts are reused for v0.1.13. No full suite, performance
 sweep or accessibility work. Parser, reports, generations and export gates reused.
+
+## UTF-8-safe Find Entitlement — accepted feature evidence
+
+Native reproduction confirmed that replacing composed with decomposed Unicode
+could retain old hidden-key feedback and use the old key. A native assertion
+failed before repair and passed afterward. Two focused command/input methods
+passed; the real development app built/launched. Native checks confirmed initial
+focus, immediate feedback clearing, Return-to-Find, Escape preserving selection
+and filter, hidden reveal preserving descending sorting, and visible-key selection.
+These accepted receipts are reused for v0.1.14. Core/browser lookup, complete
+schema-1 reports, parser, provenance, source generations and child input checks
+are reused. No full suite, performance sweep or accessibility work.

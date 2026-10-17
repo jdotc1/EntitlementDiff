@@ -3,12 +3,12 @@ import AppKit
 import SwiftUI
 @testable import EntitlementDiffApp
 
-final class ExactChildKeyInputTests: XCTestCase {
+final class ExactKeyInputTests: XCTestCase {
     @MainActor
     func testNativeEditDeliversExactBytesAndInvalidatesLookup() {
-        var input = ExactChildKeyInput(value: "é")
+        var input = ExactKeyInput(value: "é")
         var invalidations = 0
-        let bridge = ExactChildKeyField(input: Binding(get: { input }, set: { input = $0 }),
+        let bridge = ExactKeyField(input: Binding(get: { input }, set: { input = $0 }),
                                         edited: { invalidations += 1 })
         let coordinator = bridge.makeCoordinator()
         let field = NSTextField(string: "e\u{301}")
@@ -22,8 +22,8 @@ final class ExactChildKeyInputTests: XCTestCase {
     }
 
     func testCanonicalEquivalentInputStillInvalidatesResult() {
-        XCTAssertNotEqual(ExactChildKeyInput(value: "é"), ExactChildKeyInput(value: "e\u{301}"))
-        XCTAssertNotEqual(ExactChildKeyInput(value: " spaced "), ExactChildKeyInput(value: "spaced"))
-        XCTAssertEqual(ExactChildKeyInput(value: ""), ExactChildKeyInput(value: ""))
+        XCTAssertNotEqual(ExactKeyInput(value: "é"), ExactKeyInput(value: "e\u{301}"))
+        XCTAssertNotEqual(ExactKeyInput(value: " spaced "), ExactKeyInput(value: "spaced"))
+        XCTAssertEqual(ExactKeyInput(value: ""), ExactKeyInput(value: ""))
     }
 }

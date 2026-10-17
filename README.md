@@ -169,6 +169,13 @@ Branch or View Value. Up restores the parent page. Editing or changing the branc
 clears the match. Lookup searches immediate keys without scanning descendants.
 Included in v0.1.13 (build 14). See [Exact child lookup](docs/EXACT_CHILD_KEY.md).
 
+## Exact-key input fidelity
+
+Find Entitlement preserves raw UTF-8 edits, including changing between composed
+and decomposed Unicode spellings. Editing clears prior lookup feedback; Find and
+Show in All Keys use the current key. Initial focus, Return and Escape remain
+available. Included in v0.1.14 (build 15). See [Input correction](docs/UTF8_FIND_INPUT.md).
+
 ## Build from source
 
 Requires macOS 14+, a Swift 6 toolchain, and macOS command-line developer tools.

@@ -225,3 +225,8 @@ one bounded result and existing typed leaf/container actions. Lookup leaves pagi
 unchanged; Up restores the parent page. Edits/navigation/revision changes clear
 results. A narrow native text field preserves canonically equivalent byte-distinct
 edits. Branch controls and children scroll together. See EXACT_CHILD_KEY.md.
+
+Find Entitlement and child lookup share the raw-byte ExactKeyField input boundary.
+Native edits invalidate prior feedback; Find retains initial focus, Return and
+Escape through narrow AppKit callbacks. See UTF8_FIND_INPUT.md for the confirmed
+canonical-equivalence input defect and focused correction.

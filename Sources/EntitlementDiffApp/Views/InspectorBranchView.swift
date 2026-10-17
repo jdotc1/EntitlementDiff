@@ -9,7 +9,7 @@ struct InspectorBranchView: View {
     @State private var navigation: InspectorBranchNavigator
     @State private var arrayIndex = ""
     @State private var indexError = false
-    @State private var childInput = ExactChildKeyInput()
+    @State private var childInput = ExactKeyInput()
     @State private var childMissing = false
 
     init(change: EntitlementChange, inspect: @escaping (EntitlementChange, InspectorRow) -> Void,
@@ -45,7 +45,7 @@ struct InspectorBranchView: View {
                 }
                 if navigation.canFindChildKey {
                     HStack {
-                        ExactChildKeyField(input: $childInput) {
+                        ExactKeyField(input: $childInput) {
                             navigation.clearExactChild(); childMissing = false
                         }.frame(height: 24)
                         Button("Find Child Key") { childMissing = !navigation.findExactChild(childInput.value) }
@@ -95,7 +95,7 @@ struct InspectorBranchView: View {
     }
 
     private func resetLookup() {
-        childInput = ExactChildKeyInput(); childMissing = false; navigation.clearExactChild()
+        childInput = ExactKeyInput(); childMissing = false; navigation.clearExactChild()
     }
     private func resetIndex() { arrayIndex = ""; indexError = false; resetLookup() }
 }
