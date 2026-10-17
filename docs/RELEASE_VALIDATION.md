@@ -1,3 +1,7 @@
+v0.1.29 (30) — Copy Current Difference Details
+
+Bounded path-free summaries copy the selected captured string/data difference without rescanning. Four focused development tests and native clipboard/layout acceptance passed and are reused for release. Distribution evidence is recorded separately.
+
 v0.1.28 (29) — Jump to a Found Difference
 
 Direct retained-difference navigation preserves exact Unicode and byte contexts, bounded history, frontier continuation and stale-result suppression. Invalid numbers leave the selection unchanged. The focused string window now has room for its complete controls and viewport. Five focused regression methods and final native jump/layout checks passed during development; their accepted evidence is reused for release without rerunning tests. Distribution signing, notarization and installed acceptance are recorded separately.

@@ -396,3 +396,7 @@ page reveal and bounded data hex context remain exact.
 Go to found difference jumps directly to a retained string/data result by ordinal.
 The displayed range includes only discovered, retained results. Invalid or discarded
 ordinals leave the current result unchanged; Next preserves the original frontier.
+
+Copy Difference Details copies the currently displayed found string/data mismatch
+as a compact path-free text summary, preserving exact Unicode/byte details and
+bounded hex context. It follows Previous and Go to found difference without rescanning.

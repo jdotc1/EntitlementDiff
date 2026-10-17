@@ -26,6 +26,10 @@ final class FocusedStringDifference {
     var historyNotice: String? { history.notice }
     var foundRange: String? { history.rangeLabel }
     var canJump: Bool { (phase == .different || phase == .finished) && position != nil }
+    var copyDetails: String? {
+        guard canJump, let position else { return nil }
+        return CurrentDifferenceDetails.string(position, ordinal: differenceCount)
+    }
     func setJumpInput(_ value: String) {
         jumpInput = String(decoding: value.utf8.prefix(21), as: UTF8.self)
         jumpError = nil

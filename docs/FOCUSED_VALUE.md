@@ -336,3 +336,8 @@ copy139–144, page378–383 and parser/report receipts reused for unchanged bou
 No suite rerun, accessibility, broad appearance campaign, timing/corpus sweep,
 unchanged hashes/signatures, release or push. Current ambient dark appearance was
 observed without changing system settings. Installed/public v0.1.27 unchanged.
+
+Copy Difference Details uses the current captured string/data mismatch with
+exact scalar/UTF-8 or byte/EOF details and bounded context. No rescans or source
+paths; clipboard output is limited to2048 UTF-8 bytes and guarded by focused
+selection identity. See COPY_DIFFERENCE_DETAILS.md for scope and evidence678–684.

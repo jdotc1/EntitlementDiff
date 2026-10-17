@@ -44,6 +44,17 @@ final class AppActions {
         }
     }
 
+    func copyDifferenceDetails(_ text: String?, selectionID: UUID, to clipboard: NSPasteboard = .general) {
+        guard focusedValue?.id == selectionID, !isWritingReport,
+              let text, text.utf8.count <= CurrentDifferenceDetails.byteLimit else { return }
+        clipboard.clearContents()
+        if clipboard.setData(Data(text.utf8), forType: .string) {
+            statusMessage = "Current difference details copied. Includes captured scalar or byte values."
+        } else {
+            errorMessage = "The system clipboard did not accept the difference details."
+        }
+    }
+
     func copyExactKey() {
         guard canCopyExactKey, let key = model.browser.selectedRow?.key else { return }
         statusMessage = ""

@@ -370,3 +370,8 @@ Jump to a Found Difference now directly selects retained string/data ordinals;
 see FOCUSED_VALUE.md for bounded parsing, unchanged frontier and evidence656–665.
 String selection restores both original UTF-8 coordinates and exact scalar details.
 The taller focused sheet and minimum viewport fix the confirmed added-row clipping.
+
+Copy Difference Details uses the current captured string/data mismatch with
+exact scalar/UTF-8 or byte/EOF details and bounded context. No rescans or source
+paths; clipboard output is limited to2048 UTF-8 bytes and guarded by focused
+selection identity. See COPY_DIFFERENCE_DETAILS.md for scope and evidence678–684.

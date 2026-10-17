@@ -44,7 +44,8 @@ struct FocusedValueView: View {
                 if let range = difference.foundRange {
                     FoundDifferenceJumpView(input: Binding(get: { difference.jumpInput }, set: { difference.setJumpInput($0) }),
                                             range: range, error: difference.jumpError, enabled: difference.canJump,
-                                            go: { difference.jumpToFound() })
+                                            go: { difference.jumpToFound() },
+                                            copy: { actions.copyDifferenceDetails(difference.copyDetails, selectionID: selection.id) })
                 }
                 if let notice = difference.historyNotice { Text(notice).font(.caption).foregroundStyle(.secondary) }
                 Text(difference.message).font(.caption).foregroundStyle(.secondary)
@@ -66,7 +67,8 @@ struct FocusedValueView: View {
                 if let range = dataDifference.foundRange {
                     FoundDifferenceJumpView(input: Binding(get: { dataDifference.jumpInput }, set: { dataDifference.setJumpInput($0) }),
                                             range: range, error: dataDifference.jumpError, enabled: dataDifference.canJump,
-                                            go: { dataDifference.jumpToFound() })
+                                            go: { dataDifference.jumpToFound() },
+                                            copy: { actions.copyDifferenceDetails(dataDifference.copyDetails, selectionID: selection.id) })
                 }
                 if let notice = dataDifference.historyNotice { Text(notice).font(.caption).foregroundStyle(.secondary) }
                 Text(dataDifference.message).font(.caption).foregroundStyle(.secondary)
@@ -320,6 +322,7 @@ private struct FoundDifferenceJumpView: View {
     let error: String?
     let enabled: Bool
     let go: () -> Void
+    let copy: () -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
@@ -329,6 +332,8 @@ private struct FoundDifferenceJumpView: View {
                     .textFieldStyle(.roundedBorder).frame(width: 90).onSubmit(go)
                 Button("Go", action: go)
                 Text(verbatim: range).font(.caption).foregroundStyle(.secondary)
+                Spacer()
+                Button("Copy Difference Details", action: copy)
             }
             .disabled(!enabled)
             if let error { Text(verbatim: error).font(.caption).foregroundStyle(.secondary) }

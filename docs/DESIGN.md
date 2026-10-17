@@ -370,3 +370,8 @@ A narrow FoundDifferenceJumpView owns only binding/presentation inputs. The
 focused sheet is680 points high with at least80 points for the string viewport,
 preventing added navigation/validation rows clipping original text. No report,
 clipboard, parser, history-cap, architecture or minimum-platform contract changes.
+
+Copy Difference Details uses the current captured string/data mismatch with
+exact scalar/UTF-8 or byte/EOF details and bounded context. No rescans or source
+paths; clipboard output is limited to2048 UTF-8 bytes and guarded by focused
+selection identity. See COPY_DIFFERENCE_DETAILS.md for scope and evidence678–684.
