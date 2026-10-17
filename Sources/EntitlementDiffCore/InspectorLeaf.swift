@@ -27,6 +27,7 @@ public struct LeafValueDocument: Sendable {
     public static let dataBytesPerPage = 768
     public let leaf: InspectorLeaf
     public let pageCount: Int
+    public let stringScalarCount: Int?
     private let stringPages: [Range<String.Index>]
     private let stringPageByteOffsets: [Int]
 
@@ -36,14 +37,17 @@ public struct LeafValueDocument: Sendable {
         var pages: [Range<String.Index>] = []
         var byteOffsets: [Int] = []
         var byteOffset = 0
+        var scalarCount: Int?
         switch leaf.value {
         case .string(let string):
+            scalarCount = 0
             let scalars = string.unicodeScalars
             var start = scalars.startIndex
             while start < scalars.endIndex {
                 try Task.checkCancellation()
                 let end = scalars.index(start, offsetBy: Self.stringScalarsPerPage,
                                         limitedBy: scalars.endIndex) ?? scalars.endIndex
+                scalarCount = (scalarCount ?? 0) + scalars.distance(from: start, to: end)
                 byteOffsets.append(byteOffset)
                 byteOffset += string.utf8.distance(from: start, to: end)
                 pages.append(start..<end)
@@ -56,8 +60,33 @@ public struct LeafValueDocument: Sendable {
         default:
             pageCount = 1
         }
+        stringScalarCount = scalarCount
         stringPages = pages
         stringPageByteOffsets = byteOffsets
+    }
+
+    public struct ScalarPosition: Sendable, Equatable {
+        public let scalarOffset: Int
+        public let byteOffset: Int
+        public let pageIndex: Int
+        public let scalar: Unicode.Scalar?
+        public var detail: StringScalarDetail { StringScalarDetail(scalar: scalar) }
+        public var byteCount: Int { scalar.map { String($0).utf8.count } ?? 0 }
+    }
+
+    /// Zero-based original scalar or EOF; visits at most one prepared 512-scalar page.
+    public func scalarPosition(at offset: Int) -> ScalarPosition? {
+        guard case .string(let string) = leaf.value, let count = stringScalarCount,
+              offset >= 0, offset <= count else { return nil }
+        let page = min(offset / Self.stringScalarsPerPage, pageCount - 1)
+        let scalars = string.unicodeScalars
+        var index = stringPages[page].lowerBound, byte = stringPageByteOffsets[page]
+        for _ in 0..<(offset - page * Self.stringScalarsPerPage) {
+            byte += String(scalars[index]).utf8.count
+            scalars.formIndex(after: &index)
+        }
+        return ScalarPosition(scalarOffset: offset, byteOffset: byte, pageIndex: page,
+                              scalar: index == scalars.endIndex ? nil : scalars[index])
     }
 
     public struct StringPage: Sendable {

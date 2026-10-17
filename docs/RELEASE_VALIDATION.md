@@ -1,3 +1,7 @@
+v0.1.32 (33) — Go to Unicode Scalar
+
+Independent original-scalar navigation reuses prepared page checkpoints and preserves literal-search and difference state. Four focused development tests and native acceptance are reused; distribution evidence is recorded separately.
+
 v0.1.31 (32) — Copy Viewed Byte Context
 
 Per-pane manual context copying uses captured original bytes and the last successful position. Three focused development tests and native clipboard/layout evidence are reused; distribution validation is recorded separately.

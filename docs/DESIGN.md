@@ -387,3 +387,9 @@ for an explicit side, independently of pending/rejected field text and selected
 difference. Original hex bytes and positions remain bounded/path-free; clipboard
 output limit1024 UTF-8 bytes and focused-selection UUID guard apply. Reveal
 Difference clears manual copy actions. See COPY_VIEWED_BYTE_CONTEXT.md,716–723.
+
+Go to Unicode Scalar provides independent1-based original-scalar/EOF navigation
+with exact code points and UTF-8 positions/bytes. Prepared page checkpoints bound
+lookup to512 scalars; no prefix rescan. Manual display preserves difference/search
+sessions, and Reveal Difference or new search restores its corresponding display.
+Strict bounded input and exact-state/native evidence736–745: see GO_TO_SCALAR.md.

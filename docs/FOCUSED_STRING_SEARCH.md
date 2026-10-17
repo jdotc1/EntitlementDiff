@@ -375,3 +375,9 @@ Copy Difference Details uses the current captured string/data mismatch with
 exact scalar/UTF-8 or byte/EOF details and bounded context. No rescans or source
 paths; clipboard output is limited to2048 UTF-8 bytes and guarded by focused
 selection identity. See COPY_DIFFERENCE_DETAILS.md for scope and evidence678–684.
+
+Go to Unicode Scalar provides independent1-based original-scalar/EOF navigation
+with exact code points and UTF-8 positions/bytes. Prepared page checkpoints bound
+lookup to512 scalars; no prefix rescan. Manual display preserves difference/search
+sessions, and Reveal Difference or new search restores its corresponding display.
+Strict bounded input and exact-state/native evidence736–745: see GO_TO_SCALAR.md.

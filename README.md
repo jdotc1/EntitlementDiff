@@ -408,3 +408,7 @@ difference and Copy Difference Details unchanged; Reveal Difference returns to i
 Copy Byte Context copies a pane’s last successfully viewed byte position or EOF
 and bounded original hex context. Pending edits and invalid positions do not
 change it; Copy Difference Details continues to describe the selected mismatch.
+
+Go to Scalar in each focused string pane reveals a1-based original Unicode scalar
+or EOF with exact code-point and UTF-8 details. Manual navigation keeps literal
+search and selected-difference state independent; Reveal Difference returns to it.

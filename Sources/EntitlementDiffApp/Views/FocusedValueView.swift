@@ -96,7 +96,7 @@ struct FocusedValueView: View {
             }
         }
         .padding(20)
-        .frame(width: 880, height: 680)
+        .frame(width: 880, height: 800)
         .interactiveDismissDisabled(actions.isWritingReport)
         .task(id: selection.id) {
             difference?.cancel(); dataDifference?.cancel()
@@ -122,6 +122,7 @@ private struct LeafValuePane: View {
     let dataDifferencePosition: DataFirstDifference.Position?
     let dataDifferenceRevision: UUID?
     let dataContext: DataDifferenceContext?
+    @State private var scalarNavigation = StringScalarNavigation()
     @State private var byteNavigation = DataByteNavigation()
     @State private var showingDifference = false
     @State private var document: LeafValueDocument?
@@ -170,9 +171,31 @@ private struct LeafValuePane: View {
                 } else if let dataContext { DataHexContextView(context: dataContext) }
             }
             if let document {
+                if document.stringScalarCount != nil {
+                    HStack {
+                        Text("Go to scalar (1-based)").font(.caption)
+                        TextField("\(side.label) scalar position", text: Binding(
+                            get: { scalarNavigation.input }, set: { scalarNavigation.setInput($0) }))
+                            .textFieldStyle(.roundedBorder).frame(width: 90)
+                            .onSubmit { goToScalar(document) }
+                        Button("Go to Scalar") { goToScalar(document) }
+                    }
+                    .disabled(search?.phase == .running)
+                    if let error = scalarNavigation.error {
+                        Text(verbatim: error).font(.caption).foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    if let position = scalarNavigation.position {
+                        Text("Manual scalar \(position.scalarOffset + 1) · UTF-8 byte \(position.byteOffset + 1) · difference/search unchanged")
+                            .font(.caption).foregroundStyle(.secondary)
+                        Text(verbatim: position.detail.scalarLabel + " · UTF-8: " + (position.detail.utf8Bytes ?? "EOF"))
+                            .font(.system(.caption, design: .monospaced)).textSelection(.enabled)
+                    }
+                }
                 if let page = stringPage(document) {
                     HighlightedStringPageView(page: page, pageIndex: navigation.index,
-                                              revealRevision: showingDifference ? differenceRevision : search?.matchRevision)
+                                              revealRevision: scalarNavigation.position != nil ? scalarNavigation.revision :
+                                                (showingDifference ? differenceRevision : search?.matchRevision))
                         .frame(minHeight: 80)
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .background(.quaternary.opacity(0.3), in: RoundedRectangle(cornerRadius: 6))
@@ -262,11 +285,11 @@ private struct LeafValuePane: View {
             if position == nil { showingDifference = false }
         }
         .onChange(of: search?.phase) { _, phase in
-            if phase == .running { showingDifference = false }
+            if phase == .running { showingDifference = false; scalarNavigation.reset() }
         }
         .onChange(of: search?.matchRevision) { _, _ in
             if let page = search?.match?.pageIndex, let document {
-                showingDifference = false
+                showingDifference = false; scalarNavigation.reset()
                 navigation.select(page, pageCount: document.pageCount)
             }
         }
@@ -292,6 +315,13 @@ private struct LeafValuePane: View {
         }
     }
 
+    private func goToScalar(_ document: LeafValueDocument) {
+        guard search?.phase != .running, scalarNavigation.go(document: document),
+              let position = scalarNavigation.position else { return }
+        showingDifference = false
+        navigation.select(position.pageIndex, pageCount: document.pageCount)
+    }
+
     private func goToByte(_ data: Data) {
         guard byteNavigation.go(data: data), let offset = byteNavigation.byteOffset,
               let document else { return }
@@ -303,6 +333,10 @@ private struct LeafValuePane: View {
         side == .previous ? position.previousByteCount : position.currentByteCount
     }
     private func stringPage(_ document: LeafValueDocument) -> LeafValueDocument.StringPage? {
+        if let position = scalarNavigation.position {
+            return document.stringDifferencePage(onPage: navigation.index, byteOffset: position.byteOffset,
+                                                 scalarByteCount: position.byteCount)
+        }
         if showingDifference, let position = differencePosition {
             return document.stringDifferencePage(onPage: navigation.index, byteOffset: side == .previous ? position.previousByteOffset : position.currentByteOffset,
                                                  scalarByteCount: byteCount(position))
@@ -310,6 +344,7 @@ private struct LeafValuePane: View {
         return document.stringPage(onPage: navigation.index, matching: search?.matchByteRange)
     }
     private func revealDifference() {
+        scalarNavigation.reset()
         guard let document, let position = differencePosition else { return }
         showingDifference = true
         navigation.select(min(position.pageIndex, document.pageCount - 1), pageCount: document.pageCount)
