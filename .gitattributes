@@ -1,4 +1,2 @@
-* text=auto
-*.png binary
-*.car binary
-*.icns binary
+evidence/*.log -whitespace
+docs/REVIEW_FIXES.patch -whitespace

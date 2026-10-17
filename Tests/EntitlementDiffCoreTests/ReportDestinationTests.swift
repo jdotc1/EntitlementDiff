@@ -27,6 +27,22 @@ final class ReportDestinationTests: XCTestCase {
         defer { try? FileManager.default.removeItem(at: root) }
         let alias = root.appendingPathComponent("Alias", isDirectory: true)
         try FileManager.default.createSymbolicLink(at: alias, withDestinationURL: app)
-        XCTAssertThrowsError(try ReportDestination.validate(alias.appendingPathComponent("report.json"), excluding: [app]))
+        XCTAssertThrowsError(try ReportDestination.validate(alias.appendingPathComponent("report.json"), excluding: [app])) { error in
+            guard case ReportDestinationError.insideInputBundle = error else {
+                return XCTFail("Expected input-bundle rejection, got: \(error)")
+            }
+        }
     }
+    func testProtectsEntryAncestryIndependentlyOfResolvedTarget() {
+        // Synthetic URLs exercise ancestry policy without a link or write fixture.
+        let input = URL(fileURLWithPath: "/phase1-policy/Selected.app")
+        let entry = input.appendingPathComponent("Contents/report.json")
+        let target = URL(fileURLWithPath: "/phase1-policy/Reports/report.json")
+        XCTAssertThrowsError(try ReportDestination.validate(entryURL: entry, resolvedTargetURL: target, excluding: [input])) { error in
+            guard case ReportDestinationError.insideInputBundle = error else {
+                return XCTFail("Expected input-entry rejection, got: \(error)")
+            }
+        }
+    }
+
 }

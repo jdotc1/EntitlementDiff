@@ -2,10 +2,11 @@ import Foundation
 import EntitlementDiffCore
 
 public enum BrowserFilter: String, CaseIterable, Sendable {
-    case allChanges, added, removed, changed, unchanged
+    case allChanges, allKeys, added, removed, changed, unchanged
     public var label: String {
         switch self {
         case .allChanges: "All Changes"
+        case .allKeys: "All Keys"
         case .added: "Added"
         case .removed: "Removed"
         case .changed: "Changed"
@@ -13,7 +14,7 @@ public enum BrowserFilter: String, CaseIterable, Sendable {
         }
     }
     public func includes(_ kind: ChangeKind) -> Bool {
-        self == .allChanges ? kind != .unchanged : rawValue == kind.rawValue
+        self == .allKeys || (self == .allChanges ? kind != .unchanged : rawValue == kind.rawValue)
     }
 }
 
@@ -42,14 +43,71 @@ public struct BrowserSort: SortComparator, Sendable {
     }
 }
 
-/// View preferences only; never changes comparison or report contents.
+/// Session presentation only; never changes comparison or report contents.
+/// The UI reads stored projections instead of filtering/sorting during body evaluation.
 public struct ComparisonBrowser {
-    public var filter: BrowserFilter = .allChanges
-    public var query = ""
-    public var sortOrder = [BrowserSort()]
+    private struct Preferences {
+        var filter: BrowserFilter = .allChanges
+        var query = ""
+        var sortOrder = [BrowserSort()]
+    }
+    private var preferences = Preferences()
+    private var hasStoredSource = false
+    private var sourceRows: [EntitlementChange] = []
+    private var countsByKind: [ChangeKind: Int] = [:]
+    private var visibleRowsByID: [String: EntitlementChange] = [:]
+    public private(set) var visibleRows: [EntitlementChange] = []
+
+    public var filter: BrowserFilter {
+        get { preferences.filter }
+        set {
+            guard newValue != preferences.filter else { return }
+            preferences.filter = newValue
+            refreshProjection()
+        }
+    }
+    public var query: String {
+        get { preferences.query }
+        set {
+            guard !newValue.utf8.elementsEqual(preferences.query.utf8) else { return }
+            preferences.query = newValue
+            refreshProjection()
+        }
+    }
+    public var sortOrder: [BrowserSort] {
+        get { preferences.sortOrder }
+        set {
+            guard newValue != preferences.sortOrder else { return }
+            preferences.sortOrder = newValue
+            refreshProjection()
+        }
+    }
     public var selection: String?
+    public var selectedRow: EntitlementChange? { selection.flatMap { visibleRowsByID[$0] } }
     public init() {}
     public var isDefault: Bool { filter == .allChanges && query.isEmpty && sortOrder == [BrowserSort()] }
+
+    /// Call for every new comparison, even if keys/IDs are identical after Reload.
+    public mutating func replaceRows(_ rows: [EntitlementChange]) {
+        hasStoredSource = true
+        sourceRows = rows
+        countsByKind = [:]
+        for row in rows { countsByKind[row.kind, default: 0] += 1 }
+        refreshProjection()
+    }
+
+    public func count(_ filter: BrowserFilter) -> Int {
+        switch filter {
+        case .allChanges: sourceRows.count - countsByKind[.unchanged, default: 0]
+        case .allKeys: sourceRows.count
+        case .added: countsByKind[.added, default: 0]
+        case .removed: countsByKind[.removed, default: 0]
+        case .changed: countsByKind[.changed, default: 0]
+        case .unchanged: countsByKind[.unchanged, default: 0]
+        }
+    }
+
+    // Retain the stateless library helpers; the app uses the stored projection above.
     public func count(_ filter: BrowserFilter, in rows: [EntitlementChange]) -> Int {
         rows.filter { filter.includes($0.kind) }.count
     }
@@ -67,8 +125,17 @@ public struct ComparisonBrowser {
         if let selection, !visibleRows.contains(where: { $0.id == selection }) { self.selection = nil }
     }
     public mutating func reset() {
-        filter = .allChanges
-        query = ""
-        sortOrder = [BrowserSort()]
+        guard !isDefault else { return }
+        preferences = Preferences()
+        refreshProjection()
+    }
+
+    private mutating func refreshProjection() {
+        // Stateless callers still own their rows and reconcile selection explicitly.
+        guard hasStoredSource else { return }
+        visibleRows = visibleRows(in: sourceRows)
+        visibleRowsByID = [:]
+        for row in visibleRows { visibleRowsByID[row.id] = row }
+        if let selection, visibleRowsByID[selection] == nil { self.selection = nil }
     }
 }

@@ -15,8 +15,13 @@ final class ReloadInputTests: XCTestCase {
             await task.value
         }
         XCTAssertNotNil(model.report)
+        model.browser.filter = .unchanged
+        model.browser.selection = model.browser.visibleRows.first?.id
+        XCTAssertEqual(model.browser.selectedRow?.current, .integer(1))
         let task = try XCTUnwrap(model.reload(.previous))
         XCTAssertNil(model.report)
+        XCTAssertTrue(model.browser.visibleRows.isEmpty)
+        XCTAssertNil(model.browser.selection)
         XCTAssertTrue(model.previous.isLoading)
         XCTAssertNotNil(model.current.snapshot)
         let request = await reader.next()
@@ -26,6 +31,10 @@ final class ReloadInputTests: XCTestCase {
         await task.value
         XCTAssertEqual(model.rows.first?.kind, .changed)
         XCTAssertEqual(model.previous.snapshot?.entitlements["value"], .integer(2))
+        XCTAssertEqual(model.browser.count(.changed), 1)
+        XCTAssertTrue(model.browser.visibleRows.isEmpty)
+        model.browser.filter = .changed
+        XCTAssertEqual(model.browser.visibleRows.first?.previous, .integer(2))
     }
 
     func testFailureRetainsURLForRetryAndSwapRetainsCorrectSource() async throws {

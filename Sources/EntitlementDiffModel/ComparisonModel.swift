@@ -14,8 +14,12 @@ public final class ComparisonModel {
     public private(set) var current: InputState = .empty
     public private(set) var architecture: Architecture
     public private(set) var report: ComparisonReport?
-    public private(set) var rows: [EntitlementChange] = []
+    public var rows: [EntitlementChange] { report?.comparison.rows ?? [] }
+    /// Session presentation state. Filtering never changes the validated report.
+    public var browser = ComparisonBrowser()
     public private(set) var reportError: String?
+    /// Session identity for views holding navigation into a captured report; never serialized.
+    public private(set) var reportRevision = UUID()
 
     private let reader: any SnapshotReading
     // A constant, private reference is naturally excluded from Observation.
@@ -158,15 +162,20 @@ public final class ComparisonModel {
     }
 
     private func updateReport() {
-        report = nil
-        rows = []
+        reportRevision = UUID()
         reportError = nil
-        guard let old = previous.snapshot, let new = current.snapshot else { return }
-        do {
-            report = try ComparisonReport(previous: old, current: new)
-            rows = EntitlementComparison(previous: old.entitlements, current: new.entitlements).rows
-        } catch {
-            reportError = error.localizedDescription
+        if let old = previous.snapshot, let new = current.snapshot {
+            do {
+                report = try ComparisonReport(previous: old, current: new)
+            } catch {
+                report = nil
+                reportError = error.localizedDescription
+            }
+        } else {
+            report = nil
         }
+        // Publish the final projection once, preserving visible selection on Swap.
+        // Replacement/loading/error/clear still remove old rows synchronously.
+        browser.replaceRows(rows)
     }
 }

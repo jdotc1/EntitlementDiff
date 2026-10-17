@@ -35,22 +35,31 @@ public enum ReportDestination {
         }
         let candidateURL = parent.appendingPathComponent(destination.lastPathComponent)
             .resolvingSymlinksInPath().standardizedFileURL
+        try validate(entryURL: parent.appendingPathComponent(destination.lastPathComponent),
+                     resolvedTargetURL: candidateURL, excluding: inputs)
+    }
+
+    // Separate ancestry policy from path resolution for synthetic policy tests.
+    static func validate(entryURL: URL, resolvedTargetURL: URL, excluding inputs: [URL]) throws {
         // File identity also catches aliases whose spelling differs on a
         // case-insensitive filesystem. Device + inode are compared together.
         let protected = inputs.compactMap { identity($0.resolvingSymlinksInPath()) }
-        var ancestor = candidateURL
-        while true {
-            if let current = identity(ancestor), protected.contains(current) {
-                throw ReportDestinationError.insideInputBundle
+        // Atomic replacement can mutate the entry independently of its resolved target.
+        for candidateURL in [entryURL, resolvedTargetURL] {
+            var ancestor = candidateURL
+            while true {
+                if let current = identity(ancestor), protected.contains(current) {
+                    throw ReportDestinationError.insideInputBundle
+                }
+                guard ancestor.pathComponents.count > 1 else { break }
+                ancestor.deleteLastPathComponent()
             }
-            guard ancestor.pathComponents.count > 1 else { break }
-            ancestor.deleteLastPathComponent()
-        }
-        let candidate = candidateURL.pathComponents
-        for input in inputs {
-            let base = input.resolvingSymlinksInPath().standardizedFileURL.pathComponents
-            if candidate.count >= base.count && zip(base, candidate).allSatisfy({ $0.utf8.elementsEqual($1.utf8) }) {
-                throw ReportDestinationError.insideInputBundle
+            let candidate = candidateURL.pathComponents
+            for input in inputs {
+                let base = input.resolvingSymlinksInPath().standardizedFileURL.pathComponents
+                if candidate.count >= base.count && zip(base, candidate).allSatisfy({ $0.utf8.elementsEqual($1.utf8) }) {
+                    throw ReportDestinationError.insideInputBundle
+                }
             }
         }
     }

@@ -20,7 +20,8 @@ ComparisonModel.load path and selected architecture as panel selections.
 The reader retains full bundle/signing/architecture validation. Selection triggers read-only
 inspection; comparison appears only when both reads succeed. Show Added,
 Removed, Changed or Unchanged through a category picker, defaulting to All Changes
-(excluding unchanged). Each category shows its total independent of key search.
+(excluding unchanged). All Keys optionally shows changed and unchanged entries
+together. Each category shows its total independent of key search.
 A shown-row count combines category and key search. Change and Entitlement headers
 sort in both directions, using UTF-8 bytes for deterministic key identity/order.
 Reset View restores All Changes, empty search and ascending key order. Selection
@@ -78,6 +79,13 @@ values can still be sensitive. No timestamps or random IDs enter the report.
 - EntitlementDiffSecurity: serial actor wrapping synchronous native inspection.
 - EntitlementDiffApp: one native SwiftUI Window, semantic styles, standard Table,
   detail pane, file/save panels, keyboard commands, explicit error/loading states.
+
+The validated report retains one immutable comparison, reused for UI rows and
+excluded from schema 1 by explicit CodingKeys. The session Model owns browser
+presentation state: category counts refresh on source replacement; visible rows
+refresh on source, query, category or sort changes. Selected-row lookup and view
+rendering read this stored projection. Same-ID replacement refreshes values;
+selection is reconciled synchronously.
 
 Use generation tokens as well as Task cancellation: Security calls are
 synchronous and cannot be forcibly interrupted. Never accept a late result for a
@@ -167,3 +175,28 @@ but are excluded from Codable report fields. Selected URLs remain session-only.
 Input Details separates bundle/signing identifiers and reveals the selected item
 in Finder. Metadata is unverified; requested architecture and main-executable-only
 inspection remain explicit. See RELEASE_VALIDATION.md.
+
+## Focused scalar inspection
+
+A scalar-bearing inspector row opens an immutable Previous/Current selection in a
+native sheet. Strings are indexed off MainActor into 512-Unicode-scalar pages and
+escaped after slicing; data pages hold 768 bytes rendered as base64. Other scalar
+types use one page. Preparation is cancelled on dismissal, and each presentation
+has independent state. Absent/container sides display context without leaf copy.
+Side-specific Copy Leaf JSON uses the original complete value and existing tagged
+encoding off MainActor, independently of paging. Source actions are disabled while
+the sheet is open, and concurrent copy/dismissal while writing is blocked. Existing
+whole-entitlement copy, traversal limits and report schema remain unchanged.
+
+## Explicit branch navigation
+
+Browse Branches provides 50 immediate children per step, paired by exact UTF-8
+key or array index. Saved dictionary merge offsets avoid rescanning earlier pages;
+arrays allow validated direct index jumps. Open Branch descends one level and Up
+restores the parent page. Mixed container types retain separate side structures.
+The view does not recursively search or compare descendants. Existing bounded
+search and incomplete-search wording remain; full reports/copy are independent.
+Branch/page changes reset scrolling. Report revision and selected-key identities
+reset captured navigation on source/direction/selection changes. Revision UUIDs
+are session-only and never enter exported reports. Child count is bounded; key
+byte costs and user-driven ancestor/page history are not constant-memory claims.

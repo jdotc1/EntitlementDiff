@@ -126,9 +126,42 @@ final class ComparisonModelTests: XCTestCase {
         model.loadExample()
         let before = model.report?.previous.sourceName
         let addedKeys = model.rows.filter { $0.kind == .added }.map(\.key)
+        let selected = model.rows.first { $0.key == "example.parser-version" }!.id
+        model.browser.selection = selected
         XCTAssertTrue(model.swap())
         XCTAssertEqual(model.report?.current.sourceName, before)
         XCTAssertEqual(model.rows.filter { $0.kind == .removed }.map(\.key), addedKeys)
+        XCTAssertEqual(model.browser.selection, selected)
+        XCTAssertEqual(model.browser.selectedRow?.previous, .integer(2))
+        XCTAssertEqual(model.browser.selectedRow?.current, .integer(1))
+        XCTAssertEqual(model.browser.count(.allChanges), model.report?.changes.count)
+    }
+
+    func testBrowserProjectionInvalidatesWithoutChangingReportContents() async throws {
+        let reader = ControlledReader()
+        let model = ComparisonModel(reader: reader, architecture: .arm64)
+        model.loadExample()
+        let report = try XCTUnwrap(model.report)
+        let json = try report.jsonData()
+        model.browser.query = "parser"
+        model.browser.selection = model.browser.visibleRows.first?.id
+        XCTAssertEqual(model.browser.selectedRow?.current, .integer(2))
+        XCTAssertEqual(model.browser.count(.allChanges), 5)
+        XCTAssertEqual(model.rows.count, 6)
+        XCTAssertEqual(try model.report?.jsonData(), json)
+        let task = model.load(url("Replacement.app"), side: .previous)
+        let request = await reader.next()
+        XCTAssertNil(model.report)
+        XCTAssertTrue(model.browser.visibleRows.isEmpty)
+        XCTAssertNil(model.browser.selectedRow)
+        XCTAssertNil(model.browser.selection)
+        XCTAssertEqual(model.browser.count(.allChanges), 0)
+        model.setArchitecture(.x86_64)
+        await reader.succeed(request, snapshot: snapshot("Replacement.app", value: true))
+        await task.value
+        XCTAssertNil(model.report)
+        XCTAssertTrue(model.browser.visibleRows.isEmpty)
+        XCTAssertEqual(model.browser.query, "parser")
     }
 
     func testWrongArchitectureFromReaderIsRejected() async {

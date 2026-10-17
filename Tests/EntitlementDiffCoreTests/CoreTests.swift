@@ -143,6 +143,17 @@ final class CoreTests: XCTestCase {
         XCTAssertEqual((current["entitlements"] as? [Any])?.count, 2)
     }
 
+    func testSharedComparisonKeepsSchemaOneExampleBytes() throws {
+        let pair = ExampleSnapshots.pair(architecture: .arm64)
+        let report = try ComparisonReport(previous: pair.previous, current: pair.current)
+        XCTAssertEqual(report.comparison.rows.count, 6)
+        XCTAssertEqual(report.changes.count, 5)
+        let examples = URL(fileURLWithPath: #filePath).deletingLastPathComponent()
+            .deletingLastPathComponent().deletingLastPathComponent().appendingPathComponent("Examples")
+        XCTAssertEqual(try report.jsonData(), try Data(contentsOf: examples.appendingPathComponent("example-report.json")))
+        XCTAssertEqual(report.text(), try String(contentsOf: examples.appendingPathComponent("example-report.txt"), encoding: .utf8))
+    }
+
     private func snapshot(_ name: String, _ entries: EntitlementDictionary) -> EntitlementSnapshot {
         .init(sourceName: name, signingIdentifier: "test.app", architecture: .arm64, entitlements: entries)
     }

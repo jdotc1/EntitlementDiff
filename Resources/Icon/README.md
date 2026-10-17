@@ -25,8 +25,9 @@ After editing the .icon in Icon Composer, explicitly run ./script/compile_icon.s
 once and update the previews. Ordinary builds reuse the compiled resources.
 Do not rerun icon compilation or unchanged validation solely for additional confidence.
 
-The checked-in resources were built and locally inspected. Raw workstation logs
-are excluded from source releases. This is not distribution-signing evidence.
+Accepted icon compilation and visual inspection receipts are retained in the
+private local audit. Raw workstation logs are excluded from source releases.
+Icon integration evidence does not establish distribution signing.
 
 References:
 - https://developer.apple.com/design/human-interface-guidelines/icons

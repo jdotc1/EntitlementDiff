@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Stage an allowlisted source release without local evidence or historical archives."""
+"""Package the public working tree; preserve documentation and validation evidence verbatim."""
 from pathlib import Path
 import json
 import plistlib
@@ -9,17 +9,24 @@ import subprocess
 import zipfile
 
 ROOT = Path(__file__).resolve().parent.parent
-with (ROOT / "Resources/Info.plist").open("rb") as metadata_file:
-    VERSION = plistlib.load(metadata_file)["CFBundleShortVersionString"]
-if not re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", VERSION):
-    raise SystemExit("Invalid source release version")
-DEST = ROOT / "dist" / f"EntitlementDiff-{VERSION}-Source"
-ARCHIVE = ROOT / "dist" / f"EntitlementDiff-{VERSION}-Source.zip"
+DIST = ROOT / "dist"
 DOCS = {
     "docs/DESIGN.md", "docs/REPORT_FORMAT.md", "docs/report.schema.json",
-    "docs/SOURCES.md", "docs/PUBLISHING.md", "docs/RELOAD_INPUTS.md",
+    "docs/SOURCES.md", "docs/PUBLISHING.md", "docs/RELEASE_VALIDATION.md",
+    "docs/MACOS_ACCEPTANCE.md", "docs/RELOAD_INPUTS.md",
+    "docs/SHARED_COMPARISON.md", "docs/FOCUSED_VALUE.md", "docs/BRANCH_NAVIGATION.md",
+    "docs/COMPARISON_BROWSER.md",
 }
 ROOT_FILES = {"Package.swift", "LICENSE", "README.md", ".gitignore", ".gitattributes"}
+REQUIRED = ROOT_FILES | {"docs/PUBLISHING.md", "docs/RELEASE_VALIDATION.md", "docs/MACOS_ACCEPTANCE.md", "docs/RELOAD_INPUTS.md",
+    "docs/SHARED_COMPARISON.md", "docs/FOCUSED_VALUE.md", "docs/BRANCH_NAVIGATION.md",
+    "docs/COMPARISON_BROWSER.md", "Resources/Info.plist", "script/package_source.py"}
+PATTERNS = {
+    "private key": rb"-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----",
+    "GitHub token": rb"gh[pousr]_[A-Za-z0-9]{30,}",
+    "AWS access key": rb"AKIA[A-Z0-9]{16}",
+    "personal home path": rb"/(?:Users|home)/[A-Za-z0-9_.-]+/",
+}
 
 
 def publishable(name):
@@ -28,110 +35,100 @@ def publishable(name):
             or (name.startswith("Resources/") and not name.endswith(".log")))
 
 
+def selected_index_paths():
+    """Use index metadata to reject unresolved or non-regular selected entries.
+
+    Contents still come from the working tree, not the indexed blob objects.
+    """
+    entries = subprocess.check_output(
+        ["git", "ls-files", "--stage", "-z"], cwd=ROOT
+    ).decode("utf-8").split("\0")
+    names = set()
+    for entry in entries:
+        if not entry:
+            continue
+        metadata, name = entry.split("\t", 1)
+        mode, _object_id, stage = metadata.split()
+        if not publishable(name):
+            continue
+        if stage != "0":
+            raise SystemExit(f"Refusing unresolved release input: {name}")
+        if mode not in {"100644", "100755"}:
+            raise SystemExit(f"Refusing non-regular indexed release input: {name} (mode {mode})")
+        names.add(name)
+    return sorted(names)
+
+
+def source_version():
+    with (ROOT / "Resources/Info.plist").open("rb") as metadata_file:
+        version = plistlib.load(metadata_file)["CFBundleShortVersionString"]
+    if not isinstance(version, str) or not re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", version):
+        raise SystemExit("Invalid source release version")
+    return version
+
+
 def main():
-    if DEST.exists() or ARCHIVE.exists():
+    version = source_version()
+    DEST = DIST / f"EntitlementDiff-{version}-Source"
+    ARCHIVE = DIST / f"EntitlementDiff-{version}-Source.zip"
+    RECEIPT = DIST / f"EntitlementDiff-{version}-Source.receipt.json"
+    if DIST.is_symlink():
+        raise SystemExit("Refusing a symlinked distribution directory.")
+    if any(path.exists() or path.is_symlink() for path in (DEST, ARCHIVE, RECEIPT)):
         raise SystemExit("Source staging output already exists; preserve or move it before packaging again.")
-    files = subprocess.check_output(["git", "ls-files", "-z"], cwd=ROOT).decode().split("\0")
-    names = sorted(name for name in files if name and publishable(name))
-    # Include this newly authored packaging tool before its first local commit.
-    names = sorted(set(names) | {"script/package_source.py", "docs/PUBLISHING.md"})
+    names = selected_index_paths()
+    missing = REQUIRED - set(names)
+    if missing:
+        raise SystemExit("Missing tracked release inputs: " + ", ".join(sorted(missing)))
     for name in names:
         source = ROOT / name
-        if source.is_symlink() or not source.is_file():
+        if (source.is_symlink() or not source.is_file()
+                or not source.resolve().is_relative_to(ROOT)
+                or any(parent.is_symlink() for parent in source.parents if parent != ROOT and ROOT in parent.parents)):
             raise SystemExit(f"Refusing non-regular release input: {name}")
+
+    # This is a local, single-invocation packaging tool, not a concurrent or
+    # hostile-filesystem boundary. Only outputs created by this invocation are removed.
     DEST.mkdir(parents=True)
-    for name in names:
-        target = DEST / name
-        target.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(ROOT / name, target)
-    readme = DEST / "README.md"
-    text = readme.read_text()
-    start = text.index("## Current local validation")
-    text = text[:start] + """## Input Identity and Build Metadata
-
-Source panes show version/build. Input Details separates bundle and signing
-identifiers and shows the selected location, with Reveal in Finder. Optional fields
-are bounded and unverified. Locations stay session-only; report schema 1 and
-export bytes are unchanged.
-
-## Validation and distribution
-
-This source release reuses accepted local validation receipts. The baseline passed
-58 tests in both debug and release, including all eight native integration tests.
-Subsequent browser, drop, structured-inspector, inspector-navigation and Reload/Retry changes
-passed focused checks and actual local app inspection. Input Identity and Build Metadata passed six new focused methods and native
-selection, details, Finder reveal, reload and Swap inspection. The latest affected
-checks preserve report schema 1 and unchanged report bytes. These are separate receipts, not a fresh full-suite run
-on the release snapshot. See `docs/RELEASE_VALIDATION.md` for evidence boundaries.
-
-Build locally using the commands above. This release does not include an installed
-app binary. Local builds are ad-hoc development signed, not Developer ID signed or
-notarized. No distribution readiness or complete accessibility acceptance is claimed.
-`LICENSE` is MIT.
-"""
-    text = text.replace("The Codex **Run** action calls the same script.", "")
-    text += f"\nNotarized arm64 app downloads and source releases: https://github.com/jdotc1/EntitlementDiff/releases/tag/v{VERSION}\n"
-    readme.write_text(text)
-    icon_readme = DEST / "Resources/Icon/README.md"
-    text = icon_readme.read_text()
-    text = text.replace("Evidence: compile.log, build.log and docs/ICON_ACCEPTANCE.md. This is local\nintegration, not distribution signing, publication or cross-device file delivery.",
-                        "The checked-in resources were built and locally inspected. Raw workstation logs\nare excluded from source releases. This is not distribution-signing evidence.")
-    icon_readme.write_text(text)
-    (DEST / "docs/RELEASE_VALIDATION.md").write_text("""# Accepted local validation summary
-
-- Original macOS baseline: 58 tests in debug and 58 in release, including eight
-  native integration methods. Native compilation and local development signature
-  verification passed on Apple silicon, macOS 27.2 beta, Apple Swift 6.4.
-- Comparison browser: three new focused methods passed and local UI inspected.
-- Application drop: six new focused policy/action methods passed. Real Finder
-  drops into both panes, explicit architecture rejection and invalid-file recovery
-  were observed. Native multiple-file gesture and held-hover outline were not
-  separately accepted; multiple-input rejection has focused test coverage.
-- Structured inspector: three focused methods passed and local UI inspected.
-- Reload/Retry: five new focused methods passed; changed-fixture reload, failed
-  input recovery and Reload Both were inspected in the actual development app.
-- Input identity: six new focused methods passed, including native metadata refresh,
-  bounds/type checks, unchanged report bytes/schema and stale-result continuity.
-  Same-named inputs, Finder reveal, changed/malformed metadata reload and Swap
-  were inspected in the actual development app.
-- Inspector navigation: six affected methods passed (three new, three existing),
-  and rebuilt app search, paging, filtering and complete filtered JSON copy were
-  inspected. No full-suite rerun occurred after the baseline.
-
-Raw workstation logs, screenshots, handoff archives, personal agent instructions
-and local Git history are excluded. The local audit retains those accepted receipts.
-This summary is not a new test run, independent release audit or binary-distribution
-qualification. Accessibility work was explicitly stopped; complete acceptance is
-not claimed. AppKit sharing-indicator geometry faults were previously localized to
-system stacks; no product fix or fault-free-runtime claim follows.
-""")
-    design = DEST / "docs/DESIGN.md"
-    text = design.read_text().replace("RED_TEAM_REVIEW.md", "RELEASE_VALIDATION.md").replace("INSPECTOR_NAVIGATION.md", "RELEASE_VALIDATION.md").replace("INPUT_IDENTITY.md", "RELEASE_VALIDATION.md")
-    design.write_text(text)
-    (DEST / ".gitattributes").write_text("* text=auto\n*.png binary\n*.car binary\n*.icns binary\n")
-    patterns = {
-        "private key": rb"-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----",
-        "GitHub token": rb"gh[pousr]_[A-Za-z0-9]{30,}",
-        "AWS access key": rb"AKIA[A-Z0-9]{16}",
-        "personal home path": rb"/(?:Users|home)/[A-Za-z0-9_.-]+/",
-    }
-    staged = sorted(p for p in DEST.rglob("*") if p.is_file())
-    findings = []
-    for path in staged:
-        data = path.read_bytes()
-        for label, pattern in patterns.items():
-            if re.search(pattern, data):
-                findings.append({"file": str(path.relative_to(DEST)), "finding": label})
-    if findings:
-        raise SystemExit("Publication scan found disallowed content: " + json.dumps(findings))
-    with zipfile.ZipFile(ARCHIVE, "x", compression=zipfile.ZIP_DEFLATED) as archive:
-        for path in staged:
-            archive.write(path, "EntitlementDiff/" + path.relative_to(DEST).as_posix())
-    receipt = {"file_count": len(staged), "excluded": ["evidence/", "local Git history", "historical archives", "personal instructions", "workstation logs"],
-               "scan": "No matches for configured credential markers or personal home paths; not a universal secret detector.",
-               "validation": "Accepted build/test/runtime receipts reused; no tests, hashes or signing verification repeated."}
-    (ROOT / f"evidence/112-v{VERSION}-source-preparation.json").write_text(json.dumps(receipt, indent=2) + "\n")
-    print(f"Prepared {len(staged)} source files in {DEST.relative_to(ROOT)} and {ARCHIVE.relative_to(ROOT)}")
+    archive_created = False
+    receipt_created = False
+    try:
+        for name in names:
+            target = DEST / name
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(ROOT / name, target)
+        findings = []
+        for name in names:
+            data = (DEST / name).read_bytes()
+            for label, pattern in PATTERNS.items():
+                if re.search(pattern, data):
+                    findings.append({"file": name, "finding": label})
+        if findings:
+            raise SystemExit("Publication scan found disallowed content: " + json.dumps(findings))
+        with zipfile.ZipFile(ARCHIVE, "x", compression=zipfile.ZIP_DEFLATED) as archive:
+            archive_created = True
+            for name in names:
+                archive.write(DEST / name, "EntitlementDiff/" + name)
+        receipt = {
+            "file_count": len(names),
+            "version": version,
+            "source_selection": "Tracked working-tree files; not a commit or binary attestation.",
+            "selection_policy": "Explicit root/document allowlists and source/test/example/script/resource prefixes; manually review all selected files.",
+            "excluded_roots": ["evidence/", ".git/", "dist/"],
+            "scan": "No matches for configured credential markers or personal home paths; not a universal secret detector.",
+            "validation": "Documentation copied unchanged. Packaging did not run tests or verify signing.",
+        }
+        with RECEIPT.open("x", encoding="utf-8") as handle:
+            receipt_created = True
+            handle.write(json.dumps(receipt, indent=2) + "\n")
+    except BaseException:
+        if receipt_created:
+            RECEIPT.unlink(missing_ok=True)
+        if archive_created:
+            ARCHIVE.unlink(missing_ok=True)
+        shutil.rmtree(DEST)
+        raise
+    print(f"Prepared {len(names)} source files in {DEST.relative_to(ROOT)} and {ARCHIVE.relative_to(ROOT)}")
 
 
 if __name__ == "__main__":

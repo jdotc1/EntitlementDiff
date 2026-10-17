@@ -21,9 +21,17 @@ public struct ComparisonReport: Sendable, Encodable {
     public let gatekeeperAssessment = "notPerformed"
     public let previous: EntitlementSnapshot
     public let current: EntitlementSnapshot
+    /// The validated pair's complete comparison, shared with presentation clients.
+    /// Kept out of schema 1; exports continue to contain changes and both snapshots.
+    public let comparison: EntitlementComparison
     public let changes: [EntitlementChange]
     public let unchangedCount: Int
     public let notices: [String]
+
+    private enum CodingKeys: String, CodingKey {
+        case schemaVersion, tool, scope, signatureValidation, gatekeeperAssessment
+        case previous, current, changes, unchangedCount, notices
+    }
 
     public init(previous: EntitlementSnapshot, current: EntitlementSnapshot) throws {
         guard previous.architecture == current.architecture else { throw ReportError.architectureMismatch }
@@ -35,7 +43,7 @@ public struct ComparisonReport: Sendable, Encodable {
         }
         self.previous = previous
         self.current = current
-        let comparison = EntitlementComparison(previous: previous.entitlements, current: current.entitlements)
+        comparison = EntitlementComparison(previous: previous.entitlements, current: current.entitlements)
         changes = comparison.changes
         unchangedCount = comparison.rows.count - changes.count
         var notices = [

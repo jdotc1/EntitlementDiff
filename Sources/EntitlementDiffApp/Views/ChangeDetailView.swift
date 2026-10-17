@@ -4,6 +4,9 @@ import EntitlementDiffCore
 struct ChangeDetailView: View {
     let change: EntitlementChange?
     let copy: (EntitlementChange) -> Void
+    let inspect: (EntitlementChange, InspectorRow) -> Void
+    let busy: Bool
+    @State private var browsingBranch = false
     @State private var query = ""
     @State private var changesOnly = false
     @State private var page = 0
@@ -17,9 +20,13 @@ struct ChangeDetailView: View {
                         .font(.system(.headline, design: .monospaced)).lineLimit(2).textSelection(.enabled)
                     Spacer()
                     Button("Copy Selected JSON") { copy(change) }
-                    Button("Collapse") { expanded = []; query = ""; page = 0 }
+                    Button("Browse Branches") { browsingBranch = true }.disabled(busy || browsingBranch)
+                    Button("Collapse") { browsingBranch = false; expanded = []; query = ""; page = 0 }
                 }
-                inspector(change)
+                if browsingBranch {
+                    InspectorBranchView(change: change, inspect: inspect,
+                                        close: { browsingBranch = false }, busy: busy)
+                } else { inspector(change) }
             } else {
                 Text("Select an entitlement to inspect its typed values.")
                     .foregroundStyle(.secondary).frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -62,6 +69,9 @@ struct ChangeDetailView: View {
                                 }
                                 Text("\(projection.pageOffset == 0 ? row.label : EntitlementValue.string(row.displayPath).preview(maxCharacters: 512)) · \(row.kind.label)").textSelection(.enabled)
                                     .help(EntitlementValue.string(row.displayPath).preview(maxCharacters: 512))
+                                if row.hasLeafValue {
+                                    Button("View Value…") { inspect(change, row) }.disabled(busy)
+                                }
                             }
                             .padding(.leading, CGFloat(row.depth) * 12)
                             .frame(maxWidth: .infinity, alignment: .leading)
@@ -80,7 +90,7 @@ struct ChangeDetailView: View {
             Text("\(projection.rows.count) shown · \(projection.matchingRowCount) paths in inspected portion · page \(projection.pageOffset / 50 + 1)")
                 .font(.caption).foregroundStyle(.secondary)
             Text(projection.searchIncomplete
-                 ? "Inspection limit reached (2,000 nodes or 12 levels). Some paths remain unsearched. Copy Selected JSON contains complete values."
+                 ? "Inspection limit reached (2,000 nodes or 12 levels). Some paths remain unsearched. Browse Branches to reach later or deeper values. Copy Selected JSON contains complete values."
                  : "50 rows per page · up to 2,000 inspected nodes · 12 levels · 256 scalars per preview. Search opens collapsed paths; arrays compare by index. Copy contains complete values.")
                 .font(.caption).foregroundStyle(.secondary)
         }

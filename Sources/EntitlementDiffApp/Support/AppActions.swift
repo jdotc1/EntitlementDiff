@@ -14,7 +14,8 @@ final class AppActions {
     private(set) var isWritingReport = false
     var errorMessage: String?
     private(set) var statusMessage = ""
-    var isBusy: Bool { isPresentingPanel || isWritingReport }
+    var focusedValue: FocusedValueSelection?
+    var isBusy: Bool { isPresentingPanel || isWritingReport || focusedValue != nil }
 
     init(model: ComparisonModel) { self.model = model }
 
@@ -100,6 +101,36 @@ final class AppActions {
         guard !isBusy else { return }
         statusMessage = ""
         model.loadExample()
+    }
+
+    func inspectValue(_ change: EntitlementChange, row: InspectorRow) {
+        guard !isBusy, row.hasLeafValue else { return }
+        statusMessage = ""
+        focusedValue = .init(entitlementKey: change.key, pathPreview: row.displayPath,
+                             previous: row.previous, current: row.current)
+    }
+
+    /// Capture the chosen side before suspension. Paging never changes the payload.
+    @discardableResult
+    func copyLeaf(_ side: ComparisonSide, to clipboard: NSPasteboard = .general) -> Task<Void, Never>? {
+        guard !isPresentingPanel, !isWritingReport,
+              let leaf = InspectorLeaf(focusedValue?.value(for: side)) else { return nil }
+        isWritingReport = true
+        statusMessage = "Preparing complete \(side.label.lowercased()) leaf JSON…"
+        return Task {
+            defer { isWritingReport = false }
+            do {
+                let data = try await Task.detached(priority: .userInitiated) { try leaf.jsonData() }.value
+                clipboard.clearContents()
+                guard clipboard.setString(String(decoding: data, as: UTF8.self), forType: .string) else {
+                    statusMessage = "Could not copy leaf JSON: the system clipboard did not accept it."
+                    return
+                }
+                statusMessage = "Complete \(side.label.lowercased()) leaf JSON copied. It includes the value and its type."
+            } catch {
+                statusMessage = "Could not copy leaf JSON: \(error.localizedDescription)"
+            }
+        }
     }
 
     func copySelected(_ change: EntitlementChange) {

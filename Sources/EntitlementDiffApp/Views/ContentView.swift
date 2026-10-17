@@ -3,14 +3,11 @@ import EntitlementDiffCore
 import EntitlementDiffModel
 
 struct ContentView: View {
-    let model: ComparisonModel
+    @Bindable var model: ComparisonModel
     @Bindable var actions: AppActions
-    @State private var browser = ComparisonBrowser()
 
-    private var visibleRows: [EntitlementChange] { browser.visibleRows(in: model.rows) }
-    private var selectedRow: EntitlementChange? {
-        visibleRows.first { $0.id == browser.selection }
-    }
+    private var browser: ComparisonBrowser { model.browser }
+    private var visibleRows: [EntitlementChange] { browser.visibleRows }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -25,8 +22,8 @@ struct ContentView: View {
             footer
         }
         .frame(minWidth: 880, minHeight: 650)
-        .onChange(of: visibleRows.map(\.id)) { _, _ in
-            browser.reconcileSelection(in: visibleRows)
+        .sheet(item: $actions.focusedValue) { selection in
+            FocusedValueView(selection: selection, actions: actions).id(selection.id)
         }
         .toolbar {
             ToolbarItemGroup {
@@ -99,24 +96,24 @@ struct ContentView: View {
     private var comparison: some View {
         VStack(spacing: 0) {
             HStack(spacing: 14) {
-                TextField("Filter entitlement keys", text: $browser.query)
+                TextField("Filter entitlement keys", text: $model.browser.query)
                     .textFieldStyle(.roundedBorder)
                     .accessibilityLabel("Filter entitlement keys")
                     .frame(maxWidth: 280)
-                Picker("Show", selection: $browser.filter) {
+                Picker("Show", selection: $model.browser.filter) {
                     ForEach(BrowserFilter.allCases, id: \.self) { filter in
-                        Text("\(filter.label) (\(browser.count(filter, in: model.rows)))").tag(filter)
+                        Text("\(filter.label) (\(browser.count(filter)))").tag(filter)
                     }
                 }.frame(width: 210)
                 Button("Nested Example") { actions.loadStructuredExample() }.disabled(actions.isBusy)
-                Button("Reset View") { browser.reset() }
+                Button("Reset View") { model.browser.reset() }
                     .disabled(browser.isDefault)
                 Spacer()
                 Text("\(visibleRows.count) shown · \(model.report?.changes.count ?? 0) changes · \(model.report?.unchangedCount ?? 0) unchanged")
                     .font(.caption).monospacedDigit().foregroundStyle(.secondary)
             }.padding(.horizontal, 16).padding(.vertical, 10)
             VSplitView {
-                ChangeTable(rows: visibleRows, selection: $browser.selection, sortOrder: $browser.sortOrder)
+                ChangeTable(rows: visibleRows, selection: $model.browser.selection, sortOrder: $model.browser.sortOrder)
                     .overlay {
                         if visibleRows.isEmpty {
                             VStack(spacing: 5) {
@@ -128,7 +125,9 @@ struct ContentView: View {
                         }
                     }
                     .frame(minHeight: 180, idealHeight: 260)
-                ChangeDetailView(change: selectedRow, copy: actions.copySelected)
+                ChangeDetailView(change: browser.selectedRow, copy: actions.copySelected,
+                                 inspect: actions.inspectValue, busy: actions.isBusy)
+                    .id(model.reportRevision).id(browser.selectedRow?.id)
                     .frame(minHeight: 155, idealHeight: 205)
             }
         }

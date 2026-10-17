@@ -5,12 +5,14 @@ public enum ExampleSnapshots {
     public static func structuredPair(architecture: Architecture) -> (previous: EntitlementSnapshot, current: EntitlementSnapshot) {
         let old = EntitlementValue.dictionary(.init([
             "enabled": .boolean(true), "removed": .string("old"),
-            "samples": .array((0..<120).map { .integer(Int64($0)) }),
+            "long-text": .string(String(repeating: "0123456789 ", count: 120) + "PREVIOUS END"),
+            "samples": .array((0..<2_100).map { .integer(Int64($0)) }),
             "options": .dictionary(.init(["labels": .array([.string("local"), .string("research")])]))
         ]))
         let new = EntitlementValue.dictionary(.init([
             "enabled": .integer(1), "added": .unsignedInteger(UInt64.max),
-            "samples": .array((0..<120).map { .integer(Int64($0 == 75 ? 999 : $0)) }),
+            "long-text": .string(String(repeating: "0123456789 ", count: 120) + "CURRENT END"),
+            "samples": .array((0..<2_100).map { .integer(Int64($0 == 75 ? 999 : $0)) }),
             "options": .dictionary(.init(["labels": .array([.string("research"), .string("local"), .string("new")])]))
         ]))
         func snapshot(_ value: EntitlementValue, _ name: String) -> EntitlementSnapshot {
