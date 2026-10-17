@@ -210,11 +210,20 @@ side directly, retry failed inspection when its local source is retained, or ope
 a saved report. Saved-baseline guidance explicitly asks for a Current app. A failed
 inspection never becomes an empty comparison. Included in v0.1.8.
 
+## Inspector projection reuse
+
+Nested inspection retains its projection across unrelated view updates and reuses
+rendered row change kinds. Search, expansion, Changes only and paging update it
+explicitly. A changed comparison or selected entitlement replaces the session,
+including same-key replacement. Existing display limits, exact types and complete
+exports are preserved. No measured speedup or bound on full equality is claimed.
+Included in v0.1.9.
+
 ## Downloads and development builds
 
-The published release is **v0.1.8 (build 9)**, including Reload/Retry and Input
+The published release is **v0.1.9 (build 10)**, including Reload/Retry and Input
 Identity. The arm64 app is Developer ID signed and Apple notarized. Download the
-app or sanitized source from https://github.com/jdotc1/EntitlementDiff/releases/tag/v0.1.8.
+app or sanitized source from https://github.com/jdotc1/EntitlementDiff/releases/tag/v0.1.9.
 Local development builds are ad-hoc signed and are separate from that published app.
 The current local Phase 1 export/source-packaging, comparison/browser computation,
 focused-value viewer/copy, branch-navigation and All Keys changes are not in v0.1.2.

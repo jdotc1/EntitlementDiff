@@ -171,3 +171,15 @@ Previous guidance and failed-input Retry were accepted. Loading and both-failed
 states have focused model coverage, not separate native visual acceptance. These
 receipts are reused for v0.1.8. Reader, generations, typed values, report encoding
 and browser behavior are unchanged. No full suite; accessibility remains stopped.
+
+## Inspector Projection Reuse — accepted feature evidence
+
+Eleven distinct focused methods passed: five new session/regression methods and
+six existing inspector methods covering the changed construction path. An introduced
+absent/absent Changes-only case failed its new assertion regression before a narrow
+fix, then passed its scoped rerun. Real development app builds and native typed
+rows, collapse, bounded search, paging, Changes only and same-key Swap invalidation
+were accepted. These receipts are reused for v0.1.9. Branch listing retains lazy
+classification; native-read generations, types, reports and export boundaries are
+unchanged. Display bounds do not bound recursive equality time. No measured speedup
+is claimed. No full suite was rerun; accessibility remains stopped.

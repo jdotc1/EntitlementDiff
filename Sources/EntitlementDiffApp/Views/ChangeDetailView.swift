@@ -1,17 +1,16 @@
 import SwiftUI
 import EntitlementDiffCore
+import EntitlementDiffModel
 
 struct ChangeDetailView: View {
     let change: EntitlementChange?
+    let comparisonRevision: UUID
     let copy: (EntitlementChange) -> Void
     let copyKey: () -> Void
     let inspect: (EntitlementChange, InspectorRow) -> Void
     let busy: Bool
     @State private var browsingBranch = false
-    @State private var query = ""
-    @State private var changesOnly = false
-    @State private var page = 0
-    @State private var expanded: Set<String> = ["root"]
+    @State private var session: InspectorProjectionSession?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -23,34 +22,44 @@ struct ChangeDetailView: View {
                     Button("Copy Exact Key", action: copyKey).disabled(busy)
                     Button("Copy Selected JSON") { copy(change) }
                     Button("Browse Branches") { browsingBranch = true }.disabled(busy || browsingBranch)
-                    Button("Collapse") { browsingBranch = false; expanded = []; query = ""; page = 0 }
+                    Button("Collapse") { browsingBranch = false; session?.collapse() }
                 }
                 if browsingBranch {
                     InspectorBranchView(change: change, inspect: inspect,
                                         close: { browsingBranch = false }, busy: busy)
-                } else { inspector(change) }
+                } else if let session,
+                          session.comparisonRevision == comparisonRevision,
+                          session.selectionID == change.id {
+                    inspector(change, session: session)
+                } else { ProgressView().controlSize(.small) }
             } else {
                 Text("Select an entitlement to inspect its typed values.")
                     .foregroundStyle(.secondary).frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
         .padding(12)
-        .onChange(of: change?.id) { _, _ in expanded = ["root"]; query = ""; changesOnly = false; page = 0 }
+        .onAppear { if session == nil { replaceSession() } }
+        .onChange(of: comparisonRevision) { _, _ in replaceSession() }
+        .onChange(of: change?.id) { _, _ in replaceSession() }
     }
 
-    private func inspector(_ change: EntitlementChange) -> some View {
-        let projection = ValueInspector(previous: change.previous, current: change.current, expanded: expanded,
-                                        maxRows: 50, query: query, changesOnly: changesOnly, offset: page)
+    private func replaceSession() {
+        browsingBranch = false
+        session = change.map { InspectorProjectionSession(change: $0, comparisonRevision: comparisonRevision) }
+    }
+
+    private func inspector(_ change: EntitlementChange, session: InspectorProjectionSession) -> some View {
+        let projection = session.projection
 
         return VStack(alignment: .leading, spacing: 5) {
             HStack {
-                TextField("Search nested paths", text: $query).textFieldStyle(.roundedBorder)
+                TextField("Search nested paths", text: Binding(get: { session.query }, set: { self.session?.setQuery($0) })).textFieldStyle(.roundedBorder)
                     .frame(maxWidth: 260)
-                Toggle("Changes only", isOn: $changesOnly).toggleStyle(.checkbox)
+                Toggle("Changes only", isOn: Binding(get: { session.changesOnly }, set: { self.session?.setChangesOnly($0) })).toggleStyle(.checkbox)
                 Spacer()
-                Button("Previous Page") { page = max(0, projection.pageOffset - 50) }
+                Button("Previous Page") { self.session?.previousPage() }
                     .disabled(projection.pageOffset == 0)
-                Button("Reveal More") { page = projection.pageOffset + 50 }
+                Button("Reveal More") { self.session?.nextPage() }
                     .disabled(!projection.hasNextPage)
             }
 
@@ -64,9 +73,9 @@ struct ChangeDetailView: View {
                     ForEach(projection.rows) { row in
                         HStack(alignment: .top, spacing: 12) {
                             HStack(alignment: .top, spacing: 4) {
-                                if row.expandable && query.isEmpty {
-                                    Button(expanded.contains(row.id) ? "▾" : "▸") {
-                                        if !expanded.insert(row.id).inserted { expanded.remove(row.id) }; page = 0
+                                if row.expandable && session.query.isEmpty {
+                                    Button(session.expanded.contains(row.id) ? "▾" : "▸") {
+                                        self.session?.toggleExpansion(row.id)
                                     }.buttonStyle(.borderless)
                                 }
                                 Text("\(projection.pageOffset == 0 ? row.label : EntitlementValue.string(row.displayPath).preview(maxCharacters: 512)) · \(row.kind.label)").textSelection(.enabled)
@@ -96,12 +105,5 @@ struct ChangeDetailView: View {
                  : "50 rows per page · up to 2,000 inspected nodes · 12 levels · 256 scalars per preview. Search opens collapsed paths; arrays compare by index. Copy contains complete values.")
                 .font(.caption).foregroundStyle(.secondary)
         }
-        .onChange(of: query) { _, value in
-            let bounded = String(value.unicodeScalars.prefix(256))
-            if bounded != value { query = bounded }
-            page = 0
-        }
-        .onChange(of: changesOnly) { _, _ in page = 0 }
-
     }
 }

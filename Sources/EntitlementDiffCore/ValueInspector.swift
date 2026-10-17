@@ -9,10 +9,29 @@ public struct InspectorRow: Identifiable, Sendable {
     public let previous: EntitlementValue?
     public let current: EntitlementValue?
     public let expandable: Bool
+    // Branch navigation leaves this nil: it does not classify entire subtrees.
+    private let cachedKind: ChangeKind?
+    init(id: String, depth: Int, label: String, displayPath: String,
+         previous: EntitlementValue?, current: EntitlementValue?, expandable: Bool,
+         cachedKind: ChangeKind? = nil) {
+        self.id = id; self.depth = depth; self.label = label; self.displayPath = displayPath
+        self.previous = previous; self.current = current; self.expandable = expandable
+        self.cachedKind = cachedKind
+    }
     public var kind: ChangeKind {
+        if let cachedKind { return cachedKind }
+        return Self.classify(previous, current)
+    }
+    private static func classify(_ previous: EntitlementValue?, _ current: EntitlementValue?) -> ChangeKind {
         if previous == nil { return .added }
         if current == nil { return .removed }
         return previous == current ? .unchanged : .changed
+    }
+    func classified() -> Self {
+        guard cachedKind == nil else { return self }
+        return .init(id: id, depth: depth, label: label, displayPath: displayPath,
+                     previous: previous, current: current, expandable: expandable,
+                     cachedKind: kind)
     }
     public static func summary(_ value: EntitlementValue?) -> String {
         switch value {
@@ -55,7 +74,11 @@ public struct ValueInspector: Sendable {
                    parent: Int? = nil, inheritedMatch: Bool = false, rawLabel: String? = nil) {
             guard visited < scanBudget else { hitLimit = true; return }
             visited += 1
-            if changesOnly && old == new { return }
+            if changesOnly && old == nil && new == nil { return }
+            let kind: ChangeKind? = changesOnly
+                ? (old == nil ? .added : new == nil ? .removed : old == new ? .unchanged : .changed)
+                : nil
+            if kind == .unchanged { return }
             let matched = inheritedMatch || !searching || ((rawLabel ?? label).localizedStandardContains(needle) ||
                 (parent.map { result[$0].displayPath + " / " + label } ?? label).localizedStandardContains(needle))
             let index = result.count
@@ -64,7 +87,7 @@ public struct ValueInspector: Sendable {
             let hasChildren = children(old) || children(new)
             let displayPath = parent.map { result[$0].displayPath + " / " + label } ?? label
             result.append(.init(id: path, depth: depth, label: label, displayPath: displayPath, previous: old, current: new,
-                                expandable: hasChildren && depth < depthBudget))
+                                expandable: hasChildren && depth < depthBudget, cachedKind: kind))
             guard hasChildren else { return }
             guard depth < depthBudget else { hitLimit = true; return }
             guard searching || expanded.contains(path) else { return }
@@ -118,7 +141,7 @@ public struct ValueInspector: Sendable {
         let requested = max(0, min(offset, scanBudget - 1))
         let lastPage = filtered.isEmpty ? 0 : ((filtered.count - 1) / budget) * budget
         pageOffset = min((requested / budget) * budget, lastPage)
-        rows = Array(filtered.dropFirst(pageOffset).prefix(budget))
+        rows = filtered.dropFirst(pageOffset).prefix(budget).map { $0.classified() }
         hasNextPage = pageOffset + rows.count < filtered.count
         searchIncomplete = hitLimit
         limited = hitLimit || hasNextPage
