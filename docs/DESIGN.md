@@ -306,3 +306,13 @@ revision, resets the data page viewport, and clamps EOF independently per side.
 No base64 character is marked as an individual original byte. Mixed/non-data pairs
 have no data-comparison action; string search/comparison, complete copying and
 schema-1 reports retain their existing contracts.
+
+DataDifferenceContext is a fixed window over captured original Data. It reads at
+most33 bytes per side (16 before, one target,16 after), using relative offsets
+mapped through startIndex. EOF has a bracketed marker and no fabricated byte;
+empty/beginning/end windows clamp independently. Hex strings and range labels
+are prepared once when the data result passes its cancellation/generation guard.
+No added full-value copy, base64 decode, prefix scan or per-body formatting occurs.
+The narrow DataHexContextView displays this immutable result; existing base64
+page navigation and complete typed-copy/report contracts are unchanged. Context
+clears with the result and survives manual paging/Reveal Difference unchanged.

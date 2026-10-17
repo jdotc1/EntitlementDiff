@@ -8,6 +8,8 @@ final class FocusedDataDifference {
     typealias Runner = @Sendable (DataFirstDifference) async throws -> (DataFirstDifference, DataFirstDifference.Step)
     private(set) var phase: Phase = .ready
     private(set) var position: DataFirstDifference.Position?
+    private(set) var previousContext: DataDifferenceContext?
+    private(set) var currentContext: DataDifferenceContext?
     private(set) var revision = UUID()
     private let previous: Data
     private let current: Data
@@ -43,7 +45,7 @@ final class FocusedDataDifference {
     deinit { work?.cancel() }
     func cancel() {
         generation = UUID(); work?.cancel(); work = nil
-        cursor = nil; position = nil; phase = .ready
+        cursor = nil; position = nil; previousContext = nil; currentContext = nil; phase = .ready
     }
     @discardableResult
     func find() -> Task<Void, Never>? {
@@ -64,7 +66,11 @@ final class FocusedDataDifference {
                 switch step {
                 case .more: phase = .paused
                 case .equal: phase = .equal
-                case .difference(let found): position = found; revision = UUID(); phase = .different
+                case .difference(let found):
+                    // At most 33 original bytes per side; published under the same generation guard.
+                    previousContext = DataDifferenceContext(data: previous, byteOffset: found.byteOffset)
+                    currentContext = DataDifferenceContext(data: current, byteOffset: found.byteOffset)
+                    position = found; revision = UUID(); phase = .different
                 }
             } catch {
                 guard !Task.isCancelled, generation == request else { return }

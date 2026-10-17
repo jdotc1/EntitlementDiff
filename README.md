@@ -371,3 +371,8 @@ Find First Difference in Focused String Values is included in v0.1.21 (build22),
 Exact Unicode Difference Details is included in v0.1.22 (build23), with original scalar/EOF metadata, explicit escapes and exact UTF-8 bytes. The arm64 app is Developer ID signed, notarized and stapled.
 
 Release v0.1.23 adds first-difference navigation for focused data values: exact original bytes, explicit continuation, hexadecimal byte/EOF details and independent base64 page reveal.
+
+Focused data differences also show bounded hex context: up to16 original bytes
+before and after the marked byte, exact one-based positions, and explicit [EOF]
+versus [00]. The complete original values remain available through typed copies
+and reports; the base64 pages retain their existing navigation.

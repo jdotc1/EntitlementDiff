@@ -141,3 +141,48 @@ source-generation checks reused for unchanged boundaries. Only the five new data
 methods ran. No suite, corpus/timing sweep, unchanged hashes/signatures,
 accessibility, broad appearance work, packaging, release, Applications update or
 push. Installed/public v0.1.22 unchanged; unrelated audit preserved.
+
+## Hex Context Around the First Data Difference — 2026-10-17
+
+After a data comparison finds its first difference, both panes show a compact
+original-byte hex window. Up to16 bytes precede the bracketed target and up to16
+follow it. Range and target labels use one-based original byte positions. EOF
+is [EOF], distinct from [00]; empty data has no invented surrounding bytes.
+Windows clamp to each value independently. Existing base64 pages, Reveal Difference
+and complete Copy Leaf JSON remain available and retain their contracts.
+
+DataDifferenceContext uses native Data indices relative to startIndex, supporting
+sliced Data without flattening or decoding. Initialization rejects invalid offsets
+before indexing. It reads/formats at most33 bytes per side once, under the same
+MainActor cancellation/generation publication guard as the saved difference.
+This fixed work adds no additional comparison step or asynchronous publication.
+Stored context is cleared on restart/dismissal, unchanged by manual paging/reveal,
+and rendered by a narrow SwiftUI section with no full-source formatting in body.
+The existing32KiB comparison-step bound is unchanged; the fixed66-byte maximum
+context preparation is separate. No constant-time whole-comparison claim is made.
+
+New evidence:
+
+-575: `swift test --filter 'DataDifferenceContextTests|FocusedDataDifferenceTests.testHexContextPublishesWithResultAndClearsOnRestart|FocusedDataDifferenceTests.testCancelledResultCannotPublishHexContext' -Xswiftc -warnings-as-errors`
+ passed five new methods (three Core/two App). Covers exact surrounding bytes,
+33-byte cap, beginning/last/empty/prefix EOF versus00, sliced storage, invalid
+offsets, saved reveal identity, restart clearing and computed-result cancellation.
+No pre-existing behavioral defect was confirmed; specifications preceded new APIs.
+-576: `./script/build_and_run.sh` built/staged/launched the real development app
+without compiler warnings. Native process uses this checkout's dist bundle.
+-577: synthetic64-byte pair differed at byte33 (20 versusFF); each pane showed
+bytes17–49, exact preceding10–1F, bracketed target and following21–30. Native
+screenshot visually inspected; context/layout/base64 and copy controls fit.
+-578: Previous768FF versus Current768FF+00; context shows bytes753–768 [EOF]
+versus bytes753–769 [00], and existing base64 pages independently reveal1/1 and2/2.
+Screenshot visually inspected; no fabricated byte or page-alignment highlight.
+-579: manually navigating Current to page1 retained the saved context; Reveal
+Difference restored page2 without another comparison or context generation.
+-580: Done/reopen returned to ready with no difference/context and original pages.
+
+Fixture: dist/data-hex-context-acceptance/HexContext.json, synthetic schema-1 pair;
+no inspected executable launched. Prior data553/555–560, string/search,
+renderer453/456/457, full leaf copy139–144, page378–383 and parser/report evidence
+reused for unchanged boundaries. No full suite, accessibility, timing/corpus sweep,
+unchanged hash/signature check, release or push. Installed/public v0.1.23 remains
+unchanged. This is local development acceptance, not distribution qualification.

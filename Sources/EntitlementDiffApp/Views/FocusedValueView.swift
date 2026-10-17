@@ -57,7 +57,8 @@ struct FocusedValueView: View {
                     LeafValuePane(side: side, value: selection.value(for: side),
                                   copying: actions.isWritingReport, copy: { actions.copyLeaf(side) },
                                   differencePosition: difference?.position, differenceRevision: difference?.revision,
-                                  dataDifferencePosition: dataDifference?.position, dataDifferenceRevision: dataDifference?.revision)
+                                  dataDifferencePosition: dataDifference?.position, dataDifferenceRevision: dataDifference?.revision,
+                                  dataContext: side == .previous ? dataDifference?.previousContext : dataDifference?.currentContext)
                 }
             }
             Text("Values are captured when opened. Strings escape control characters; data is base64. Copy Leaf JSON includes the complete typed value, regardless of the page.")
@@ -96,6 +97,7 @@ private struct LeafValuePane: View {
     let differenceRevision: UUID?
     let dataDifferencePosition: DataFirstDifference.Position?
     let dataDifferenceRevision: UUID?
+    let dataContext: DataDifferenceContext?
     @State private var showingDifference = false
     @State private var document: LeafValueDocument?
     @State private var navigation = LeafPageNavigation()
@@ -122,6 +124,7 @@ private struct LeafValuePane: View {
                      "Difference byte: " + (side == .previous ? position.previousLabel : position.currentLabel))
                     .font(.system(.caption, design: .monospaced)).textSelection(.enabled)
             }
+            if let dataContext { DataHexContextView(context: dataContext) }
             if let document {
                 if let page = stringPage(document) {
                     HighlightedStringPageView(page: page, pageIndex: navigation.index,
@@ -268,4 +271,24 @@ private struct LeafValuePane: View {
 private struct DataPageIdentity: Hashable {
     let page: Int
     let revision: UUID?
+}
+
+private struct DataHexContextView: View {
+    let context: DataDifferenceContext
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text("Hex context").font(.caption.weight(.semibold))
+            Text(verbatim: context.rangeLabel).font(.caption).foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+            VStack(alignment: .leading, spacing: 1) {
+                if !context.beforeHex.isEmpty { Text(verbatim: context.beforeHex) }
+                Text(verbatim: context.markedHex).fontWeight(.semibold)
+                if !context.afterHex.isEmpty { Text(verbatim: context.afterHex) }
+            }
+            .font(.system(.caption, design: .monospaced))
+            .textSelection(.enabled)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
 }
