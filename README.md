@@ -376,3 +376,8 @@ Focused data differences also show bounded hex context: up to16 original bytes
 before and after the marked byte, exact one-based positions, and explicit [EOF]
 versus [00]. The complete original values remain available through typed copies
 and reports; the base64 pages retain their existing navigation.
+
+Find Next Difference advances through focused data mismatches without rescanning
+the prefix. Long equal intervals require explicit continuation; the last byte and
+hex context remain visible while paused. Completion stops without wrapping and
+keeps the last result available to reveal. Find First Difference restarts.

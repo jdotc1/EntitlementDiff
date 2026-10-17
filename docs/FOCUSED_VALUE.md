@@ -186,3 +186,50 @@ renderer453/456/457, full leaf copy139–144, page378–383 and parser/report ev
 reused for unchanged boundaries. No full suite, accessibility, timing/corpus sweep,
 unchanged hash/signature check, release or push. Installed/public v0.1.23 remains
 unchanged. This is local development acceptance, not distribution qualification.
+
+## Find Next Difference in Focused Data Values — 2026-10-17
+
+After finding a mismatch, Find Next Difference starts immediately after the saved
+original-byte position. Adjacent unequal bytes are separate results. Long equal
+intervals still require explicit Continue Comparison after a32KiB combined input
+step. While paused, the prior byte/EOF details and hex context remain available
+and Reveal Difference still points to that saved result. A new result updates
+ordinal, context and existing base64-page reveal together. Base64 remains display,
+not comparison input. Prefix EOF is one terminal result; there is no suffix walk,
+wrap, alignment heuristic or invented byte. Completion says No further differences
+rather than falsely claiming the original pair equal. Restart returns to first.
+
+DataFirstDifference.movePastDifference explicitly advances past an already-read
+mismatch in constant work. Native indices and relative offsets handle sliced Data.
+EOF marks exhaustion without visiting the unmatched suffix. The existing step API
+still returns the saved mismatch unless explicitly advanced. FocusedDataDifference
+starts next work under a new request generation; its existing cancellation and
+generation guard prevents a late next result replacing a restarted first result.
+Context formatting remains fixed at33 original bytes per side and occurs only on
+new accepted results. Manual page/reveal and complete copies remain independent.
+
+Evidence:
+-594: `swift test --filter 'DataFirstDifferenceTests|FocusedDataDifferenceTests' -Xswiftc -warnings-as-errors`
+ passed12 affected methods: five Core/seven App, including five new methods.
+New coverage includes adjacent mismatches, one terminal EOF, sliced values,
+bounded long equal intervals, next context/ordinal, completion guards, restart,
+retained context during pause, and a computed next result returning after a newer
+first request. Seven prior methods were affected by cursor/session changes;
+unmodified context formatter575 and unrelated checks were reused. No pre-existing
+behavioral defect was confirmed; this adds explicit forward navigation.
+-595: `./script/build_and_run.sh` built/staged/launched without compiler warnings.
+-596: native next advanced first byte00/7F to adjacent byte2 00/80, updated ordinal/context.
+-597: next paused across the equal interval, retained byte2 context and disabled Next;
+Continue Comparison remained explicit. No false completion/equality.
+-598: continued to difference3 at byte20002,00/FF, both page27; exact context updated.
+Screenshot visually inspected, layout and existing copy/base64 controls fit.
+-599: next returned difference4 at byte20003, EOF versus00, once.
+-600: following next reported No further differences, disabled Next, kept last
+context and Reveal Difference. Screenshot visually inspected.
+-601: Find First Difference reset ordinal, result/context and both pages to byte1/page1.
+
+Fixture: dist/data-next-difference-acceptance/NextDifference.json, synthetic schema-1
+captured pair with adjacent/distant/terminal changes. Inspected executables were
+not launched. Accepted context575/577–580, unchanged string/search, complete
+copy139–144, page378–383 and parser/report evidence reused. No suite, accessibility,
+performance sweep, distribution action or push. Installed/public v0.1.24 unchanged.

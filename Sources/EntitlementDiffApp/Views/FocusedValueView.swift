@@ -46,7 +46,11 @@ struct FocusedValueView: View {
                         if dataDifference.phase == .paused { dataDifference.advance() } else { dataDifference.find() }
                     }
                     .disabled(dataDifference.phase == .running)
-                    if dataDifference.position != nil { Button("Reveal Difference") { dataDifference.reveal() } }
+                    if dataDifference.position != nil {
+                        Button("Find Next Difference") { dataDifference.next() }
+                            .disabled(dataDifference.phase != .different)
+                        Button("Reveal Difference") { dataDifference.reveal() }
+                    }
                     if dataDifference.phase == .running { ProgressView().controlSize(.small) }
                 }
                 Text(dataDifference.message).font(.caption).foregroundStyle(.secondary)

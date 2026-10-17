@@ -316,3 +316,16 @@ No added full-value copy, base64 decode, prefix scan or per-body formatting occu
 The narrow DataHexContextView displays this immutable result; existing base64
 page navigation and complete typed-copy/report contracts are unchanged. Context
 clears with the result and survives manual paging/Reveal Difference unchanged.
+
+Focused data Find Next Difference advances both native Data indices past the
+already-read mismatch in constant work; it never rescans the prefix. The existing
+step method retains the current result until explicitly advanced. A prefix EOF
+is emitted once, then the cursor is exhausted without walking unmatched trailing
+bytes. This is positional byte comparison, not insertion/deletion alignment.
+The MainActor session retains the last result/context during next-search portions;
+publication requires cancellation and generation guards. Every new result updates
+ordinal, exact byte/EOF details, fixed context and reveal revision together.
+A separate finished phase means No further differences; equal remains reserved
+for a fully equal pair. Next is disabled while paused/running/finished. Explicit
+Continue Comparison resumes paused work; Find First Difference resets the cursor,
+ordinal and context. String behavior and complete report/copy contracts unchanged.

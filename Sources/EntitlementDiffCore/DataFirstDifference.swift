@@ -17,6 +17,8 @@ public struct DataFirstDifference: Sendable {
     private var previousIndex: Data.Index
     private var currentIndex: Data.Index
     private var byteOffset = 0
+    private var foundDifference: Position?
+    private var exhausted = false
 
     public init(previous: Data, current: Data) {
         self.previous = previous; self.current = current
@@ -25,6 +27,7 @@ public struct DataFirstDifference: Sendable {
     /// Counts both inputs' bytes; reserve two bytes before reading a pair.
     public mutating func step(byteLimit: Int = Self.stepByteLimit) throws -> Step {
         try Task.checkCancellation()
+        if exhausted { return .equal }
         let limit = min(Self.stepByteLimit, max(2, byteLimit))
         var consumed = 0, pairs = 0
         while true {
@@ -34,9 +37,29 @@ public struct DataFirstDifference: Sendable {
             guard limit - consumed >= 2 else { return .more }
             let a = aEnded ? nil : previous[previousIndex]
             let b = bEnded ? nil : current[currentIndex]
-            if a != b { return .difference(.init(byteOffset: byteOffset, previousByte: a, currentByte: b)) }
+            if a != b {
+                let found = Position(byteOffset: byteOffset, previousByte: a, currentByte: b)
+                foundDifference = found
+                return .difference(found)
+            }
             previous.formIndex(after: &previousIndex); current.formIndex(after: &currentIndex)
             byteOffset += 1; consumed += 2; pairs += 1
         }
     }
+    /// Explicitly skip the already-read mismatch. EOF is a single terminal difference.
+    /// No prefix rescan or trailing-byte walk is required.
+    @discardableResult
+    public mutating func movePastDifference() -> Bool {
+        guard let found = foundDifference else { return false }
+        foundDifference = nil
+        if found.previousByte == nil || found.currentByte == nil {
+            exhausted = true
+        } else {
+            previous.formIndex(after: &previousIndex)
+            current.formIndex(after: &currentIndex)
+            byteOffset += 1
+        }
+        return true
+    }
+
 }

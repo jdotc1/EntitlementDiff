@@ -5,6 +5,50 @@ import EntitlementDiffCore
 
 @MainActor
 final class FocusedDataDifferenceTests: XCTestCase {
+    func testNextContextCompletionAndRestart() async throws {
+        let session = FocusedDataDifference(previous: Data([0, 1, 2]), current: Data([9, 8, 2, 0]))
+        XCTAssertNil(session.next())
+        try await XCTUnwrap(session.find()).value
+        try await XCTUnwrap(session.next()).value
+        XCTAssertEqual(session.differenceCount, 2); XCTAssertEqual(session.position?.byteOffset, 1)
+        XCTAssertEqual(session.currentContext?.markedHex, "[08]")
+        XCTAssertTrue(session.message.contains("Difference 2"))
+        try await XCTUnwrap(session.next()).value
+        XCTAssertEqual(session.differenceCount, 3); XCTAssertEqual(session.previousContext?.markedHex, "[EOF]")
+        let saved = session.currentContext
+        try await XCTUnwrap(session.next()).value
+        XCTAssertEqual(session.phase, .finished); XCTAssertTrue(session.message.contains("No further differences"))
+        XCTAssertEqual(session.currentContext, saved); XCTAssertNil(session.next()); XCTAssertNil(session.advance())
+        try await XCTUnwrap(session.find()).value
+        XCTAssertEqual(session.differenceCount, 1); XCTAssertEqual(session.position?.byteOffset, 0)
+    }
+    func testNextPausedKeepsLastResultUntilContinuation() async throws {
+        let a = Data(repeating: 0, count: 20002)
+        var b = a; b[0] = 1; b[20001] = 0x80
+        let session = FocusedDataDifference(previous: a, current: b)
+        try await XCTUnwrap(session.find()).value
+        try await XCTUnwrap(session.next()).value
+        XCTAssertEqual(session.phase, .paused); XCTAssertEqual(session.position?.byteOffset, 0)
+        XCTAssertEqual(session.currentContext?.markedHex, "[01]")
+        XCTAssertTrue(session.message.contains("No further difference yet")); XCTAssertNil(session.next())
+        try await XCTUnwrap(session.advance()).value
+        XCTAssertEqual(session.position?.byteOffset, 20001); XCTAssertEqual(session.differenceCount, 2)
+        XCTAssertEqual(session.currentContext?.markedHex, "[80]")
+    }
+    func testCancelledNextCannotReplaceNewFirstResult() async throws {
+        let gate = NextDifferenceGate()
+        let session = FocusedDataDifference(previous: Data([0, 1]), current: Data([9, 8]), runner: { cursor in
+            var next = cursor; let result = try next.step()
+            await gate.waitOnSecond(); return (next, result)
+        })
+        try await XCTUnwrap(session.find()).value
+        let late = try XCTUnwrap(session.next())
+        while !(await gate.entered) { await Task.yield() }
+        try await XCTUnwrap(session.find()).value
+        await gate.release(); await late.value
+        XCTAssertEqual(session.differenceCount, 1); XCTAssertEqual(session.position?.byteOffset, 0)
+        XCTAssertEqual(session.currentContext?.markedHex, "[09]")
+    }
     func testHexContextPublishesWithResultAndClearsOnRestart() async throws {
         let session = FocusedDataDifference(previous: Data([0, 0x7F]), current: Data([0, 0x80, 0xFF]))
         XCTAssertNil(session.previousContext); XCTAssertNil(session.currentContext)
@@ -74,4 +118,15 @@ private actor DataDifferenceGate {
     private var waiter: CheckedContinuation<Void, Never>?
     func wait() async { entered = true; if !open { await withCheckedContinuation { waiter = $0 } } }
     func release() { open = true; waiter?.resume(); waiter = nil }
+}
+
+private actor NextDifferenceGate {
+    var entered = false
+    private var calls = 0
+    private var waiter: CheckedContinuation<Void, Never>?
+    func waitOnSecond() async {
+        calls += 1
+        if calls == 2 { entered = true; await withCheckedContinuation { waiter = $0 } }
+    }
+    func release() { waiter?.resume(); waiter = nil }
 }

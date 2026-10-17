@@ -3,6 +3,30 @@ import XCTest
 @testable import EntitlementDiffCore
 
 final class DataFirstDifferenceTests: XCTestCase {
+    func testNextAdjacentDifferencesAndTerminalEOF() throws {
+        var cursor = DataFirstDifference(previous: Data([0, 1, 2]), current: Data([9, 8, 2, 0, 1]))
+        XCTAssertFalse(cursor.movePastDifference())
+        guard case .difference(let first) = try cursor.step() else { return XCTFail("Missing first") }
+        XCTAssertEqual(first.byteOffset, 0); XCTAssertTrue(cursor.movePastDifference())
+        guard case .difference(let second) = try cursor.step() else { return XCTFail("Missing adjacent") }
+        XCTAssertEqual(second.byteOffset, 1); XCTAssertTrue(cursor.movePastDifference())
+        guard case .difference(let end) = try cursor.step() else { return XCTFail("Missing EOF") }
+        XCTAssertEqual(end.byteOffset, 3); XCTAssertNil(end.previousByte); XCTAssertEqual(end.currentByte, 0)
+        XCTAssertTrue(cursor.movePastDifference()); XCTAssertFalse(cursor.movePastDifference())
+        XCTAssertEqual(try cursor.step(), .equal)
+        XCTAssertEqual(try cursor.step(), .equal)
+    }
+    func testNextRetainsCursorAcrossBoundedEqualIntervalAndSlices() throws {
+        let a = Data(repeating: 0, count: 20003).dropFirst()
+        var b = a; b[b.startIndex] = 0xFF; b[b.index(before: b.endIndex)] = 0x80
+        var cursor = DataFirstDifference(previous: a, current: b)
+        guard case .difference(let first) = try cursor.step() else { return XCTFail("Missing first") }
+        XCTAssertEqual(first.byteOffset, 0); XCTAssertTrue(cursor.movePastDifference())
+        XCTAssertEqual(try cursor.step(), .more)
+        guard case .difference(let next) = try cursor.step() else { return XCTFail("Missing later") }
+        XCTAssertEqual(next.byteOffset, 20001); XCTAssertEqual(next.currentByte, 0x80)
+        XCTAssertTrue(cursor.movePastDifference()); XCTAssertEqual(try cursor.step(), .equal)
+    }
     func testBudgetLaterPageAndExactBytes() throws {
         var left = Data(repeating: 0xAA, count: 20001), right = left
         left[20000] = 0x7F; right[20000] = 0x80
