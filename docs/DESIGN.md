@@ -342,3 +342,17 @@ FocusedStringDifference starts next under a fresh generation, retains old detail
 while paused, and atomically publishes ordinal/scalars/coordinates/reveal revision.
 Finished differs from equal; Next never wraps. Existing literal Find state,
 complete copies, data inspection and schema-1 reports retain their contracts.
+
+FoundDifferenceHistory retains at most64 compact position/ordinal entries, never
+source values or cursor snapshots. A session keeps one frontier cursor while its
+displayed history index can move backward/forward. Only frontier scanning appends;
+eviction drops the oldest entry and exposes the earliest retained ordinal. Saved
+replay does not invoke the comparison runner. String scalar/per-side UTF-8 details
+are restored exactly; data hex context is regenerated with its existing fixed
+33-byte-per-side bound. Reveal revision reuses existing page/highlight mapping.
+Frontier completion is independent of displayed result: moving backward from a
+finished comparison and forward again restores finished without rescanning.
+Previous/Next require settled phases; paused/running work cannot navigate history.
+Every navigation/new request invalidates old generations and cancels prior work;
+accepted new results alone populate history. Restart/dismissal replaces history.
+No report, copy, parser, architecture, dependency or source-value contracts change.

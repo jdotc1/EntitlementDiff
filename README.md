@@ -387,3 +387,8 @@ and separate Previous/Current UTF-8 byte positions. Long equal spans require
 explicit continuation. Next stops without wrapping; Find First Difference restarts.
 Literal text Find remains independent, and comparison never normalizes text or
 infers insertion/deletion alignment.
+
+Previous Found Difference revisits up to64 discovered string/data differences.
+Next replays saved results before resuming the frontier scan. Retention limits
+are explicit, and restart/dismissal clears history. Saved Unicode/byte details,
+page reveal and bounded data hex context remain exact.

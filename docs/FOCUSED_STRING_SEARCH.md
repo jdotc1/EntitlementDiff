@@ -359,3 +359,9 @@ schema-1 pair. No inspected executable launched. Data594–601, fixed context575
 unchanged search479, renderer453/456/457, complete copy139–144, page378–383 and
 parser/report evidence reused. No full suite, accessibility, timing/corpus sweep,
 unchanged signature/hash rerun, release or push. Installed/public v0.1.25 unchanged.
+
+Previous Found Difference now provides the same64-result bounded history for
+strings and data; see FOCUSED_VALUE.md for the implementation/evidence635–643.
+String entries retain original scalar identities and separate Previous/Current
+UTF-8 positions. Replay restores the exact captured detail/highlight coordinate;
+completion and scan frontier stay separate from the displayed historical result.

@@ -35,11 +35,13 @@ struct FocusedValueView: View {
                     }
                     .disabled(difference.phase == .running)
                     if difference.position != nil {
-                        Button("Find Next Difference") { difference.next() }.disabled(difference.phase != .different)
+                        Button("Previous Found Difference") { difference.previousFound() }.disabled(!difference.canPrevious)
+                        Button("Find Next Difference") { difference.next() }.disabled(!difference.canNext)
                         Button("Reveal Difference") { difference.reveal() }
                     }
                     if difference.phase == .running { ProgressView().controlSize(.small) }
                 }
+                if let notice = difference.historyNotice { Text(notice).font(.caption).foregroundStyle(.secondary) }
                 Text(difference.message).font(.caption).foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -50,12 +52,13 @@ struct FocusedValueView: View {
                     }
                     .disabled(dataDifference.phase == .running)
                     if dataDifference.position != nil {
-                        Button("Find Next Difference") { dataDifference.next() }
-                            .disabled(dataDifference.phase != .different)
+                        Button("Previous Found Difference") { dataDifference.previousFound() }.disabled(!dataDifference.canPrevious)
+                        Button("Find Next Difference") { dataDifference.next() }.disabled(!dataDifference.canNext)
                         Button("Reveal Difference") { dataDifference.reveal() }
                     }
                     if dataDifference.phase == .running { ProgressView().controlSize(.small) }
                 }
+                if let notice = dataDifference.historyNotice { Text(notice).font(.caption).foregroundStyle(.secondary) }
                 Text(dataDifference.message).font(.caption).foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             }

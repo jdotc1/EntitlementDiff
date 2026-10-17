@@ -233,3 +233,53 @@ captured pair with adjacent/distant/terminal changes. Inspected executables were
 not launched. Accepted context575/577–580, unchanged string/search, complete
 copy139–144, page378–383 and parser/report evidence reused. No suite, accessibility,
 performance sweep, distribution action or push. Installed/public v0.1.24 unchanged.
+
+## Previous Found Difference in Focused Values — 2026-10-17
+
+Previous Found Difference revisits discovered results in both string/data focused
+sheets. Find Next Difference replays retained results before resuming the single
+frontier cursor. It is discovered-result navigation, not a reverse source search.
+A fixed64-entry history stores only immutable positions and ordinals, not source
+copies or a cursor per entry. Eviction exposes "Found history starts at difference
+N. Find First Difference to restart." The oldest retained result disables Previous;
+there is no wrap. Restart/dismissal clears history and completion state.
+
+Replay restores exact byte/scalar/EOF details, per-side UTF-8 coordinates and reveal
+revision. Data context is regenerated within the accepted33-byte-per-side bound;
+string highlights reuse per-side mapping. Comparison runners are not called for
+replay. The cursor stays at the furthest discovered result. Completed-state replay
+returns to finished at the frontier without a new scan. While running/paused,
+Previous/Next are disabled; continuation retains the last result. Generation and
+cancellation guards prevent a stale result populating restarted history. Existing
+32KiB scan steps, rendering, literal search, copy and schema-1 reports remain.
+
+Evidence:
+-635: `swift test --filter FoundDifferenceHistoryTests -Xswiftc -warnings-as-errors`
+ ran six new methods. Five passed; one test runner constructed a tuple containing
+the pre-step cursor before evaluating its mutating step. Production runner already
+computes step before return; this was a test helper error, not an app defect.
+-636: corrected only that runner evaluation order; `swift test --filter 'FoundDifferenceHistoryTests.testDataReplayDoesNotRunComparisonAndResumesFrontier' -Xswiftc -warnings-as-errors`
+ passed. Other five results635 reused. Coverage includes64-entry eviction, exact
+ordinals, replay without runner calls, frontier resumption, completed/EOF replay,
+independent UTF-8 details, both model history caps/reset, and late computed data/
+string results arriving after restart. Only new methods ran, no existing suite.
+-637: `./script/build_and_run.sh` built/staged/launched the real development app.
+-638: native string Previous restored result1 after discovering result2.
+-639: Next replayed result2 with Previous byte2/Current byte5, U+00E9/C3 A9 and
+U+200B/E2 80 8B. Original highlight/details restored; screenshot visually inspected.
+-640: completed string scan, Previous restored result3; Next restored terminal EOF
+and finished state with Next disabled, without wrap or another scan.
+-641: native data traversal reached difference65; notice states retained history
+starts at difference2. Controls, context and notice fit; screenshot inspected.
+A transient computer-use capture failure interrupted at result20; current state
+was read and navigation resumed without restart or duplicate actions.
+-642: Previous restored data result64/context, Next replayed65, then resumed to66;
+retention notice advanced to3. Tests636 prove replay does not call runner.
+-643: restart returned to result1, disabled Previous and cleared retention notice.
+
+Synthetic schema-1 fixture: dist/found-history-acceptance/History.json,72 unequal
+data bytes plus a Unicode pair. No inspected executable launched. Previous Core
+comparison/data/Unicode checks594/614/615, fixed context575, renderer453/456/457,
+complete copy139–144, page378–383 and parser/report receipts reused. No suite rerun,
+accessibility, performance sweep, unchanged hashes/signatures, release or push.
+Installed/public v0.1.26 unchanged; this is development acceptance only.

@@ -12,12 +12,18 @@ final class FocusedDataDifference {
     private(set) var previousContext: DataDifferenceContext?
     private(set) var currentContext: DataDifferenceContext?
     private(set) var revision = UUID()
+    private var history = FoundDifferenceHistory<DataFirstDifference.Position>()
+    private var frontierFinished = false
     private let previous: Data
     private let current: Data
     @ObservationIgnored private let runner: Runner
     @ObservationIgnored private var cursor: DataFirstDifference?
     @ObservationIgnored private var generation = UUID()
     @ObservationIgnored private var work: Task<Void, Never>?
+
+    var canPrevious: Bool { (phase == .different || phase == .finished) && history.canPrevious }
+    var canNext: Bool { (phase == .different || phase == .finished) && (history.canNext || !frontierFinished) }
+    var historyNotice: String? { history.notice }
 
     var message: String {
         switch phase {
@@ -47,6 +53,7 @@ final class FocusedDataDifference {
     deinit { work?.cancel() }
     func cancel() {
         generation = UUID(); work?.cancel(); work = nil
+        history = .init(); frontierFinished = false
         cursor = nil; differenceCount = 0; position = nil; previousContext = nil; currentContext = nil; phase = .ready
     }
     @discardableResult
@@ -54,12 +61,28 @@ final class FocusedDataDifference {
         cancel(); cursor = DataFirstDifference(previous: previous, current: current)
         return advance()
     }
+    func previousFound() {
+        guard canPrevious, let entry = history.previous() else { return }
+        generation = UUID(); work?.cancel(); work = nil
+        restore(entry)
+    }
     @discardableResult
     func next() -> Task<Void, Never>? {
-        guard phase == .different, var cursor, cursor.movePastDifference() else { return nil }
+        guard canNext else { return nil }
         generation = UUID(); work?.cancel(); work = nil
+        if let entry = history.next() {
+            restore(entry)
+            return Task {}
+        }
+        guard var cursor, cursor.movePastDifference() else { return nil }
         self.cursor = cursor; phase = .ready
         return advance()
+    }
+    private func restore(_ entry: FoundDifferenceHistory<DataFirstDifference.Position>.Entry) {
+        previousContext = DataDifferenceContext(data: previous, byteOffset: entry.position.byteOffset)
+        currentContext = DataDifferenceContext(data: current, byteOffset: entry.position.byteOffset)
+        differenceCount = entry.ordinal; position = entry.position; revision = UUID()
+        phase = frontierFinished && history.isAtFrontier ? .finished : .different
     }
     func reveal() { if position != nil { revision = UUID() } }
     @discardableResult
@@ -74,13 +97,8 @@ final class FocusedDataDifference {
                 self.cursor = next
                 switch step {
                 case .more: phase = .paused
-                case .equal: phase = position == nil ? .equal : .finished
-                case .difference(let found):
-                    // At most 33 original bytes per side; published under the same generation guard.
-                    previousContext = DataDifferenceContext(data: previous, byteOffset: found.byteOffset)
-                    currentContext = DataDifferenceContext(data: current, byteOffset: found.byteOffset)
-                    differenceCount += 1
-                    position = found; revision = UUID(); phase = .different
+                case .equal: frontierFinished = true; phase = position == nil ? .equal : .finished
+                case .difference(let found): restore(history.append(found))
                 }
             } catch {
                 guard !Task.isCancelled, generation == request else { return }

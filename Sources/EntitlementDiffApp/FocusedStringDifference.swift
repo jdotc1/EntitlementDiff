@@ -10,12 +10,18 @@ final class FocusedStringDifference {
     private(set) var differenceCount = 0
     private(set) var position: StringFirstDifference.Position?
     private(set) var revision = UUID()
+    private var history = FoundDifferenceHistory<StringFirstDifference.Position>()
+    private var frontierFinished = false
     private let previous: String
     private let current: String
     @ObservationIgnored private let runner: Runner
     @ObservationIgnored private var cursor: StringFirstDifference?
     @ObservationIgnored private var generation = UUID()
     @ObservationIgnored private var work: Task<Void, Never>?
+
+    var canPrevious: Bool { (phase == .different || phase == .finished) && history.canPrevious }
+    var canNext: Bool { (phase == .different || phase == .finished) && (history.canNext || !frontierFinished) }
+    var historyNotice: String? { history.notice }
 
     var message: String {
         switch phase {
@@ -46,6 +52,7 @@ final class FocusedStringDifference {
     deinit { work?.cancel() }
     func cancel() {
         generation = UUID(); work?.cancel(); work = nil
+        history = .init(); frontierFinished = false
         cursor = nil; differenceCount = 0; position = nil; phase = .ready
     }
     @discardableResult
@@ -53,12 +60,26 @@ final class FocusedStringDifference {
         cancel(); cursor = StringFirstDifference(previous: previous, current: current)
         return advance()
     }
+    func previousFound() {
+        guard canPrevious, let entry = history.previous() else { return }
+        generation = UUID(); work?.cancel(); work = nil
+        restore(entry)
+    }
     @discardableResult
     func next() -> Task<Void, Never>? {
-        guard phase == .different, var cursor, cursor.movePastDifference() else { return nil }
+        guard canNext else { return nil }
         generation = UUID(); work?.cancel(); work = nil
+        if let entry = history.next() {
+            restore(entry)
+            return Task {}
+        }
+        guard var cursor, cursor.movePastDifference() else { return nil }
         self.cursor = cursor; phase = .ready
         return advance()
+    }
+    private func restore(_ entry: FoundDifferenceHistory<StringFirstDifference.Position>.Entry) {
+        differenceCount = entry.ordinal; position = entry.position; revision = UUID()
+        phase = frontierFinished && history.isAtFrontier ? .finished : .different
     }
     func reveal() { if position != nil { revision = UUID() } }
     @discardableResult
@@ -73,8 +94,8 @@ final class FocusedStringDifference {
                 self.cursor = next
                 switch step {
                 case .more: phase = .paused
-                case .equal: phase = position == nil ? .equal : .finished
-                case .difference(let found): differenceCount += 1; position = found; revision = UUID(); phase = .different
+                case .equal: frontierFinished = true; phase = position == nil ? .equal : .finished
+                case .difference(let found): restore(history.append(found))
                 }
             } catch {
                 guard !Task.isCancelled, generation == request else { return }
