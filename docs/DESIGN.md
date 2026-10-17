@@ -230,3 +230,8 @@ Find Entitlement and child lookup share the raw-byte ExactKeyField input boundar
 Native edits invalidate prior feedback; Find retains initial focus, Return and
 Escape through narrow AppKit callbacks. See UTF8_FIND_INPUT.md for the confirmed
 canonical-equivalence input defect and focused correction.
+
+Focused leaf panes support independent explicit one-based page jumps using the
+existing document index. Invalid input preserves the page; editing clears range
+feedback. Existing navigation synchronizes the field, and new presentations reset
+all state. Rendering limits and complete copying are unchanged. See LEAF_PAGE_JUMP.md.

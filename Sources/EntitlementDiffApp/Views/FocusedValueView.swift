@@ -55,7 +55,7 @@ private struct LeafValuePane: View {
     let copying: Bool
     let copy: () -> Void
     @State private var document: LeafValueDocument?
-    @State private var page = 0
+    @State private var navigation = LeafPageNavigation()
     @State private var preparationError: String?
 
     var body: some View {
@@ -64,7 +64,7 @@ private struct LeafValuePane: View {
             Text(value?.typeName ?? "Absent").foregroundStyle(.secondary)
             if let document {
                 ScrollView {
-                    Text(verbatim: document.text(onPage: page))
+                    Text(verbatim: document.text(onPage: navigation.index))
                         .font(.system(.body, design: .monospaced))
                         .textSelection(.enabled)
                         .frame(maxWidth: .infinity, alignment: .topLeading)
@@ -72,12 +72,23 @@ private struct LeafValuePane: View {
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .background(.quaternary.opacity(0.3), in: RoundedRectangle(cornerRadius: 6))
-                Text("Page \(page + 1) of \(document.pageCount)").font(.caption).monospacedDigit()
+                Text("Page \(navigation.index + 1) of \(document.pageCount)").font(.caption).monospacedDigit()
                 HStack {
-                    Button("First") { page = 0 }.disabled(page == 0)
-                    Button("Previous") { page -= 1 }.disabled(page == 0)
-                    Button("Next") { page += 1 }.disabled(page + 1 == document.pageCount)
-                    Button("Last") { page = document.pageCount - 1 }.disabled(page + 1 == document.pageCount)
+                    Button("First") { navigation.select(0, pageCount: document.pageCount) }.disabled(navigation.index == 0)
+                    Button("Previous") { navigation.select(navigation.index - 1, pageCount: document.pageCount) }.disabled(navigation.index == 0)
+                    Button("Next") { navigation.select(navigation.index + 1, pageCount: document.pageCount) }.disabled(navigation.index + 1 == document.pageCount)
+                    Button("Last") { navigation.select(document.pageCount - 1, pageCount: document.pageCount) }.disabled(navigation.index + 1 == document.pageCount)
+                }
+                HStack {
+                    TextField("Page number", text: $navigation.input)
+                        .textFieldStyle(.roundedBorder).frame(width: 90)
+                        .onSubmit { navigation.go(pageCount: document.pageCount) }
+                    Button("Go") { navigation.go(pageCount: document.pageCount) }
+                    Text("1–\(document.pageCount)").font(.caption).foregroundStyle(.secondary)
+                }
+                if navigation.isInvalid {
+                    Text("Enter a whole page number from 1 through \(document.pageCount).")
+                        .font(.caption).foregroundStyle(.secondary)
                 }
             } else if InspectorLeaf(value) != nil {
                 if let preparationError {

@@ -1,3 +1,5 @@
+Direct one-based page navigation added locally2026-10-17; see LEAF_PAGE_JUMP.md. Existing rendering/copy/preparation evidence below is reused.
+
 # Focused value viewer and typed leaf copy
 
 Implemented locally 2026-10-15 on milestone 2 commit `bc65b87`. This is the

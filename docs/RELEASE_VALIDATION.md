@@ -244,3 +244,13 @@ and filter, hidden reveal preserving descending sorting, and visible-key selecti
 These accepted receipts are reused for v0.1.14. Core/browser lookup, complete
 schema-1 reports, parser, provenance, source generations and child input checks
 are reused. No full suite, performance sweep or accessibility work.
+
+## Go to Page in Focused Value — accepted feature evidence
+
+Two focused methods passed for invalid page preservation, recovery, one-based
+conversion, independent string/data navigation and fresh state. The real app built
+and launched. Native checks confirmed independent middle-page jumps and exact
+middle text, invalid range feedback preserving both pages, Return recovery and
+fresh page1 on reopening. Screenshot was visually inspected. These receipts are
+reused for v0.1.15. Existing slicing/type/copy, parser, reports and cancellation
+checks are reused. No full suite, performance sweep or accessibility work.

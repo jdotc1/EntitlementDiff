@@ -176,6 +176,14 @@ and decomposed Unicode spellings. Editing clears prior lookup feedback; Find and
 Show in All Keys use the current key. Initial focus, Return and Escape remain
 available. Included in v0.1.14 (build 15). See [Input correction](docs/UTF8_FIND_INPUT.md).
 
+## Jump to a focused value page
+
+Each Previous/Current pane in Focused Value offers Page number and Go, with Return
+submission and a valid one-based range. Invalid input leaves the page unchanged;
+existing paging buttons synchronize the field. Each side navigates independently,
+and reopening starts at page1. Rendering bounds and complete leaf copying remain
+unchanged. Included in v0.1.15 (build16). See [Page navigation](docs/LEAF_PAGE_JUMP.md).
+
 ## Build from source
 
 Requires macOS 14+, a Swift 6 toolchain, and macOS command-line developer tools.
