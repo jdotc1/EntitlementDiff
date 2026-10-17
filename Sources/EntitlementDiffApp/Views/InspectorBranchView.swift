@@ -28,8 +28,20 @@ struct InspectorBranchView: View {
                 HStack {
                     Button("Back to Search", action: close)
                     Button("Up") { navigation.back(); resetIndex() }.disabled(!navigation.canGoBack)
+                    Button("Root") {
+                        if let root = navigation.rootAncestor, navigation.jump(to: root) { resetIndex() }
+                    }.disabled(!navigation.canGoBack)
+                    Menu("Ancestors…") {
+                        ForEach(navigation.recentAncestors) { ancestor in
+                            Button("Level \(ancestor.level) · \(ancestor.label)") {
+                                if navigation.jump(to: ancestor) { resetIndex() }
+                            }
+                        }
+                    }.fixedSize().disabled(navigation.recentAncestors.isEmpty)
                     Text("Branch level \(navigation.depth)").font(.caption)
                     Spacer()
+                }
+                HStack {
                     Button("First Children") { navigation.firstPage(); resetIndex() }.disabled(!navigation.hasPrevious)
                     Button("Previous Children") { navigation.previousPage(); resetIndex() }.disabled(!navigation.hasPrevious)
                     Button("Next Children") { navigation.nextPage(); resetIndex() }.disabled(!navigation.hasNext)

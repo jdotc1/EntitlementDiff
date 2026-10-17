@@ -6,6 +6,7 @@ public struct InspectorBranchNavigator: Sendable {
     public static let pageSize = 50
     private struct Cursor: Sendable { var old = 0; var new = 0; var ordinal = 0 }
     private struct Frame: Sendable {
+        let token = UUID()
         let root: InspectorRow
         var cursor = Cursor()
         var history: [Cursor] = []
@@ -21,6 +22,33 @@ public struct InspectorBranchNavigator: Sendable {
     public var offset: Int { frame.cursor.ordinal }
     public var canGoBack: Bool { !ancestors.isEmpty }
     public var hasPrevious: Bool { offset > 0 }
+    /// Opaque frame identity prevents an old menu action from resolving in a new branch/session.
+    public struct Ancestor: Identifiable, Sendable {
+        public let id: UUID
+        public let level: Int
+        public let label: String
+    }
+    public var rootAncestor: Ancestor? {
+        ancestors.first.map { Ancestor(id: $0.token, level: 0, label: "Root") }
+    }
+    /// Nearest twelve non-root ancestors; Root is a separate direct action.
+    public var recentAncestors: [Ancestor] {
+        let start = max(1, ancestors.count - 12)
+        guard start < ancestors.count else { return [] }
+        return (start..<ancestors.count).reversed().map {
+            Ancestor(id: ancestors[$0].token, level: $0, label: ancestors[$0].root.label)
+        }
+    }
+    @discardableResult
+    public mutating func jump(to ancestor: Ancestor) -> Bool {
+        guard ancestors.indices.contains(ancestor.level),
+              ancestors[ancestor.level].token == ancestor.id else { return false }
+        frame = ancestors[ancestor.level]
+        ancestors.removeSubrange(ancestor.level...)
+        refresh()
+        return true
+    }
+
     public var arrayCount: Int? {
         switch (root.previous, root.current) {
         case (.array(let a), .array(let b)): max(a.count, b.count)

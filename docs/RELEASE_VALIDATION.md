@@ -265,3 +265,13 @@ Native copies at children51–100 retained all118 Previous/119 Current entries,
 exact types and side-only data while excluding the parent sibling. Screenshot
 inspected. These receipts are reused for v0.1.16. Existing encoder/report, parser,
 reader-generation and navigation checks reused; no full suite or accessibility.
+
+## Jump to Ancestor — accepted feature evidence
+
+Three focused methods passed for dictionary page/history restoration, array-index
+cursor restoration, bounded menu entries, Unicode labels, lookup clearing and stale
+frame rejection. The real development app built/launched. Native level3→level1
+restored index93/children94–120; Root restored children51–100. Final compact layout
+was inspected and Swap removed captured branch/ancestor controls. These receipts
+are reused for v0.1.17. Existing types, reports, parser, copy and reader-generation
+checks reused; no full suite, performance sweep or accessibility work.

@@ -241,3 +241,8 @@ Encoding runs off-main from immutable captured values, with revision/selection
 guards and busy navigation/selection blocking. Empty containers remain valid;
 absent/scalar sides are disabled. This is a value fragment, not a schema-1 saved
 report. Rendering/full report contracts are unchanged. See COPY_BRANCH_JSON.md.
+
+Browse Branches offers Root and at most12 nearest non-root ancestors. Opaque
+frame destinations restore saved cursor/page history without parsing labels or
+searching descendants; stale destinations are rejected and lookup input cleared.
+Existing revision/selection resets apply. See ANCESTOR_NAVIGATION.md.

@@ -193,6 +193,14 @@ a complete tagged value fragment, not a saved comparison report. Encoding runs
 off-main with revision/selection guards. Included in v0.1.16 (build17).
 See [Branch copying](docs/COPY_BRANCH_JSON.md).
 
+## Jump to an ancestor branch
+
+Browse Branches offers Root and a compact Ancestors menu with up to12 nearest
+non-root ancestors. A jump restores the saved parent child page and clears lookup
+input. Opaque frame identities reject stale destinations; comparison replacement
+resets navigation. Included in v0.1.17 (build18).
+See [Ancestor navigation](docs/ANCESTOR_NAVIGATION.md).
+
 ## Build from source
 
 Requires macOS 14+, a Swift 6 toolchain, and macOS command-line developer tools.
