@@ -1,3 +1,7 @@
+v0.1.31 (32) — Copy Viewed Byte Context
+
+Per-pane manual context copying uses captured original bytes and the last successful position. Three focused development tests and native clipboard/layout evidence are reused; distribution validation is recorded separately.
+
 v0.1.30 (31) — Go to Byte
 
 Independent per-data-pane byte navigation preserves original bytes, bounded context and selected-difference behavior. Four focused development tests and native acceptance are reused for release. Distribution checks are recorded separately.

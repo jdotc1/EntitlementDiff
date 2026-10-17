@@ -381,3 +381,9 @@ original byte or EOF, with bounded33-byte hex context and direct base64 page
 selection. Manual viewing does not change the selected difference or its copied
 details. Reveal Difference resets manual navigation. Strict bounded input, invalid
 nonmutation and dismissal reset are covered in GO_TO_BYTE.md, evidence697–703.
+
+Copy Byte Context copies the last successfully viewed manual byte/EOF context
+for an explicit side, independently of pending/rejected field text and selected
+difference. Original hex bytes and positions remain bounded/path-free; clipboard
+output limit1024 UTF-8 bytes and focused-selection UUID guard apply. Reveal
+Difference clears manual copy actions. See COPY_VIEWED_BYTE_CONTEXT.md,716–723.

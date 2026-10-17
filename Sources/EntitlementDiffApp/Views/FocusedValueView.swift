@@ -77,6 +77,7 @@ struct FocusedValueView: View {
             HStack(alignment: .top, spacing: 16) {
                 ForEach(ComparisonSide.allCases, id: \.self) { side in
                     LeafValuePane(side: side, value: selection.value(for: side),
+                                  copyByteContext: { actions.copyByteContext($0, side: side, selectionID: selection.id) },
                                   copying: actions.isWritingReport, copy: { actions.copyLeaf(side) },
                                   differencePosition: difference?.position, differenceRevision: difference?.revision,
                                   dataDifferencePosition: dataDifference?.position, dataDifferenceRevision: dataDifference?.revision,
@@ -113,6 +114,7 @@ struct FocusedValueView: View {
 private struct LeafValuePane: View {
     let side: ComparisonSide
     let value: EntitlementValue?
+    let copyByteContext: (DataByteNavigation) -> Void
     let copying: Bool
     let copy: () -> Void
     let differencePosition: StringFirstDifference.Position?
@@ -163,6 +165,8 @@ private struct LeafValuePane: View {
                 if let context = byteNavigation.context {
                     Text("Manual byte context · selected difference unchanged").font(.caption).foregroundStyle(.secondary)
                     DataHexContextView(context: context)
+                    Button("Copy Byte Context") { copyByteContext(byteNavigation) }
+                        .disabled(copying)
                 } else if let dataContext { DataHexContextView(context: dataContext) }
             }
             if let document {

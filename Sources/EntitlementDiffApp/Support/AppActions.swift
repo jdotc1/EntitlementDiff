@@ -44,6 +44,18 @@ final class AppActions {
         }
     }
 
+    func copyByteContext(_ navigation: DataByteNavigation, side: ComparisonSide,
+                         selectionID: UUID, to clipboard: NSPasteboard = .general) {
+        guard focusedValue?.id == selectionID, !isWritingReport,
+              let text = navigation.copyText(side: side), text.utf8.count <= DataByteNavigation.copyByteLimit else { return }
+        clipboard.clearContents()
+        if clipboard.setData(Data(text.utf8), forType: .string) {
+            statusMessage = "\(side.label) viewed byte context copied. Includes original byte values."
+        } else {
+            errorMessage = "The system clipboard did not accept the byte context."
+        }
+    }
+
     func copyDifferenceDetails(_ text: String?, selectionID: UUID, to clipboard: NSPasteboard = .general) {
         guard focusedValue?.id == selectionID, !isWritingReport,
               let text, text.utf8.count <= CurrentDifferenceDetails.byteLimit else { return }

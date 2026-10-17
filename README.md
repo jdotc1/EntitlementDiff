@@ -404,3 +404,7 @@ bounded hex context. It follows Previous and Go to found difference without resc
 Go to Byte in each focused data pane inspects a known1-based byte position or
 EOF with bounded original hex context. Manual navigation leaves the selected
 difference and Copy Difference Details unchanged; Reveal Difference returns to it.
+
+Copy Byte Context copies a pane’s last successfully viewed byte position or EOF
+and bounded original hex context. Pending edits and invalid positions do not
+change it; Copy Difference Details continues to describe the selected mismatch.

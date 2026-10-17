@@ -22,3 +22,9 @@ schema1, complete copying, macOS14/Swift6 and zero dependencies unchanged.
 
 
 Four focused development methods passed, with native long-value navigation, EOF, invalid-input preservation, difference-copy independence, reveal and reopening acceptance. Existing parser, comparison, report and copy checks are reused. No suite or accessibility work was rerun.
+
+Copy Byte Context copies the last successfully viewed manual byte/EOF context
+for an explicit side, independently of pending/rejected field text and selected
+difference. Original hex bytes and positions remain bounded/path-free; clipboard
+output limit1024 UTF-8 bytes and focused-selection UUID guard apply. Reveal
+Difference clears manual copy actions. See COPY_VIEWED_BYTE_CONTEXT.md,716–723.

@@ -1,5 +1,6 @@
 import Foundation
 import EntitlementDiffCore
+import EntitlementDiffModel
 
 /// Pane-local manual context, independent of comparison history and its frontier.
 struct DataByteNavigation {
@@ -26,5 +27,14 @@ struct DataByteNavigation {
         byteOffset = number - 1; context = next; error = nil
         return true
     }
+    /// Uses the last successful position, never pending or rejected field input.
+    func copyText(side: ComparisonSide) -> String? {
+        guard let context, let byteOffset else { return nil }
+        let hex = [context.beforeHex, context.markedHex, context.afterHex]
+            .filter { !$0.isEmpty }.joined(separator: " ")
+        return "\(side.label) viewed byte context\nByte position: \(byteOffset + 1) (1-based)\n" +
+            "\(context.rangeLabel)\n\(hex)\nBrackets mark the viewed byte or EOF.\n"
+    }
+    static let copyByteLimit = 1024
     mutating func reset() { self = .init() }
 }
