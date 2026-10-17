@@ -36,6 +36,9 @@ struct EntitlementDiffApp: App {
                     .disabled(actions.isBusy)
             }
             CommandMenu("Comparison") {
+                Button("Find Entitlement…") { actions.beginFindEntitlement() }
+                    .keyboardShortcut("f", modifiers: .command)
+                    .disabled(model.report == nil || actions.isBusy)
                 Button("Load Synthetic Example") { actions.loadExample() }
                     .keyboardShortcut("d", modifiers: [.command, .shift])
                     .disabled(actions.isBusy)

@@ -17,9 +17,29 @@ final class AppActions {
     var focusedValue: FocusedValueSelection?
     var savedReport: SavedReport?
     private(set) var isReadingSavedReport = false
-    var isBusy: Bool { isPresentingPanel || isWritingReport || isReadingSavedReport || focusedValue != nil || savedReport != nil }
+    var isFindingEntitlement = false
+    private(set) var findRevealID: String?
+    private(set) var findRevealRevision = UUID()
+    var isBusy: Bool { isFindingEntitlement || isPresentingPanel || isWritingReport || isReadingSavedReport || focusedValue != nil || savedReport != nil }
 
     init(model: ComparisonModel) { self.model = model }
+
+    func beginFindEntitlement() {
+        guard !isBusy, model.report != nil else { return }
+        isFindingEntitlement = true
+    }
+
+    func findEntitlement(_ key: String, revealHidden: Bool) -> ComparisonBrowser.ExactFindResult {
+        guard isFindingEntitlement, model.report != nil else { return .missing }
+        let result = model.browser.findExactKey(key, revealHidden: revealHidden)
+        if case .found(let id) = result {
+            findRevealID = id
+            findRevealRevision = UUID()
+            isFindingEntitlement = false
+            statusMessage = "Exact entitlement selected. Reports still include the complete comparison."
+        }
+        return result
+    }
 
     func openSavedReport() {
         guard !isBusy else { return }

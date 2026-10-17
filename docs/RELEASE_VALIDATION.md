@@ -140,3 +140,13 @@ Swap, saved/live replacement and path-free schema 1. The real development app
 built/launched. Native review, opening both saved snapshots, array inspection and
 live Current replacement passed. Parser/Core encoder were unchanged. These focused
 receipts are reused for v0.1.5; no full suite was rerun. Accessibility remains stopped.
+
+## Find Entitlement — accepted feature evidence
+
+Three new focused methods passed across initial lookup and report-fidelity runs.
+They cover visible/missing/hidden keys, explicit reveal, sorting/counts, UTF-8
+identity, whitespace/empty keys, replacement, complete JSON and saved provenance.
+The real development app built/launched. Native 100-row acceptance selected and
+scrolled to the final row, confirmed hidden-key reveal, and preserved selection
+and filters on a missing lookup. These receipts are reused for v0.1.6. No full
+suite was rerun; accessibility remains stopped.

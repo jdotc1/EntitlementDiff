@@ -30,6 +30,10 @@ struct ContentView: View {
                               openComparison: actions.openSavedComparison,
                               cancel: { actions.savedReport = nil })
         }
+        .sheet(isPresented: $actions.isFindingEntitlement) {
+            FindEntitlementView(find: actions.findEntitlement,
+                                cancel: { actions.isFindingEntitlement = false })
+        }
         .toolbar {
             ToolbarItemGroup {
                 Button { actions.openSavedReport() } label: { Label("Open Saved Report…", systemImage: "folder") }
@@ -112,6 +116,7 @@ struct ContentView: View {
                         Text("\(filter.label) (\(browser.count(filter)))").tag(filter)
                     }
                 }.frame(width: 210)
+                Button("Find Entitlement…") { actions.beginFindEntitlement() }.disabled(actions.isBusy)
                 Button("Nested Example") { actions.loadStructuredExample() }.disabled(actions.isBusy)
                 Button("Reset View") { model.browser.reset() }
                     .disabled(browser.isDefault)
@@ -120,7 +125,8 @@ struct ContentView: View {
                     .font(.caption).monospacedDigit().foregroundStyle(.secondary)
             }.padding(.horizontal, 16).padding(.vertical, 10)
             VSplitView {
-                ChangeTable(rows: visibleRows, selection: $model.browser.selection, sortOrder: $model.browser.sortOrder)
+                ChangeTable(rows: visibleRows, selection: $model.browser.selection, sortOrder: $model.browser.sortOrder,
+                            revealID: actions.findRevealID, revealRevision: actions.findRevealRevision)
                     .overlay {
                         if visibleRows.isEmpty {
                             VStack(spacing: 5) {

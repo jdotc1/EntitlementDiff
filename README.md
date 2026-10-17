@@ -123,6 +123,13 @@ validated saved snapshots immediately. Both remain labelled unverified, with no
 Reload/Reveal or retained app paths. Either side can be replaced with a live app;
 reports remain complete, recomputed and schema 1. Open Saved Comparison is included in v0.1.5. See docs/SAVED_COMPARISON.md.
 
+## Exact key lookup
+
+Find Entitlement… (Command-F) matches a complete key by UTF-8 bytes and selects and
+reveals its row. Hidden matches offer explicit Show in All Keys; missing matches
+preserve filters and selection. Sorting, full exports and saved provenance remain
+unchanged. Find Entitlement is included in v0.1.6. See docs/EXACT_FIND.md.
+
 ## Reusable libraries
 
 `EntitlementDiffCore` provides typed property-list values, bounded Foundation
@@ -190,9 +197,9 @@ intended for developer-controlled builds, not bulk malware triage.
 
 ## Downloads and development builds
 
-The published release is **v0.1.5 (build 6)**, including Reload/Retry and Input
+The published release is **v0.1.6 (build 7)**, including Reload/Retry and Input
 Identity. The arm64 app is Developer ID signed and Apple notarized. Download the
-app or sanitized source from https://github.com/jdotc1/EntitlementDiff/releases/tag/v0.1.5.
+app or sanitized source from https://github.com/jdotc1/EntitlementDiff/releases/tag/v0.1.6.
 Local development builds are ad-hoc signed and are separate from that published app.
 The current local Phase 1 export/source-packaging, comparison/browser computation,
 focused-value viewer/copy, branch-navigation and All Keys changes are not in v0.1.2.

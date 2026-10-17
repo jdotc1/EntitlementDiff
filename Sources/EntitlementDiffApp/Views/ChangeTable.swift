@@ -8,7 +8,11 @@ struct ChangeTable: View {
 
     @Binding var sortOrder: [BrowserSort]
 
+    let revealID: String?
+    let revealRevision: UUID
+
     var body: some View {
+        ScrollViewReader { proxy in
         Table(rows, selection: $selection, sortOrder: $sortOrder) {
             TableColumn("Change", sortUsing: BrowserSort(column: .change)) { row in
                 Label(row.kind.label, systemImage: symbol(row.kind))
@@ -33,6 +37,10 @@ struct ChangeTable: View {
             }.width(min: 130, ideal: 210)
         }
         .accessibilityLabel("Entitlement comparison. Select a row to inspect its values.")
+        .onChange(of: revealRevision) { _, _ in
+            if let revealID { proxy.scrollTo(revealID, anchor: .center) }
+        }
+        }
     }
 
     private func symbol(_ kind: ChangeKind) -> String {

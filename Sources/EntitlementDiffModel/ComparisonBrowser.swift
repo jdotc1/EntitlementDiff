@@ -46,6 +46,23 @@ public struct BrowserSort: SortComparator, Sendable {
 /// Session presentation only; never changes comparison or report contents.
 /// The UI reads stored projections instead of filtering/sorting during body evaluation.
 public struct ComparisonBrowser {
+    public enum ExactFindResult: Equatable, Sendable {
+        case found(String), hidden, missing
+    }
+
+    /// Explicit full-key lookup. Never trims, case-folds or normalizes Unicode.
+    public mutating func findExactKey(_ key: String, revealHidden: Bool = false) -> ExactFindResult {
+        guard let row = sourceRows.first(where: { $0.key.utf8.elementsEqual(key.utf8) }) else { return .missing }
+        if visibleRowsByID[row.id] == nil {
+            guard revealHidden else { return .hidden }
+            preferences.filter = .allKeys
+            preferences.query = ""
+            refreshProjection()
+        }
+        selection = row.id
+        return .found(row.id)
+    }
+
     private struct Preferences {
         var filter: BrowserFilter = .allChanges
         var query = ""
