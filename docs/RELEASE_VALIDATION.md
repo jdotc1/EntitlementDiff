@@ -275,3 +275,14 @@ restored index93/children94–120; Root restored children51–100. Final compact
 was inspected and Swap removed captured branch/ancestor controls. These receipts
 are reused for v0.1.17. Existing types, reports, parser, copy and reader-generation
 checks reused; no full suite, performance sweep or accessibility work.
+
+## Find Text in Focused String Values — accepted feature evidence
+
+Five focused methods passed for literal UTF-8 matching, original byte/scalar/page
+positions, page/step-boundary matches, overlaps,32KiB budget, query limits,
+continuation/end and late-result suppression. Real development app built/launched.
+Native checks confirmed cross-page matching, explicit continuation, Current page65,
+Find Next/end without wrap, composed-to-decomposed query edits and fresh reopening.
+Screenshot inspected. These receipts are reused for v0.1.18. Existing rendering,
+copy, paging, parser, reports and source-generation checks reused. No full suite,
+performance sweep or accessibility work.

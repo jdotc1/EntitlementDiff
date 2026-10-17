@@ -246,3 +246,9 @@ Browse Branches offers Root and at most12 nearest non-root ancestors. Opaque
 frame destinations restore saved cursor/page history without parsing labels or
 searching descendants; stale destinations are rejected and lookup input cleared.
 Existing revision/selection resets apply. See ANCESTOR_NAVIGATION.md.
+
+Focused string panes offer independent explicit literal UTF-8 search, with1,024-byte
+queries and32KiB steps, continuation, overlapping Find Next and nonwrapping end.
+Original byte/scalar offsets navigate to the start page without changing rendering
+limits or complete copying. Cancellation plus query/session generations suppress
+stale publication. No data/base64 search. See FOCUSED_STRING_SEARCH.md.

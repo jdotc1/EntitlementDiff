@@ -57,6 +57,7 @@ private struct LeafValuePane: View {
     @State private var document: LeafValueDocument?
     @State private var navigation = LeafPageNavigation()
     @State private var preparationError: String?
+    @State private var search: FocusedStringSearch?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -102,10 +103,31 @@ private struct LeafValuePane: View {
                     .foregroundStyle(.secondary)
                 Spacer()
             }
+            if let search {
+                HStack {
+                    ExactKeyField(input: Binding(get: { search.input }, set: { search.setQuery($0) }),
+                                  placeholder: "Find literal text", submit: { search.find() }, edited: {})
+                        .frame(height: 24)
+                    Button("Find") { search.find() }
+                }
+                HStack {
+                    Button(search.phase == .paused ? "Continue Search" : "Find Next") { search.advance() }
+                        .disabled(!search.canAdvance)
+                    if search.phase == .running { ProgressView().controlSize(.small) }
+                }
+                Text(search.message).font(.caption).foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
             Button("Copy \(side.label) Leaf JSON", action: copy)
                 .disabled(InspectorLeaf(value) == nil || copying)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .onChange(of: search?.matchRevision) { _, _ in
+            if let page = search?.match?.pageIndex, let document {
+                navigation.select(page, pageCount: document.pageCount)
+            }
+        }
+        .onDisappear { search?.cancel() }
         .task {
             guard let leaf = InspectorLeaf(value) else { return }
             let work = Task.detached(priority: .userInitiated) { try LeafValueDocument(leaf: leaf) }
@@ -117,6 +139,7 @@ private struct LeafValuePane: View {
                 }
                 try Task.checkCancellation()
                 document = prepared
+                if case .string(let text) = leaf.value { search = FocusedStringSearch(source: text) }
             } catch is CancellationError {
                 // The sheet was dismissed; never publish a late preparation result.
             } catch {

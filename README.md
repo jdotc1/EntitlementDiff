@@ -201,6 +201,15 @@ input. Opaque frame identities reject stale destinations; comparison replacement
 resets navigation. Included in v0.1.17 (build18).
 See [Ancestor navigation](docs/ANCESTOR_NAVIGATION.md).
 
+## Find text inside focused strings
+
+Each string pane in Focused Value offers literal UTF-8 Find and overlapping Find
+Next. Search runs in explicit32KiB steps; Continue Search examines more without
+raising rendering limits. Matches navigate to the original start page and show
+byte position. Raw edits and dismissal invalidate pending results. Data/base64
+search is excluded. Included in v0.1.18 (build19).
+See [Focused string search](docs/FOCUSED_STRING_SEARCH.md).
+
 ## Build from source
 
 Requires macOS 14+, a Swift 6 toolchain, and macOS command-line developer tools.
