@@ -4,6 +4,49 @@ import EntitlementDiffCore
 
 @MainActor
 final class FocusedStringDifferenceTests: XCTestCase {
+    func testNextDetailsCompletionRestartAndIndependentFind() async throws {
+        let session = FocusedStringDifference(previous: "aé", current: "🙂\u{200B}x")
+        let search = FocusedStringSearch(source: "target")
+        search.setQuery(.init(value: "target")); try await XCTUnwrap(search.find()).value
+        XCTAssertNil(session.next()); try await XCTUnwrap(session.find()).value
+        try await XCTUnwrap(session.next()).value
+        XCTAssertEqual(session.differenceCount, 2); XCTAssertEqual(session.position?.previousByteOffset, 1)
+        XCTAssertEqual(session.position?.currentByteOffset, 4)
+        XCTAssertEqual(session.position?.currentDetail.utf8Bytes, "E2 80 8B")
+        XCTAssertTrue(session.message.contains("Previous byte 2, Current byte 5"))
+        XCTAssertEqual(search.input.value, "target"); XCTAssertEqual(search.match?.byteOffset, 0)
+        try await XCTUnwrap(session.next()).value
+        XCTAssertNil(session.position?.previousScalar)
+        try await XCTUnwrap(session.next()).value
+        XCTAssertEqual(session.phase, .finished); XCTAssertTrue(session.message.contains("No further differences"))
+        XCTAssertNil(session.next()); XCTAssertNil(session.advance())
+        let saved = session.position; session.reveal(); XCTAssertEqual(session.position, saved)
+        try await XCTUnwrap(session.find()).value
+        XCTAssertEqual(session.differenceCount, 1); XCTAssertEqual(session.position?.scalarOffset, 0)
+    }
+    func testNextPauseRetainsLastPositionAndResumes() async throws {
+        let gap = String(repeating: "🙂", count: 5000)
+        let session = FocusedStringDifference(previous: "a" + gap + "x", current: "🙂" + gap + "y")
+        try await XCTUnwrap(session.find()).value; try await XCTUnwrap(session.next()).value
+        XCTAssertEqual(session.phase, .paused); XCTAssertEqual(session.position?.scalarOffset, 0)
+        XCTAssertTrue(session.message.contains("No further difference yet")); XCTAssertNil(session.next())
+        try await XCTUnwrap(session.advance()).value
+        XCTAssertEqual(session.position?.scalarOffset, 5001); XCTAssertEqual(session.differenceCount, 2)
+        XCTAssertEqual(session.position?.currentByteOffset, 20004)
+    }
+    func testLateNextCannotOverwriteRestartedUnicodeDetails() async throws {
+        let gate = NextStringDifferenceGate()
+        let session = FocusedStringDifference(previous: "aé", current: "🙂x", runner: { cursor in
+            var next = cursor; let result = try next.step(); await gate.waitOnSecond(); return (next, result)
+        })
+        try await XCTUnwrap(session.find()).value
+        let old = try XCTUnwrap(session.next())
+        while !(await gate.entered) { await Task.yield() }
+        try await XCTUnwrap(session.find()).value
+        await gate.release(); await old.value
+        XCTAssertEqual(session.differenceCount, 1); XCTAssertEqual(session.position?.scalarOffset, 0)
+        XCTAssertEqual(session.position?.currentDetail.utf8Bytes, "F0 9F 99 82")
+    }
     func testContinuationRevealAndRestartAreIndependentOfFind() async throws {
         let prefix = String(repeating: "x", count: 16385)
         let session = FocusedStringDifference(previous: prefix + "a", current: prefix + "b")
@@ -52,4 +95,15 @@ private actor DifferenceGate {
     private var waiter: CheckedContinuation<Void, Never>?
     func wait() async { entered = true; if !open { await withCheckedContinuation { waiter = $0 } } }
     func release() { open = true; waiter?.resume(); waiter = nil }
+}
+
+private actor NextStringDifferenceGate {
+    var entered = false
+    private var calls = 0
+    private var waiter: CheckedContinuation<Void, Never>?
+    func waitOnSecond() async {
+        calls += 1
+        if calls == 2 { entered = true; await withCheckedContinuation { waiter = $0 } }
+    }
+    func release() { waiter?.resume(); waiter = nil }
 }

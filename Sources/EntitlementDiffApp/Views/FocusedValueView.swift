@@ -34,7 +34,10 @@ struct FocusedValueView: View {
                         if difference.phase == .paused { difference.advance() } else { difference.find() }
                     }
                     .disabled(difference.phase == .running)
-                    if difference.position != nil { Button("Reveal Difference") { difference.reveal() } }
+                    if difference.position != nil {
+                        Button("Find Next Difference") { difference.next() }.disabled(difference.phase != .different)
+                        Button("Reveal Difference") { difference.reveal() }
+                    }
                     if difference.phase == .running { ProgressView().controlSize(.small) }
                 }
                 Text(difference.message).font(.caption).foregroundStyle(.secondary)
@@ -253,7 +256,7 @@ private struct LeafValuePane: View {
     }
     private func stringPage(_ document: LeafValueDocument) -> LeafValueDocument.StringPage? {
         if showingDifference, let position = differencePosition {
-            return document.stringDifferencePage(onPage: navigation.index, byteOffset: position.byteOffset,
+            return document.stringDifferencePage(onPage: navigation.index, byteOffset: side == .previous ? position.previousByteOffset : position.currentByteOffset,
                                                  scalarByteCount: byteCount(position))
         }
         return document.stringPage(onPage: navigation.index, matching: search?.matchByteRange)

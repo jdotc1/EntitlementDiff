@@ -329,3 +329,16 @@ A separate finished phase means No further differences; equal remains reserved
 for a fully equal pair. Next is disabled while paused/running/finished. Explicit
 Continue Comparison resumes paused work; Find First Difference resets the cursor,
 ordinal and context. String behavior and complete report/copy contracts unchanged.
+
+StringFirstDifference now retains independent native scalar cursors and UTF-8
+byte offsets for Previous/Current. Position.byteOffset remains the Previous
+compatibility offset, previousByteOffset names it explicitly, and currentByteOffset
+tracks Current. Equal-prefix first results retain prior coordinates. Advancing
+past a saved mismatch updates each offset by its own scalar width; later page
+highlight mapping uses the side's offset. Scalar position/page remain shared
+because comparison advances one scalar per side, with no normalization or inferred
+alignment. EOF marks exhaustion once, without walking the unmatched suffix.
+FocusedStringDifference starts next under a fresh generation, retains old details
+while paused, and atomically publishes ordinal/scalars/coordinates/reveal revision.
+Finished differs from equal; Next never wraps. Existing literal Find state,
+complete copies, data inspection and schema-1 reports retain their contracts.

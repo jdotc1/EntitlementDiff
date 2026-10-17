@@ -5,9 +5,15 @@ public struct StringFirstDifference: Sendable {
     public static let stepByteLimit = 32_768
     public struct Position: Sendable, Equatable {
         public let byteOffset: Int
+        public let currentByteOffset: Int
+        public var previousByteOffset: Int { byteOffset }
         public let scalarOffset: Int
         public let previousScalar: Unicode.Scalar?
         public let currentScalar: Unicode.Scalar?
+        init(byteOffset: Int, scalarOffset: Int, previousScalar: Unicode.Scalar?, currentScalar: Unicode.Scalar?, currentByteOffset: Int? = nil) {
+            self.byteOffset = byteOffset; self.currentByteOffset = currentByteOffset ?? byteOffset
+            self.scalarOffset = scalarOffset; self.previousScalar = previousScalar; self.currentScalar = currentScalar
+        }
         public var previousByteCount: Int { previousScalar.map { String($0).utf8.count } ?? 0 }
         public var currentByteCount: Int { currentScalar.map { String($0).utf8.count } ?? 0 }
         public var previousDetail: StringScalarDetail { StringScalarDetail(scalar: previousScalar) }
@@ -21,6 +27,9 @@ public struct StringFirstDifference: Sendable {
     private var currentIndex: String.UnicodeScalarView.Index
     private var byteOffset = 0
     private var scalarOffset = 0
+    private var currentByteOffset = 0
+    private var foundDifference: Position?
+    private var exhausted = false
 
     public init(previous: String, current: String) {
         self.previous = previous; self.current = current
@@ -31,6 +40,7 @@ public struct StringFirstDifference: Sendable {
     /// Budget counts both sources' UTF-8 bytes; at least one pair (up to eight bytes) fits.
     public mutating func step(byteLimit: Int = Self.stepByteLimit) throws -> Step {
         try Task.checkCancellation()
+        if exhausted { return .equal }
         let limit = min(Self.stepByteLimit, max(8, byteLimit))
         let left = previous.unicodeScalars, right = current.unicodeScalars
         var consumed = 0, pairs = 0
@@ -46,12 +56,31 @@ public struct StringFirstDifference: Sendable {
             let bBytes = b.map { String($0).utf8.count } ?? 0
             guard consumed + aBytes + bBytes <= limit else { return .more }
             if a != b {
-                return .difference(.init(byteOffset: byteOffset, scalarOffset: scalarOffset,
-                                         previousScalar: a, currentScalar: b))
+                let found = Position(byteOffset: byteOffset, scalarOffset: scalarOffset,
+                                     previousScalar: a, currentScalar: b, currentByteOffset: currentByteOffset)
+                foundDifference = found
+                return .difference(found)
             }
             consumed += aBytes + bBytes; pairs += 1
-            byteOffset += aBytes; scalarOffset += 1
+            byteOffset += aBytes; currentByteOffset += bBytes; scalarOffset += 1
             left.formIndex(after: &previousIndex); right.formIndex(after: &currentIndex)
         }
     }
+    /// Advance only past a captured mismatch; EOF is one terminal difference.
+    @discardableResult
+    public mutating func movePastDifference() -> Bool {
+        guard let found = foundDifference else { return false }
+        foundDifference = nil
+        if found.previousScalar == nil || found.currentScalar == nil {
+            exhausted = true
+        } else {
+            previous.unicodeScalars.formIndex(after: &previousIndex)
+            current.unicodeScalars.formIndex(after: &currentIndex)
+            byteOffset += found.previousByteCount
+            currentByteOffset += found.currentByteCount
+            scalarOffset += 1
+        }
+        return true
+    }
+
 }

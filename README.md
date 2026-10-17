@@ -381,3 +381,9 @@ Find Next Difference advances through focused data mismatches without rescanning
 the prefix. Long equal intervals require explicit continuation; the last byte and
 hex context remain visible while paused. Completion stops without wrapping and
 keeps the last result available to reveal. Find First Difference restarts.
+
+Focused string values support Find Next Difference with exact Unicode details
+and separate Previous/Current UTF-8 byte positions. Long equal spans require
+explicit continuation. Next stops without wrapping; Find First Difference restarts.
+Literal text Find remains independent, and comparison never normalizes text or
+infers insertion/deletion alignment.

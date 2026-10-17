@@ -310,3 +310,52 @@ renderer453/456/457, full copy139–144, page378–383, parser/report and other 
 checks reused. No full suite, corpus/timing sweep, unchanged hashes/signatures,
 accessibility, broad appearance work, release, packaging, Applications update or
 push. Installed/public v0.1.21 unchanged; development app open and audit preserved.
+
+## Find Next Difference in Focused String Values — 2026-10-17
+
+Find Next Difference resumes immediately after the saved scalar pair. It does
+not compare normalized graphemes or align inserted/deleted text. Every unequal
+scalar pair is a positional difference. The first prefix EOF is one terminal
+result. Next completes without wrapping and says No further differences, retaining
+the last result for Reveal Difference. Find First Difference resets cursor and
+ordinal. Long equal intervals require explicit Continue Comparison within the
+existing32KiB combined UTF-8 step ceiling; prior details stay visible while paused.
+
+Previous and Current UTF-8 offsets diverge after unequal-width scalars, so the
+cursor tracks them separately. Position.byteOffset is the Previous compatibility
+coordinate; previousByteOffset and currentByteOffset explicitly identify the sides.
+Highlight preparation uses the corresponding offset/width for each pane and its
+existing bounded512-scalar page. Captured scalar/code-point/escape/UTF-8 details
+and reveal revision publish together under cancellation plus request generations.
+Next creates a fresh generation; stale next results cannot overwrite a newer first
+request. Existing literal query/search/reveal state remains independent.
+
+Evidence:
+-614: `swift test --filter 'StringFirstDifferenceTests|FocusedStringDifferenceTests|UnicodeDifferenceDetailTests|UnicodeDifferencePublicationTests' -Xswiftc -warnings-as-errors`
+ selected14 methods (six new/eight affected existing).13 passed; one new expected
+escaped U+200B in rendered text, whereas the accepted renderer preserves its
+original scalar and uses the separate Unicode detail label for an explicit escape.
+This was an incorrect test expectation, not an app defect. Original receipt retained.
+-615: corrected only that expectation; `swift test --filter 'StringFirstDifferenceTests.testNextTracksIndependentUTF8OffsetsAndHighlights' -Xswiftc -warnings-as-errors`
+ passed. Other13 method results614 reused. New coverage includes unequal-width
+scalar offsets and exact per-side display ranges across pages, composed/decomposed
+adjacency, EOF, long intervals/continuation, independent literal Find, finished
+state, restart, and a computed next result arriving after a newer first request.
+-616: `./script/build_and_run.sh` built/staged/launched the real app without warnings.
+An initial native attachment reached an older development process during staging;
+it was closed and the current bundle selected without rebuilding or repeating tests.
+-617: first a/emoji mismatch, then Next paused across5000 equal emoji; prior details
+retained and Next disabled until explicit Continue Comparison.
+-618: continuation revealed difference2 at scalar5002, Previous byte20002 and
+Current byte20005; U+00E9/C3 A9 versus U+200B/E2 80 8B. Both page10/10, viewport
+revealed, accented scalar highlighted. Invisible scalar remains original display
+text with explicit separate metadata. Screenshot visually inspected.
+-619: next emitted EOF versusx at scalar5003, independent byte starts20004/20008.
+-620: next finished with No further differences, disabled Next and retained details.
+-621: restart returned to first result/ordinal, both byte1/page1.
+
+Fixture dist/string-next-difference-acceptance/StringNext.json is a synthetic
+schema-1 pair. No inspected executable launched. Data594–601, fixed context575,
+unchanged search479, renderer453/456/457, complete copy139–144, page378–383 and
+parser/report evidence reused. No full suite, accessibility, timing/corpus sweep,
+unchanged signature/hash rerun, release or push. Installed/public v0.1.25 unchanged.
