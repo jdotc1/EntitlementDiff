@@ -87,6 +87,16 @@ private struct LeafValuePane: View {
         VStack(alignment: .leading, spacing: 8) {
             Text(side.label).font(.headline)
             Text(value?.typeName ?? "Absent").foregroundStyle(.secondary)
+            if let position = differencePosition {
+                let detail = side == .previous ? position.previousDetail : position.currentDetail
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(verbatim: "Difference: " + detail.scalarLabel).font(.system(.caption, design: .monospaced))
+                    if let bytes = detail.utf8Bytes {
+                        Text("UTF-8: \(bytes)").font(.system(.caption, design: .monospaced))
+                    }
+                }
+                .font(.caption).textSelection(.enabled)
+            }
             if let document {
                 if let page = stringPage(document) {
                     HighlightedStringPageView(page: page, pageIndex: navigation.index,

@@ -1,6 +1,6 @@
 # Copy Branch JSON
 
-Completed locally 2026-10-17 against private2afc50f / released v0.1.15.
+Completed locally 2026-10-17 against a local development revision / released v0.1.15.
 Browse Branches now offers Copy Previous Branch JSON and Copy Current Branch JSON
 for its current branch. The chosen array/dictionary is complete, including children
 outside the visible page or search prefix. Empty containers are valid. Absent and

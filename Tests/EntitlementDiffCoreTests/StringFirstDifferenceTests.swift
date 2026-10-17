@@ -4,16 +4,16 @@ import XCTest
 final class StringFirstDifferenceTests: XCTestCase {
     func testExactUnicodeAndCrossPagePositions() throws {
         var cursor = StringFirstDifference(previous: String(repeating: "🙂", count: 512) + "é", current: String(repeating: "🙂", count: 512) + "e\u{301}")
-        XCTAssertEqual(try cursor.step(), .difference(.init(byteOffset: 2048, scalarOffset: 512, previousByteCount: 2, currentByteCount: 1)))
+        XCTAssertEqual(try cursor.step(), .difference(.init(byteOffset: 2048, scalarOffset: 512, previousScalar: "é", currentScalar: "e")))
         let p = try LeafValueDocument(leaf: XCTUnwrap(InspectorLeaf(.string("é"))))
         let page = try XCTUnwrap(p.stringDifferencePage(onPage: 0, byteOffset: 0, scalarByteCount: 2))
         XCTAssertEqual((page.text as NSString).substring(with: try XCTUnwrap(page.highlight)), "é")
     }
     func testPrefixEndEmptyAndEqualAreExplicit() throws {
         var prefix = StringFirstDifference(previous: "🙂", current: "🙂x")
-        XCTAssertEqual(try prefix.step(), .difference(.init(byteOffset: 4, scalarOffset: 1, previousByteCount: 0, currentByteCount: 1)))
+        XCTAssertEqual(try prefix.step(), .difference(.init(byteOffset: 4, scalarOffset: 1, previousScalar: nil, currentScalar: "x")))
         var reverse = StringFirstDifference(previous: "x", current: "")
-        XCTAssertEqual(try reverse.step(), .difference(.init(byteOffset: 0, scalarOffset: 0, previousByteCount: 1, currentByteCount: 0)))
+        XCTAssertEqual(try reverse.step(), .difference(.init(byteOffset: 0, scalarOffset: 0, previousScalar: "x", currentScalar: nil)))
         var equal = StringFirstDifference(previous: "", current: "")
         XCTAssertEqual(try equal.step(), .equal)
         let doc = try LeafValueDocument(leaf: XCTUnwrap(InspectorLeaf(.string(String(repeating: "é", count: 512)))))
@@ -29,6 +29,6 @@ final class StringFirstDifferenceTests: XCTestCase {
         var later = StringFirstDifference(previous: "é🙂\"", current: "é🙂\\")
         XCTAssertEqual(try later.step(byteLimit: 8), .more)
         XCTAssertEqual(try later.step(byteLimit: 8), .more)
-        XCTAssertEqual(try later.step(byteLimit: 8), .difference(.init(byteOffset: 6, scalarOffset: 2, previousByteCount: 1, currentByteCount: 1)))
+        XCTAssertEqual(try later.step(byteLimit: 8), .difference(.init(byteOffset: 6, scalarOffset: 2, previousScalar: "\"", currentScalar: "\\")))
     }
 }

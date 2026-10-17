@@ -107,8 +107,8 @@ must build synthetic local app fixtures and test the Security framework without
 launching them. Include a local macOS verification script and visual/keyboard/
 accessibility checklist. Label unexecuted macOS checks honestly. Perform a
 separate adversarial review pass, add regression tests for confirmed findings,
-and preserve a finding/disposition record. Package sources, tests, plans,
-review, actual evidence, and Codex instructions in a single ZIP.
+and preserve a finding/disposition record. Package source, tests, public design
+and release-validation records together; keep workstation evidence separate.
 
 ## Native layout and display budget
 
@@ -283,3 +283,13 @@ navigators, clamped independently at EOF. Only its bounded escaped page is style
 EOF marks the closing quote with an explicit label. Find cursors/results remain
 independent; latest explicit Find/difference reveal chooses the displayed highlight.
 Reveal Difference republishes a presentation revision without comparing again.
+
+First-difference positions retain the two numeric Unicode scalars (or nil for EOF)
+read by the existing bounded cursor. Byte counts derive from those scalars, avoiding
+inconsistent scalar/count metadata. StringScalarDetail formats U+ notation, explicit
+Unicode escapes and up to four UTF-8 bytes without touching the source strings.
+EOF is an explicit End of string label without scalar/byte placeholders. Pane detail
+rows refer to the saved first difference even when Find shows a separate match;
+the existing scalar/byte position remains in the comparison summary. The same
+position publication/generation owns details, highlight and reveal. No report/schema
+change, source rescanning, additional comparison step or raw invisible label glyphs.

@@ -6,8 +6,12 @@ public struct StringFirstDifference: Sendable {
     public struct Position: Sendable, Equatable {
         public let byteOffset: Int
         public let scalarOffset: Int
-        public let previousByteCount: Int
-        public let currentByteCount: Int
+        public let previousScalar: Unicode.Scalar?
+        public let currentScalar: Unicode.Scalar?
+        public var previousByteCount: Int { previousScalar.map { String($0).utf8.count } ?? 0 }
+        public var currentByteCount: Int { currentScalar.map { String($0).utf8.count } ?? 0 }
+        public var previousDetail: StringScalarDetail { StringScalarDetail(scalar: previousScalar) }
+        public var currentDetail: StringScalarDetail { StringScalarDetail(scalar: currentScalar) }
         public var pageIndex: Int { scalarOffset / LeafValueDocument.stringScalarsPerPage }
     }
     public enum Step: Sendable, Equatable { case more, equal, difference(Position) }
@@ -43,7 +47,7 @@ public struct StringFirstDifference: Sendable {
             guard consumed + aBytes + bBytes <= limit else { return .more }
             if a != b {
                 return .difference(.init(byteOffset: byteOffset, scalarOffset: scalarOffset,
-                                         previousByteCount: aBytes, currentByteCount: bBytes))
+                                         previousScalar: a, currentScalar: b))
             }
             consumed += aBytes + bBytes; pairs += 1
             byteOffset += aBytes; scalarOffset += 1

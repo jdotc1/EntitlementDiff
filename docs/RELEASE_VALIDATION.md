@@ -19,7 +19,7 @@
   and rebuilt app search, paging, filtering and complete filtered JSON copy were
   inspected. No full-suite rerun occurred after the baseline.
 
-Raw workstation logs, screenshots, handoff archives, personal agent instructions
+Raw workstation logs, screenshots, handoff archives, private workstation instructions
 and local Git history are excluded. The local audit retains those accepted receipts.
 This summary is not a new test run, independent release audit or binary-distribution
 qualification. Accessibility work was explicitly stopped; complete acceptance is
@@ -323,7 +323,7 @@ v0.1.19 remains unchanged; this is development evidence only.
 
 ## v0.1.20 release preparation
 
-Version0.1.20/build21 packages Find Previous from private9cc9a1f. Accepted
+Version0.1.20/build21 packages Find Previous from a local development revision. Accepted
 search/model479, native481–486 and final build/launch487–488 are reused. The
 new arm64 release-optimized candidate and its configured private-marker scan are
 recorded489; signing and Apple distribution receipts follow separately. Preserve
@@ -345,7 +345,38 @@ v0.1.20 unchanged. This is development acceptance, not a distribution receipt.
 
 ## v0.1.21 release preparation
 
-Version0.1.21/build22 packages Find First Difference from private2917316. Accepted
+Version0.1.21/build22 packages Find First Difference from a local development revision. Accepted
 focused tests503, final build505 and native506–512 are reused. The new arm64 release
 build and configured private-marker scan are recorded513; signing, Apple approval
 and delivery have separate release receipts. No full suite or accessibility work.
+
+## Exact Unicode Difference Details — local feature evidence
+
+Six focused methods passed527: two new Core formatting/capture methods, one new
+App stale-publication method and three updated first-difference Core assertions
+for the changed result payload. Unaffected search/model/report checks reused.
+Build528 and compact-layout final build531 staged/launched the actual app;531
+emitted no warnings. Native529/530 observed composed/decomposed details and EOF;
+final532 inspected escaped invisible-character details,533 fresh-sheet reset.
+Screenshots529/530/532 visually inspected. No full suite, accessibility, timing
+sweep, release signing, Applications update or push. Installed/public v0.1.21
+unchanged; these are local development receipts, not distribution verification.
+
+## v0.1.22 local release preparation — publication pending
+
+Version0.1.22/build23 includes Exact Unicode Difference Details. Accepted527,531–533
+and prior behavior receipts are reused. Arm64 release build534 completed; the new
+payload passed its configured private-marker scan. Local Developer ID signing535
+uses hardened runtime with timestamp explicitly disabled to avoid an external
+submission while the required transport/audit omission condition is unestablished.
+This is not a distribution-ready signature or notarized app. Secure timestamp,
+Apple notarization, GitHub publication and installed update remain pending. No
+full suite or accessibility work. Installed/public v0.1.21 remains unchanged.
+
+## v0.1.22 distribution update
+
+The earlier local-only preparation status is superseded. Version0.1.22/build23
+uses a timestamped Developer ID signature with hardened runtime. Apple submission
+C992ECE5-7756-43FC-BF3F-FD33B3370CD6 is Ready to distribute; notarized export,
+stapled ticket and Gatekeeper are separate release receipts. Accepted feature
+tests and native checks are reused; no full-suite rerun or accessibility work.

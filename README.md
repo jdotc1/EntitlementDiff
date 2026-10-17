@@ -218,6 +218,8 @@ original Unicode scalars without normalization. **Continue Comparison** examines
 another bounded portion. A found difference reveals both panes, with an explicit
 end marker when one string is a prefix of the other. **Reveal Difference** returns
 to that location while preserving each pane's independent Find query and results.
+Each side shows the exact differing U+ code point, Unicode escape and UTF-8 bytes;
+a prefix ending is labelled End of string without an invented code point.
 This locates the first differing scalar; it does not align insertions or produce
 a complete text diff. Reports and complete typed copies are unchanged.
 
@@ -236,7 +238,6 @@ cd EntitlementDiff
 The script builds, stages, ad-hoc signs, and opens `dist/EntitlementDiff.app`.
 It stops only this checkout's staged app before rebuilding. Use the bundle when
 running the GUI; a bare `swift run` executable is not the supported launch path.
-The configured Codex Run action uses the same script.
 
 ```sh
 ./script/verify.sh
@@ -356,3 +357,5 @@ preserved. Included in v0.1.19 (build20).
 Find Previous in Focused String Values is included in v0.1.20 (build21), retaining exact UTF-8 matches, overlapping occurrences, bounded backward continuation and explicit beginning-of-string feedback.
 
 Find First Difference in Focused String Values is included in v0.1.21 (build22), preserving exact Unicode scalar identity, bounded comparison and independent Find state.
+
+Exact Unicode Difference Details is included in v0.1.22 (build23), with original scalar/EOF metadata, explicit escapes and exact UTF-8 bytes. The arm64 app is Developer ID signed, notarized and stapled.

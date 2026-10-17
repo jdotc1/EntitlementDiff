@@ -1,6 +1,6 @@
 # Go to Page in Focused Value
 
-Completed locally 2026-10-17 against private5f99a64 / released v0.1.14.
+Completed locally 2026-10-17 against a local development revision / released v0.1.14.
 Each prepared Previous/Current leaf pane now has Page number, Go and its valid
 one-based range. Return submits from the field. First/Previous/Next/Last keep the
 field synchronized. A valid number directly selects the existing document page;

@@ -1,6 +1,6 @@
 # UTF-8-safe Find Entitlement input
 
-Completed locally 2026-10-17 against installed/released v0.1.13 and private7ab3bd0.
+Completed locally 2026-10-17 against installed/released v0.1.13 and a local development revision.
 Find Entitlement now shares the exact-byte native input boundary introduced for
 child-key lookup. Core matching, AppActions, report encoding and browser projection
 are unchanged. No dependencies, architecture or deployment-target changes.

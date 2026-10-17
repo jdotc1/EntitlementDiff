@@ -1,6 +1,6 @@
 # Jump to Ancestor in Browse Branches
 
-Completed locally 2026-10-17 against private1094019 / released v0.1.16.
+Completed locally 2026-10-17 against a local development revision / released v0.1.16.
 Browse Branches offers Root and a compact Ancestors menu. Root restores the saved
 root frame, including its child page. The menu lists at most12 nearest non-root
 ancestors, closest first, with level and bounded existing label preview. Ordinary

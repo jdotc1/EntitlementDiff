@@ -1,6 +1,6 @@
 # Find Text in Focused String Values
 
-Completed locally 2026-10-17 against private0a666c8 / released v0.1.17.
+Completed locally 2026-10-17 against a local development revision / released v0.1.17.
 Each captured string pane has independent literal-text Find and Find Next controls.
 Find starts at the beginning; Return in the query field also starts Find. Find Next
 continues without wrapping, including overlapping matches. At an exhausted step
@@ -126,7 +126,7 @@ this milestone. The development app remains open with the synthetic fixture.
 
 ## Find Previous in Focused String Values — 2026-10-17
 
-Completed locally against private3029cef / released v0.1.19. This follow-up adds
+Completed locally against a local development revision / released v0.1.19. This follow-up adds
 Find Previous to each string pane. It is unavailable before a match exists; Find
 still restarts forward from the beginning. Find Next/Previous exclude the current
 match start but retain overlaps. Neither direction wraps. The beginning message
@@ -189,7 +189,7 @@ Applications update, packaging, release or push. Installed/public v0.1.19 unchan
 
 ## Find First Difference in Focused String Values — 2026-10-17
 
-Completed locally against private977b01f / released v0.1.20. When both captured
+Completed locally against a local development revision / released v0.1.20. When both captured
 sides are strings, Find First Difference explicitly begins at the start. At a
 step boundary, Continue Comparison examines the next portion. No comparison runs
 on query edits or every view update. Completed equality reports No difference;
@@ -256,3 +256,57 @@ and parser/report/source-generation checks reused for unchanged boundaries. Only
 new difference tests ran; no full suite, corpus/timing sweep, unchanged hashes or
 signatures, accessibility, broad appearance work, Applications update, packaging,
 release or push. Installed/public v0.1.20 remains unchanged; audit preserved.
+
+## Exact Unicode Difference Details — 2026-10-17
+
+Completed locally against a local development revision / released v0.1.21. After a first difference
+is found, each pane displays Difference: U+XXXX plus an explicit Unicode escape,
+and its original UTF-8 bytes in uppercase hexadecimal. Supplementary-plane code
+points retain all required digits (for example U+1F642); byte display is at most
+four bytes. Spaces, nulls, combining marks and zero-width characters are always
+escaped in the detail label, avoiding invisible/bidirectional label content. The
+original page rendering remains unchanged. EOF displays End of string with no
+invented scalar, zero byte or blank byte row. Scalar/byte positions remain in the
+comparison summary, one-based at the beginning of the scalar/end boundary.
+
+The cursor captures its already-read original Unicode scalars in Position, where
+byte counts now derive from those scalars. It does not rescan strings to recover
+metadata, normalize code points, retain a substring/context window or increase the
+32KiB combined per-step ceiling. StringScalarDetail formats only one scalar or EOF;
+formatting has a fixed scalar/byte bound. Existing512-scalar rendering and complete
+tagged copying remain intact. This is the first differing scalar, not full text
+alignment or detection of all subsequent combining-mark differences.
+
+Details belong to the same immutable position published under the existing request
+generation/cancellation checks. Find/reveal/paging do not recompute them; the label
+explicitly identifies the saved first difference even if Find reveals another match.
+Cancellation or a fresh captured sheet removes the position and all details.
+Saved provenance and path-free schema-1 exports remain unchanged.
+
+Evidence:
+
+- 526: new specification compiled before the API existed; retained missing-symbol
+ failure, not a reproduced behavioral defect or passing regression assertion.
+- 527: `swift test --filter 'UnicodeDifferenceDetailTests|UnicodeDifferencePublicationTests|StringFirstDifferenceTests' -Xswiftc -warnings-as-errors`
+ passed six methods. Three new methods cover captured composed/decomposed scalars
+after bounded continuation, four-byte emoji, null/space/zero-width/combining escapes,
+EOF without bytes, fixed label bounds, a computed result arriving after cancellation,
+and unchanged captured details across Reveal Difference. Three existing Core
+methods were updated/rerun because Position now carries scalars rather than stored
+byte counts; their Unicode/page/budget/empty/equal/prefix assertions remain intact.
+- 528 `./script/build_and_run.sh` built/staged/launched the initial real app.
+- 529: comparison continued to page33 and showed Previous U+00E9/C3 A9 versus Current
+U+0065/65 while the shaped glyphs looked alike. Screenshot visually inspected.
+- 530: prefix ending showed End of string, no byte value, and Current U+0078/78;
+existing EOF/page reveal remained correct. Screenshot visually inspected.
+- 531: same build command after a compact two-row detail refinement, with changed
+view inputs. Final build emitted no warnings; no unchanged automated tests rerun.
+- 532: final native layout showed U+0000/00 versus U+200B/E2 80 8B and explicit escapes,
+including the invisible Current glyph. Screenshot visually inspected.
+- 533: Done/reopen cleared saved comparison detail rows and Find state.
+
+Accepted App first-difference guards503, independent Find/reveal508–509, search479,
+renderer453/456/457, full copy139–144, page378–383, parser/report and other unaffected
+checks reused. No full suite, corpus/timing sweep, unchanged hashes/signatures,
+accessibility, broad appearance work, release, packaging, Applications update or
+push. Installed/public v0.1.21 unchanged; development app open and audit preserved.
