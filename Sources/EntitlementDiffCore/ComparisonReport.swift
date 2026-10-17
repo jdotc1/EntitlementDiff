@@ -60,6 +60,9 @@ public struct ComparisonReport: Sendable, Encodable {
         if previous.origin == .syntheticExample || current.origin == .syntheticExample {
             notices.append("Contains synthetic example data; not an inspection of installed applications.")
         }
+        if previous.isSavedBaseline || current.isSavedBaseline {
+            notices.append("Contains a saved-report snapshot: unverified metadata, not a fresh native inspection.")
+        }
         self.notices = notices
     }
 

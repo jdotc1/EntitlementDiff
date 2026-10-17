@@ -13,7 +13,10 @@ struct InputDetailsView: View {
             Text("Input Details").font(.headline)
             field("Selected location", sourceURL?.path, limit: 4_096)
             if let snapshot = state.snapshot {
-                if snapshot.origin == .syntheticExample {
+                if snapshot.isSavedBaseline {
+                    Text("Saved report — unverified metadata. No selected app location or build metadata.")
+                        .foregroundStyle(.secondary)
+                } else if snapshot.origin == .syntheticExample {
                     Text("Synthetic example — no selected file or build metadata.").foregroundStyle(.secondary)
                 } else {
                     field("Bundle identifier", snapshot.identity?.bundleIdentifier)

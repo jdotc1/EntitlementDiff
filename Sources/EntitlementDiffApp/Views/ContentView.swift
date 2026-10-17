@@ -25,8 +25,14 @@ struct ContentView: View {
         .sheet(item: $actions.focusedValue) { selection in
             FocusedValueView(selection: selection, actions: actions).id(selection.id)
         }
+        .sheet(item: $actions.savedReport) { report in
+            SavedBaselineView(report: report, adopt: actions.adoptSavedBaseline,
+                              cancel: { actions.savedReport = nil })
+        }
         .toolbar {
             ToolbarItemGroup {
+                Button { actions.openSavedReport() } label: { Label("Open Saved Baseline…", systemImage: "folder") }
+                    .disabled(actions.isBusy)
                 Button { actions.reload() } label: { Label("Reload Both", systemImage: "arrow.clockwise") }
                     .disabled(!model.canReloadBoth || model.isLoading || actions.isBusy)
                 Button { actions.swap() } label: { Label("Swap", systemImage: "arrow.left.arrow.right") }

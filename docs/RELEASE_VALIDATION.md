@@ -120,3 +120,14 @@ These are reused focused receipts, not a full suite on the release candidate.
 AppKit system geometry messages remain recorded without a fault-free claim.
 Accessibility stays stopped. Minimum-OS, Intel-host and clean-Mac runtime
 acceptance remain unestablished.
+
+## Open Saved Baseline — accepted feature evidence
+
+Four new bounded parser methods passed, covering typed values, Unicode identity,
+schema fields, untrusted derived claims, invalid inputs/invariants and parsing
+budgets. Two model methods passed after correcting an unnecessary try in test
+source; adoption invalidates pending reads and Current, clears URLs, sets the
+architecture and carries saved provenance through Swap. The development app
+built/launched; native report review, explicit snapshot selection/adoption, fresh
+Current selection, schema-1 path-free export and failed-import recovery passed.
+These focused receipts are reused for v0.1.4; no full suite was rerun.

@@ -15,9 +15,49 @@ final class AppActions {
     var errorMessage: String?
     private(set) var statusMessage = ""
     var focusedValue: FocusedValueSelection?
-    var isBusy: Bool { isPresentingPanel || isWritingReport || focusedValue != nil }
+    var savedReport: SavedReport?
+    private(set) var isReadingSavedReport = false
+    var isBusy: Bool { isPresentingPanel || isWritingReport || isReadingSavedReport || focusedValue != nil || savedReport != nil }
 
     init(model: ComparisonModel) { self.model = model }
+
+    func openSavedReport() {
+        guard !isBusy else { return }
+        isPresentingPanel = true
+        let panel = NSOpenPanel()
+        panel.title = "Open Saved Report"
+        panel.message = "Choose an EntitlementDiff schema-1 JSON report. No app paths are opened from the report."
+        panel.allowedContentTypes = [.json]
+        panel.allowsMultipleSelection = false
+        panel.canChooseDirectories = false
+        let result = panel.runModal()
+        isPresentingPanel = false
+        guard result == .OK, let url = panel.url else { return }
+        isReadingSavedReport = true
+        statusMessage = "Reading saved report…"
+        Task {
+            defer { isReadingSavedReport = false }
+            do {
+                let report = try await Task.detached(priority: .userInitiated) {
+                    let access = url.startAccessingSecurityScopedResource()
+                    defer { if access { url.stopAccessingSecurityScopedResource() } }
+                    return try SavedReport.read(at: url)
+                }.value
+                savedReport = report
+                statusMessage = "Review saved snapshots before replacing this session."
+            } catch {
+                statusMessage = ""
+                errorMessage = "Could not open saved report. " + error.localizedDescription
+            }
+        }
+    }
+
+    func adoptSavedBaseline(_ snapshot: EntitlementSnapshot) {
+        guard savedReport != nil else { return }
+        model.useSavedBaseline(snapshot)
+        savedReport = nil
+        statusMessage = "Saved baseline adopted. Choose a Current app for a fresh inspection."
+    }
 
     func choose(_ side: ComparisonSide) {
         guard !isBusy else { return }

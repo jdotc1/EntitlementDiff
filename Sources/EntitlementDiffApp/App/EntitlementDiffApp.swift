@@ -25,6 +25,9 @@ struct EntitlementDiffApp: App {
         .windowResizability(.contentMinSize)
         .commands {
             CommandGroup(replacing: .newItem) {
+                Button("Open Saved Baseline…") { actions.openSavedReport() }
+                    .keyboardShortcut("o", modifiers: .command)
+                    .disabled(actions.isBusy)
                 Button("Choose Previous Application…") { actions.choose(.previous) }
                     .keyboardShortcut("1", modifiers: .command)
                     .disabled(actions.isBusy)

@@ -141,6 +141,16 @@ public final class ComparisonModel {
         return true
     }
 
+    /// Explicit adoption invalidates pending reads and the old Current result.
+    public func useSavedBaseline(_ snapshot: EntitlementSnapshot) {
+        clear()
+        architecture = snapshot.architecture
+        previous = .ready(.init(sourceName: snapshot.sourceName, signingIdentifier: snapshot.signingIdentifier,
+                                architecture: snapshot.architecture, presence: snapshot.presence,
+                                origin: snapshot.origin, entitlements: snapshot.entitlements, isSavedBaseline: true))
+        updateReport()
+    }
+
     public func loadExample(structured: Bool = false) {
         clear()
         let pair = structured ? ExampleSnapshots.structuredPair(architecture: architecture) : ExampleSnapshots.pair(architecture: architecture)

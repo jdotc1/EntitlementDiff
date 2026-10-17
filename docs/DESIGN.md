@@ -200,3 +200,12 @@ Branch/page changes reset scrolling. Report revision and selected-key identities
 reset captured navigation on source/direction/selection changes. Revision UUIDs
 are session-only and never enter exported reports. Child count is bounded; key
 byte costs and user-driven ancestor/page history are not constant-memory claims.
+
+## Saved baseline ingestion
+
+Explicit schema-1 import uses bounded container parsing before typed conversion,
+strict snapshot validation and recomputation of derived results. Review/adoption
+is a separate action; adoption clears live URLs and Current, invalidates pending
+reads and selects the saved architecture. Session provenance is excluded from
+snapshot CodingKeys and disclosed through the existing report notices field.
+See SAVED_BASELINE.md for exact limits and local acceptance boundaries.

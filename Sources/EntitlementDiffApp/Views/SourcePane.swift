@@ -88,7 +88,11 @@ struct SourcePane: View {
             .accessibilityLabel("Inspection failed: \(DisplayText.escaped(message))")
         case .ready(let snapshot):
             VStack(alignment: .leading, spacing: 3) {
-                if snapshot.origin == .extracted {
+                if snapshot.isSavedBaseline {
+                    Text("Saved report — unverified metadata; not a fresh inspection.")
+                        .font(.caption).foregroundStyle(.secondary)
+                }
+                if snapshot.origin == .extracted && !snapshot.isSavedBaseline {
                     Text("Version \(display(snapshot.identity?.version)) · Build \(display(snapshot.identity?.build))")
                         .font(.caption).lineLimit(2).textSelection(.enabled)
                 }

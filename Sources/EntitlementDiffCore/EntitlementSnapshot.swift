@@ -30,6 +30,8 @@ public struct EntitlementSnapshot: Sendable, Encodable {
     public let origin: SnapshotOrigin
     public let entitlements: EntitlementDictionary
     public let identity: AppIdentity?
+    /// Session provenance; excluded from schema-1 snapshot fields.
+    public let isSavedBaseline: Bool
 
     // UI-only metadata must never change the report schema or expose local source state.
     private enum CodingKeys: String, CodingKey {
@@ -38,7 +40,7 @@ public struct EntitlementSnapshot: Sendable, Encodable {
 
     public init(sourceName: String, signingIdentifier: String, architecture: Architecture,
                 presence: EntitlementPresence = .dictionaryPresent,
-                origin: SnapshotOrigin = .extracted, entitlements: EntitlementDictionary, identity: AppIdentity? = nil) {
+                origin: SnapshotOrigin = .extracted, entitlements: EntitlementDictionary, identity: AppIdentity? = nil, isSavedBaseline: Bool = false) {
         self.sourceName = sourceName
         self.signingIdentifier = signingIdentifier
         self.architecture = architecture
@@ -46,6 +48,7 @@ public struct EntitlementSnapshot: Sendable, Encodable {
         self.origin = origin
         self.entitlements = entitlements
         self.identity = identity
+        self.isSavedBaseline = isSavedBaseline
     }
 }
 
