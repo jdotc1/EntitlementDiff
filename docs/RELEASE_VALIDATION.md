@@ -1,3 +1,5 @@
+v0.1.23 (build 24) packages Find First Difference in Focused Data Values and the accepted layered icon redesign. The five focused data tests and native continuation, byte/EOF detail, page reveal, equality and fresh-sheet checks are reused. The arm64 release build completed with missing-PCM debug-module warnings. No full suite or accessibility work was performed. Distribution approval and installed acceptance are recorded separately.
+
 # Accepted local validation summary
 
 - Original macOS baseline: 58 tests in debug and 58 in release, including eight
@@ -19,7 +21,7 @@
   and rebuilt app search, paging, filtering and complete filtered JSON copy were
   inspected. No full-suite rerun occurred after the baseline.
 
-Raw workstation logs, screenshots, handoff archives, private workstation instructions
+Raw workstation logs, screenshots, handoff archives, personal agent instructions
 and local Git history are excluded. The local audit retains those accepted receipts.
 This summary is not a new test run, independent release audit or binary-distribution
 qualification. Accessibility work was explicitly stopped; complete acceptance is
@@ -323,7 +325,7 @@ v0.1.19 remains unchanged; this is development evidence only.
 
 ## v0.1.20 release preparation
 
-Version0.1.20/build21 packages Find Previous from a local development revision. Accepted
+Version0.1.20/build21 packages Find Previous from local development. Accepted
 search/model479, native481–486 and final build/launch487–488 are reused. The
 new arm64 release-optimized candidate and its configured private-marker scan are
 recorded489; signing and Apple distribution receipts follow separately. Preserve
@@ -345,7 +347,7 @@ v0.1.20 unchanged. This is development acceptance, not a distribution receipt.
 
 ## v0.1.21 release preparation
 
-Version0.1.21/build22 packages Find First Difference from a local development revision. Accepted
+Version0.1.21/build22 packages Find First Difference from local development. Accepted
 focused tests503, final build505 and native506–512 are reused. The new arm64 release
 build and configured private-marker scan are recorded513; signing, Apple approval
 and delivery have separate release receipts. No full suite or accessibility work.
@@ -373,10 +375,13 @@ This is not a distribution-ready signature or notarized app. Secure timestamp,
 Apple notarization, GitHub publication and installed update remain pending. No
 full suite or accessibility work. Installed/public v0.1.21 remains unchanged.
 
-## v0.1.22 distribution update
+## Find First Difference in Focused Data — local feature evidence
 
-The earlier local-only preparation status is superseded. Version0.1.22/build23
-uses a timestamped Developer ID signature with hardened runtime. Apple submission
-C992ECE5-7756-43FC-BF3F-FD33B3370CD6 is Ready to distribute; notarized export,
-stapled ticket and Gatekeeper are separate release receipts. Accepted feature
-tests and native checks are reused; no full-suite rerun or accessibility work.
+Five new focused methods passed553 (three Core/two App). Real development build554
+staged/launched without warnings. Native555–560 confirms explicit continuation,
+7F versus80 at original byte20001/page27, Reveal Difference after manual paging,
+prefix EOF versus00 at byte769 with independent pages1/2, completed equality and
+fresh sheet reset. Screenshots556/558 visually inspected. Existing string/search,
+renderer, complete copy, parser/report and source-generation evidence reused.
+No suite, corpus/timing sweep, accessibility, release signing, Applications update
+or push. Installed/public v0.1.22 unchanged; this is local development acceptance.

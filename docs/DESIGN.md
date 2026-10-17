@@ -293,3 +293,16 @@ rows refer to the saved first difference even when Find shows a separate match;
 the existing scalar/byte position remains in the comparison summary. The same
 position publication/generation owns details, highlight and reveal. No report/schema
 change, source rescanning, additional comparison step or raw invisible label glyphs.
+
+Focused data pairs use a separate DataFirstDifference cursor over original Data
+indices (including sliced Data with nonzero start indices). At most32KiB combined
+input bytes are read per explicit step, with cancellation every256 pairs. A mismatch
+captures the exact optional bytes; nil denotes EOF, distinct from00. Page offsets
+remain relative to the captured value and map to existing768-byte base64 pages.
+A MainActor data session owns detached work, cancellation and request generations;
+restart/dismissal invalidate prior results. Display preparation can finish after a
+result and still navigate correctly. Reveal Difference changes only presentation
+revision, resets the data page viewport, and clamps EOF independently per side.
+No base64 character is marked as an individual original byte. Mixed/non-data pairs
+have no data-comparison action; string search/comparison, complete copying and
+schema-1 reports retain their existing contracts.

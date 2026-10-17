@@ -1,43 +1,37 @@
 # EntitlementDiff Liquid Glass icon
 
-Completed in /Applications/Icon Composer.app on 2026-10-14 with Design Generation
-27 selected. EntitlementDiff.icon is the editable native source. macOS Only is
-selected; watchOS is disabled. All three SVG layers retain their 1024 × 1024
-canvas coordinates. Front to back: Difference, Current, Previous. The native
-background is Azure with an automatic gradient. Native glass effects, neutral
-shadow (0.5), and translucency (0.3) supply material depth without baked artwork
-effects. No text, mask, shield, lock or trust verdict is drawn into the artwork.
+The accepted 2026-10-17 redesign is the canonical EntitlementDiff.icon source.
+Four native glass groups separate the violet rear plate, refractive ice-blue
+front plate, front metadata inlays, and raised amber comparison tab. The enclosure
+uses a midnight indigo automatic gradient. Plates have independent tilt and
+visible lower thickness contours. Rear markings correctly remain behind the
+front plate. No text, security shield, trust verdict or enclosure mask is drawn.
 
-Default, Dark and Mono were individually selected and visually inspected in
-Icon Composer. The cyan/pale cards, three metadata lines and minus/plus tab remain
-recognizable. Dark uses the system's dark enclosure; Mono retains the silhouettes
-and comparison mark without depending on color. Previews/ contains 1024px exports
-from Icon Composer's bundled ictool, using --design-generation 27. Native About
-panel inspection also confirmed the integrated icon at its ordinary display size.
+The front plate uses Inside specular highlights and native refraction (strength
+0.65, depth 0.22). Native neutral shadow and translucency are annotated per group.
+Design Generation 27 renders in Previews/ cover Default, Dark and Mono. All were
+visually inspected during authoring. The native source and compiled resources
+were promoted unchanged from the accepted design; compilation was not repeated.
+See REDESIGN_AUTHORING.md for the historical authoring commands and boundaries.
 
-Compiled/Assets.car is the layered asset catalog. Compiled/EntitlementDiff.icns
-is the compiler-generated compatibility fallback. The build script copies both
-into Contents/Resources; Resources/Info.plist names EntitlementDiff in both
-CFBundleIconFile and CFBundleIconName. SwiftPM source and deployment target (14.0)
-are unchanged. No custom runtime icon replacement is needed.
+Compiled/Assets.car contains layered assets; Compiled/EntitlementDiff.icns is the
+compiler-generated compatibility fallback. The existing app build script copies
+both to Contents/Resources. Existing CFBundleIconFile and CFBundleIconName keys
+already name EntitlementDiff and need no change. The actual locally staged app
+was built/launched once after promotion; its native About panel visibly rendered
+the redesigned icon next to Version 0.1.22 (23).
 
-After editing the .icon in Icon Composer, explicitly run ./script/compile_icon.sh
-once and update the previews. Ordinary builds reuse the compiled resources.
-Do not rerun icon compilation or unchanged validation solely for additional confidence.
+After changing the native document, explicitly run ./script/compile_icon.sh once
+and update previews. Ordinary app builds reuse compiled icon resources. Do not
+rerun unchanged compilation, tests or validation solely for additional confidence.
 
-Accepted icon compilation and visual inspection receipts are retained in the
-private local audit. Raw workstation logs are excluded from source releases.
-Icon integration evidence does not establish distribution signing.
+See docs/ICON_REDESIGN_ACCEPTANCE.md for local integration evidence. This change
+does not replace the installed release or alter signing identities, permissions,
+entitlements or deployment target. Raw workstation logs remain in the private
+local audit; compile.log uses relative paths for the readable compiler receipt.
 
 References:
-- https://developer.apple.com/design/human-interface-guidelines/icons
-- https://developer.apple.com/design/human-interface-guidelines/app-icons
 - https://developer.apple.com/icon-composer/
+- https://developer.apple.com/design/human-interface-guidelines/app-icons
 - https://developer.apple.com/documentation/Xcode/creating-your-app-icon-using-icon-composer
-- https://developer.apple.com/documentation/xcode/configuring-your-app-icon
 - https://bjango.com/articles/macappiconworkflow/
-- https://github.com/bjango/Bjango-Templates
-
-Apple's separate SVG artwork layers leave material effects and enclosure masking
-to Icon Composer. Bjango's silhouette, color and Dock-scale recognition principles
-informed the simple overlapping-card design.

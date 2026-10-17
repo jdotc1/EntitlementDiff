@@ -19,6 +19,7 @@ struct FocusedValueView: View {
     let selection: FocusedValueSelection
     @Bindable var actions: AppActions
     @State private var difference: FocusedStringDifference?
+    @State private var dataDifference: FocusedDataDifference?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -39,11 +40,24 @@ struct FocusedValueView: View {
                 Text(difference.message).font(.caption).foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
+            if let dataDifference {
+                HStack {
+                    Button(dataDifference.phase == .paused ? "Continue Comparison" : "Find First Difference") {
+                        if dataDifference.phase == .paused { dataDifference.advance() } else { dataDifference.find() }
+                    }
+                    .disabled(dataDifference.phase == .running)
+                    if dataDifference.position != nil { Button("Reveal Difference") { dataDifference.reveal() } }
+                    if dataDifference.phase == .running { ProgressView().controlSize(.small) }
+                }
+                Text(dataDifference.message).font(.caption).foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
             HStack(alignment: .top, spacing: 16) {
                 ForEach(ComparisonSide.allCases, id: \.self) { side in
                     LeafValuePane(side: side, value: selection.value(for: side),
                                   copying: actions.isWritingReport, copy: { actions.copyLeaf(side) },
-                                  differencePosition: difference?.position, differenceRevision: difference?.revision)
+                                  differencePosition: difference?.position, differenceRevision: difference?.revision,
+                                  dataDifferencePosition: dataDifference?.position, dataDifferenceRevision: dataDifference?.revision)
                 }
             }
             Text("Values are captured when opened. Strings escape control characters; data is base64. Copy Leaf JSON includes the complete typed value, regardless of the page.")
@@ -61,12 +75,15 @@ struct FocusedValueView: View {
         .frame(width: 880, height: 560)
         .interactiveDismissDisabled(actions.isWritingReport)
         .task(id: selection.id) {
-            difference?.cancel()
+            difference?.cancel(); dataDifference?.cancel()
             if case .string(let previous) = selection.previous, case .string(let current) = selection.current {
                 difference = FocusedStringDifference(previous: previous, current: current)
             } else { difference = nil }
+            if case .data(let previous) = selection.previous, case .data(let current) = selection.current {
+                dataDifference = FocusedDataDifference(previous: previous, current: current)
+            } else { dataDifference = nil }
         }
-        .onDisappear { difference?.cancel() }
+        .onDisappear { difference?.cancel(); dataDifference?.cancel() }
     }
 }
 
@@ -77,6 +94,8 @@ private struct LeafValuePane: View {
     let copy: () -> Void
     let differencePosition: StringFirstDifference.Position?
     let differenceRevision: UUID?
+    let dataDifferencePosition: DataFirstDifference.Position?
+    let dataDifferenceRevision: UUID?
     @State private var showingDifference = false
     @State private var document: LeafValueDocument?
     @State private var navigation = LeafPageNavigation()
@@ -96,6 +115,12 @@ private struct LeafValuePane: View {
                     }
                 }
                 .font(.caption).textSelection(.enabled)
+            }
+            if let position = dataDifferencePosition {
+                let byte = side == .previous ? position.previousByte : position.currentByte
+                Text(byte == nil ? "Difference: End of data" :
+                     "Difference byte: " + (side == .previous ? position.previousLabel : position.currentLabel))
+                    .font(.system(.caption, design: .monospaced)).textSelection(.enabled)
             }
             if let document {
                 if let page = stringPage(document) {
@@ -118,6 +143,7 @@ private struct LeafValuePane: View {
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .background(.quaternary.opacity(0.3), in: RoundedRectangle(cornerRadius: 6))
+                    .id(DataPageIdentity(page: navigation.index, revision: dataDifferenceRevision))
                 }
                 if showingDifference, let position = differencePosition,
                    byteCount(position) == 0, navigation.index == document.pageCount - 1 {
@@ -180,6 +206,7 @@ private struct LeafValuePane: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .onChange(of: differenceRevision) { _, _ in revealDifference() }
+        .onChange(of: dataDifferenceRevision) { _, _ in revealDataDifference() }
         .onChange(of: differencePosition) { _, position in
             if position == nil { showingDifference = false }
         }
@@ -204,7 +231,7 @@ private struct LeafValuePane: View {
                 }
                 try Task.checkCancellation()
                 document = prepared
-                revealDifference()
+                revealDifference(); revealDataDifference()
                 if case .string(let text) = leaf.value { search = FocusedStringSearch(source: text) }
             } catch is CancellationError {
                 // The sheet was dismissed; never publish a late preparation result.
@@ -230,4 +257,15 @@ private struct LeafValuePane: View {
         navigation.select(min(position.pageIndex, document.pageCount - 1), pageCount: document.pageCount)
     }
 
+    private func revealDataDifference() {
+        guard let document, let position = dataDifferencePosition else { return }
+        navigation.select(min(position.pageIndex, document.pageCount - 1), pageCount: document.pageCount)
+    }
+
+}
+
+
+private struct DataPageIdentity: Hashable {
+    let page: Int
+    let revision: UUID?
 }

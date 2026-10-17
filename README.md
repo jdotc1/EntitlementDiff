@@ -223,6 +223,16 @@ a prefix ending is labelled End of string without an invented code point.
 This locates the first differing scalar; it does not align insertions or produce
 a complete text diff. Reports and complete typed copies are unchanged.
 
+## Find the first difference in focused data
+
+When both focused values are data, **Find First Difference** compares their
+original bytes. **Continue Comparison** examines another bounded portion; a found
+difference navigates both panes to their existing base64 pages and shows each
+exact hexadecimal byte or **End of data**. Positions are one-based original byte
+positions. **Reveal Difference** returns to those pages without recomputing.
+Base64 characters are not highlighted as individual bytes. Complete typed copies,
+saved provenance and path-free schema-1 reports are unchanged.
+
 ## Build from source
 
 Requires macOS 14+, a Swift 6 toolchain, and macOS command-line developer tools.
@@ -359,3 +369,5 @@ Find Previous in Focused String Values is included in v0.1.20 (build21), retaini
 Find First Difference in Focused String Values is included in v0.1.21 (build22), preserving exact Unicode scalar identity, bounded comparison and independent Find state.
 
 Exact Unicode Difference Details is included in v0.1.22 (build23), with original scalar/EOF metadata, explicit escapes and exact UTF-8 bytes. The arm64 app is Developer ID signed, notarized and stapled.
+
+Release v0.1.23 adds first-difference navigation for focused data values: exact original bytes, explicit continuation, hexadecimal byte/EOF details and independent base64 page reveal.

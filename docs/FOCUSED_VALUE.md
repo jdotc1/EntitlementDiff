@@ -2,7 +2,7 @@ Direct one-based page navigation added locally2026-10-17; see LEAF_PAGE_JUMP.md.
 
 # Focused value viewer and typed leaf copy
 
-Implemented locally 2026-10-15 on milestone 2 commit `bc65b87`. This is the
+Implemented locally 2026-10-15 on milestone 2 local development. This is the
 explicitly authorized milestone 3 scope: long-value viewing and exact scalar copy.
 All Keys and deeper-tree navigation remain separate future work.
 
@@ -78,3 +78,66 @@ native extraction methods, unchanged signing/dependency/hash check or corpus run
 was repeated. No performance benchmark, minimum-macOS-14/Intel acceptance,
 accessibility work, install, notarization, release packaging or push. Published
 and installed v0.1.2 remain separate; no new distribution claim.
+
+## Find First Difference in Focused Data Values — 2026-10-17
+
+When both captured values are data, Find First Difference begins at the original
+bytes. Continue Comparison explicitly examines another bounded portion; partial
+agreement never becomes a No difference result. A mismatch reports its original
+one-based byte position and each side's uppercase hexadecimal byte. End of data
+is explicit and distinct from00. Empty/equal values remain valid. Mixed, absent
+or non-data pairs do not receive this data action; string comparison/search keep
+their existing workflow. This locates the first byte difference, not an aligned
+binary diff or a decoded format comparison.
+
+DataFirstDifference retains immutable Data values, native Data indices and a
+relative byte offset, including Data slices whose startIndex is not zero. It does
+not flatten full byte arrays, decode/re-encode base64, compare display text or
+rescan a prefix for each continuation. Steps read at most32,768 original bytes
+across both inputs combined, reserving two bytes per pair; smaller test budgets
+have a two-byte minimum. Cancellation is checked at entry/every256 pairs. Storage
+and the captured value size remain separate from this per-action work budget;
+no constant-memory or elapsed-time claim is made.
+
+FocusedDataDifference owns a separate MainActor session and cancellable detached
+steps. A request generation as well as cancellation guards every publication.
+Restart/dismissal invalidates cursor, result and work. Existing captured selection
+identity creates fresh state. A result arriving before leaf preparation is applied
+when its document becomes ready. Original byte offset maps to the existing768-byte
+base64 page; each side independently clamps an EOF boundary to its last page.
+Reveal Difference only changes presentation revision and restores/reset-scrolls
+those pages. Manual paging remains available. Base64 characters are not highlighted
+as individual original bytes. Exact byte/EOF details identify the saved difference.
+No new encoding, report schema, saved provenance or clipboard contract is introduced;
+Copy Leaf JSON still contains the complete tagged original value.
+
+Evidence:
+
+- 552: specification compilation before the new APIs existed. Missing-symbol
+ failure is not a behavioral regression failure or a passing test.
+- 553: `swift test --filter 'DataFirstDifferenceTests|FocusedDataDifferenceTests' -Xswiftc -warnings-as-errors`
+ passed five new methods (three Core/two App), covering later-page7F/80 identity,
+32KiB combined cap, explicit small-budget continuation, equality only after all
+bytes, empty/prefix EOF versus00, nonzero-index Data slices, independent restart/
+reveal state, terminal guards and a deliberately computed byte result returning
+after cancellation. No pre-existing behavioral defect was confirmed.
+- 554: `./script/build_and_run.sh` built/staged/launched the actual development
+bundle without warnings. Ad-hoc development signing is not distribution proof.
+- 555: synthetic data pair paused with explicit Continue Comparison and no result.
+- 556: continuation found original byte20001, Previous7F/Current80, and navigated
+both panes to page27 of27. Existing base64 display remained unhighlighted;
+screenshot visually inspected.
+- 557: manual Previous First page followed by Reveal Difference restored page27
+without starting comparison again.
+- 558: Previous ended after768 bytes while Current continued with00. The summary
+reported byte769; Previous clamped to page1/1 and Current opened page2/2. No false
+zero byte was assigned to EOF. Screenshot visually inspected.
+- 559: equal original data completed with explicit No difference.
+- 560: Done/reopen cleared saved data comparison and detail state. App open.
+
+Accepted string comparison503, Unicode metadata527/531–533, search479, scalar
+renderer453/456/457, full leaf copying139–144, page378–383 and parser/report/
+source-generation checks reused for unchanged boundaries. Only the five new data
+methods ran. No suite, corpus/timing sweep, unchanged hashes/signatures,
+accessibility, broad appearance work, packaging, release, Applications update or
+push. Installed/public v0.1.22 unchanged; unrelated audit preserved.

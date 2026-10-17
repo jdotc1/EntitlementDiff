@@ -1,35 +1,90 @@
 {
-  "fill" : {
-    "automatic-gradient" : "extended-srgb:0.00000,0.53333,1.00000,1.00000"
+  "features": [
+    "refractivity",
+    "specular-location"
+  ],
+  "fill": {
+    "automatic-gradient": "extended-srgb:0.08500,0.07500,0.24000,1.00000"
   },
-  "groups" : [
+  "groups": [
     {
-      "layers" : [
+      "layers": [
         {
-          "image-name" : "03-Difference.svg",
-          "name" : "03-Difference"
-        },
-        {
-          "image-name" : "02-Current.svg",
-          "name" : "02-Current"
-        },
-        {
-          "image-name" : "01-Previous.svg",
-          "name" : "01-Previous"
+          "image-name": "Delta.svg",
+          "name": "Floating comparison"
         }
       ],
-      "shadow" : {
-        "kind" : "neutral",
-        "opacity" : 0.5
+      "name": "Floating comparison",
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0.8
       },
-      "translucency" : {
-        "enabled" : true,
-        "value" : 0.3
+      "translucency": {
+        "enabled": true,
+        "value": 0.04
       }
+    },
+    {
+      "layers": [
+        {
+          "image-name": "Inlays.svg",
+          "name": "Etched metadata"
+        }
+      ],
+      "name": "Etched metadata",
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0.08
+      },
+      "translucency": {
+        "enabled": true,
+        "value": 0.02
+      }
+    },
+    {
+      "layers": [
+        {
+          "image-name": "Front.svg",
+          "name": "Clear current plate"
+        }
+      ],
+      "name": "Clear current plate",
+      "refractivity": {
+        "enabled": true,
+        "strength": 0.65,
+        "depth": 0.22
+      },
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0.75
+      },
+      "specular": "inside",
+      "translucency": {
+        "enabled": true,
+        "value": 0.48
+      }
+    },
+    {
+      "layers": [
+        {
+          "image-name": "Rear.svg",
+          "name": "Violet previous plate"
+        }
+      ],
+      "name": "Violet previous plate",
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0.65
+      },
+      "translucency": {
+        "enabled": true,
+        "value": 0.25
+      },
+      "specular": "inside"
     }
   ],
-  "supported-platforms" : {
-    "squares" : [
+  "supported-platforms": {
+    "squares": [
       "macOS"
     ]
   }
