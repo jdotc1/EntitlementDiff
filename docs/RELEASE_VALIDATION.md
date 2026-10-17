@@ -1,3 +1,7 @@
+v0.1.30 (31) — Go to Byte
+
+Independent per-data-pane byte navigation preserves original bytes, bounded context and selected-difference behavior. Four focused development tests and native acceptance are reused for release. Distribution checks are recorded separately.
+
 v0.1.29 (30) — Copy Current Difference Details
 
 Bounded path-free summaries copy the selected captured string/data difference without rescanning. Four focused development tests and native clipboard/layout acceptance passed and are reused for release. Distribution evidence is recorded separately.

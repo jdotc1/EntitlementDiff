@@ -120,6 +120,7 @@ private struct LeafValuePane: View {
     let dataDifferencePosition: DataFirstDifference.Position?
     let dataDifferenceRevision: UUID?
     let dataContext: DataDifferenceContext?
+    @State private var byteNavigation = DataByteNavigation()
     @State private var showingDifference = false
     @State private var document: LeafValueDocument?
     @State private var navigation = LeafPageNavigation()
@@ -146,7 +147,24 @@ private struct LeafValuePane: View {
                      "Difference byte: " + (side == .previous ? position.previousLabel : position.currentLabel))
                     .font(.system(.caption, design: .monospaced)).textSelection(.enabled)
             }
-            if let dataContext { DataHexContextView(context: dataContext) }
+            if case .data(let data) = value {
+                HStack {
+                    Text("Go to byte (1-based)").font(.caption)
+                    TextField("\(side.label) byte position", text: Binding(
+                        get: { byteNavigation.input }, set: { byteNavigation.setInput($0) }))
+                        .textFieldStyle(.roundedBorder).frame(width: 90)
+                        .onSubmit { goToByte(data) }
+                    Button("Go to Byte") { goToByte(data) }
+                }
+                if let error = byteNavigation.error {
+                    Text(verbatim: error).font(.caption).foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                if let context = byteNavigation.context {
+                    Text("Manual byte context · selected difference unchanged").font(.caption).foregroundStyle(.secondary)
+                    DataHexContextView(context: context)
+                } else if let dataContext { DataHexContextView(context: dataContext) }
+            }
             if let document {
                 if let page = stringPage(document) {
                     HighlightedStringPageView(page: page, pageIndex: navigation.index,
@@ -233,6 +251,9 @@ private struct LeafValuePane: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .onChange(of: differenceRevision) { _, _ in revealDifference() }
         .onChange(of: dataDifferenceRevision) { _, _ in revealDataDifference() }
+        .onChange(of: dataDifferencePosition) { _, position in
+            if position == nil { byteNavigation.reset() }
+        }
         .onChange(of: differencePosition) { _, position in
             if position == nil { showingDifference = false }
         }
@@ -267,6 +288,13 @@ private struct LeafValuePane: View {
         }
     }
 
+    private func goToByte(_ data: Data) {
+        guard byteNavigation.go(data: data), let offset = byteNavigation.byteOffset,
+              let document else { return }
+        navigation.select(min(offset / LeafValueDocument.dataBytesPerPage, document.pageCount - 1),
+                          pageCount: document.pageCount)
+    }
+
     private func byteCount(_ position: StringFirstDifference.Position) -> Int {
         side == .previous ? position.previousByteCount : position.currentByteCount
     }
@@ -284,6 +312,7 @@ private struct LeafValuePane: View {
     }
 
     private func revealDataDifference() {
+        byteNavigation.reset()
         guard let document, let position = dataDifferencePosition else { return }
         navigation.select(min(position.pageIndex, document.pageCount - 1), pageCount: document.pageCount)
     }

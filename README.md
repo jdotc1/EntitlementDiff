@@ -400,3 +400,7 @@ ordinals leave the current result unchanged; Next preserves the original frontie
 Copy Difference Details copies the currently displayed found string/data mismatch
 as a compact path-free text summary, preserving exact Unicode/byte details and
 bounded hex context. It follows Previous and Go to found difference without rescanning.
+
+Go to Byte in each focused data pane inspects a known1-based byte position or
+EOF with bounded original hex context. Manual navigation leaves the selected
+difference and Copy Difference Details unchanged; Reveal Difference returns to it.

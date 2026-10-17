@@ -341,3 +341,9 @@ Copy Difference Details uses the current captured string/data mismatch with
 exact scalar/UTF-8 or byte/EOF details and bounded context. No rescans or source
 paths; clipboard output is limited to2048 UTF-8 bytes and guarded by focused
 selection identity. See COPY_DIFFERENCE_DETAILS.md for scope and evidence678–684.
+
+Go to Byte offers independent per-data-pane1-based decimal navigation to an
+original byte or EOF, with bounded33-byte hex context and direct base64 page
+selection. Manual viewing does not change the selected difference or its copied
+details. Reveal Difference resets manual navigation. Strict bounded input, invalid
+nonmutation and dismissal reset are covered in GO_TO_BYTE.md, evidence697–703.
