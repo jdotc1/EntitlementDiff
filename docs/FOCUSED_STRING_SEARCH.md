@@ -123,3 +123,66 @@ suite, timing/corpus sweep, unchanged signature/hash checks, accessibility or br
 appearance work, packaging, publication or Applications update. Installed/public
 v0.1.18 is unchanged. No confirmed pre-existing behavioral defect was found in
 this milestone. The development app remains open with the synthetic fixture.
+
+## Find Previous in Focused String Values — 2026-10-17
+
+Completed locally against private3029cef / released v0.1.19. This follow-up adds
+Find Previous to each string pane. It is unavailable before a match exists; Find
+still restarts forward from the beginning. Find Next/Previous exclude the current
+match start but retain overlaps. Neither direction wraps. The beginning message
+keeps the last match visible and disables backward continuation; Find Next can
+change direction from there. A backward step that finds no match in32,768 bytes
+shows Continue Backward. Opposite-direction navigation restarts from the last
+visible match, not the partially searched position. No match history is accumulated.
+
+The immutable source remains shared by cursor values. The cursor retains an index
+at its last match plus original byte/scalar offsets. Switching direction adjusts
+that index by at most the1,024-byte query length and rebuilds a bounded KMP prefix
+table for the reversed pattern. Reverse scanning decrements original UTF-8/scalar
+positions and carries partial-pattern state across explicit steps, even mid-scalar.
+Forward switching starts one byte beyond the last start, retaining overlaps without
+normalizing text. No whole-source byte array or restart-from-beginning scan is used.
+The32KiB ceiling counts source bytes per step; query preprocessing/anchor movement
+is additionally bounded by1,024 bytes. Existing source/page indexing storage remains
+proportional to the captured value; this is not a constant-memory or timing claim.
+
+The MainActor model cancels old work and replaces its generation on direction
+switch, query edit, restart or dismissal. Detached work periodically checks
+cancellation; publication additionally requires matching generation. Each pane owns
+its direction/session. Opposite-direction actions can supersede pending work when
+a prior match exists. Highlight/reveal use existing match revisions and byte ranges.
+Rendering, typed copying, parser/provenance and path-free schema-1 exports unchanged.
+
+Evidence:
+
+- 477 Core and478 model specification compilations demonstrate the initially missing
+ API, not a behavioral failure or regression pass. No pre-existing behavioral defect
+ was confirmed in this milestone.
+- 479 `swift test --filter 'StringBackwardSearchTests|FocusedBackwardSearchTests|StringValueSearchTests|FocusedStringSearchTests' -Xswiftc -warnings-as-errors`
+ passed ten methods: five new and five existing forward methods with changed
+ engine/model inputs. New cases cover overlaps/direction reversals/endpoints,
+ multibyte/page and32KiB boundaries with2-byte continuation steps, composed versus
+ decomposed identity, no-match initialization guard, model beginning/query reset,
+ backward pause and deliberately late backward output after switching forward.
+- 480 `./script/build_and_run.sh` built/staged/launched the actual development app.
+ It exposed pre-existing actor-isolation warnings in the highlight coordinator.
+ The coordinator now has explicit MainActor isolation;487 rebuilt without warnings,
+ and488 records the final native main window. This compiler correction is not a
+ failed-then-fixed behavioral test. No new API or appearance campaign was needed.
+- 481: Previous 🙂target found later byte1074/page2, then Find Previous returned to
+ original byte1023/page1, highlighted the emoji and showed cross-page continuation.
+- 482: another backward action reached explicit beginning without wrapping; forward
+ remained available. Current's independent query still began at byte1/page1.
+- 483: Current reached its later match at byte32776/page65; Find Previous paused at
+ the byte ceiling with Continue Backward, retaining its match/page until found.
+- 484: Continue Backward found byte1/page1; Previous retained its match/page.
+ Screenshots481/484 were visually inspected.
+- 485: switching forward from that match paused/continued to byte32776/page65 again.
+- 486: native Current query replacement cleared match feedback and disabled both
+ navigation directions while Previous retained its independent state.
+
+Accepted renderer mapping/coordinator453/456/457 and native459–464 are reused for
+unchanged rendering behavior. Complete leaf copy139–144, page378–383, raw text field,
+parser/report and other unaffected receipts reused. No full suite, corpus/timing
+sweep, unchanged signature/hash checks, accessibility, broad appearance work,
+Applications update, packaging, release or push. Installed/public v0.1.19 unchanged.

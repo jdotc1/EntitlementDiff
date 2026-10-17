@@ -37,6 +37,7 @@ struct HighlightedStringPageView: NSViewRepresentable {
     static func dismantleNSView(_ view: NSScrollView, coordinator: Coordinator) {
         (view.documentView as? PageTextView)?.pendingReveal = nil
     }
+    @MainActor
     final class Coordinator {
         private var pageIndex: Int?
         private var revision: UUID?

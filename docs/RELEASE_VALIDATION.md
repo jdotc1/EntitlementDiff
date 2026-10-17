@@ -308,3 +308,24 @@ new payload passed the configured private-marker scan. Developer ID signing466
 uses Jeffrey Cooney (5HR49PU83V), hardened runtime and secure timestamp, without
 exception entitlements. Apple approval, export and publication are separate
 release receipts, not implied by preparation. No full suite or accessibility work.
+
+## Find Previous — local feature evidence
+
+Ten focused search/model methods passed479, including five new backward methods
+and five forward methods whose engine/model inputs changed. Native481–486 confirms
+Unicode backward page reveal, beginning without wrap, independent panes,32KiB pause,
+Continue Backward to page1, direction reversal to page65 and query reset. Screenshots
+481/484 visually inspected. Build480 exposed existing highlight-coordinator actor
+warnings; explicit MainActor correction compiled without warnings487, launched488.
+Accepted highlighting453/456/457, complete copy, report/parser and other unchanged
+checks reused. No full suite, accessibility, release or push. Installed/public
+v0.1.19 remains unchanged; this is development evidence only.
+
+## v0.1.20 release preparation
+
+Version0.1.20/build21 packages Find Previous from private9cc9a1f. Accepted
+search/model479, native481–486 and final build/launch487–488 are reused. The
+new arm64 release-optimized candidate and its configured private-marker scan are
+recorded489; signing and Apple distribution receipts follow separately. Preserve
+exact UTF-8,32KiB steps,1,024-byte queries,512-scalar rendering and schema-1 reports.
+No full suite or accessibility work. Preparation alone does not establish release.

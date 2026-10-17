@@ -8,6 +8,7 @@ final class FocusedStringSearch {
     typealias Runner = @Sendable (StringValueSearch) async throws -> (StringValueSearch, StringValueSearch.Step)
     private(set) var input = ExactKeyInput()
     private(set) var phase: Phase = .ready
+    private(set) var direction: StringValueSearch.Direction = .forward
     private(set) var match: StringValueSearch.Match?
     private(set) var matchRevision = UUID()
     private let source: String
@@ -16,6 +17,11 @@ final class FocusedStringSearch {
     @ObservationIgnored private var generation = UUID()
     @ObservationIgnored private var work: Task<Void, Never>?
     var canAdvance: Bool { phase == .paused || phase == .matched }
+    func canSearch(_ direction: StringValueSearch.Direction) -> Bool {
+        guard let cursor else { return false }
+        if direction != cursor.direction { return match != nil }
+        return canAdvance
+    }
     var matchByteRange: Range<Int>? {
         guard let match else { return nil }
         return match.byteOffset..<(match.byteOffset + input.value.utf8.count)
@@ -23,12 +29,12 @@ final class FocusedStringSearch {
     var message: String {
         switch phase {
         case .ready: "Literal UTF-8 · 1–1,024 query bytes."
-        case .running: "Searching this portion…"
-        case .paused: "No next match yet. Continue Search to examine more."
+        case .running: direction == .backward ? "Searching backward through this portion…" : "Searching this portion…"
+        case .paused: direction == .backward ? "No previous match yet. Continue backward to examine more." : "No next match yet. Continue Search to examine more."
         case .matched:
             if let match { "Match begins at byte \(match.byteOffset + 1) · page \(match.pageIndex + 1)." }
             else { "Match found." }
-        case .end: "Reached the end. No further match; search does not wrap."
+        case .end: direction == .backward ? "Reached the beginning. No earlier match; search does not wrap." : "Reached the end. No further match; search does not wrap."
         case .invalid: "Enter literal text from 1 through 1,024 UTF-8 bytes."
         case .failed: "Search could not complete. Use Find to restart."
         }
@@ -52,7 +58,7 @@ final class FocusedStringSearch {
     }
     func cancel() {
         generation = UUID(); work?.cancel(); work = nil
-        cursor = nil; match = nil; phase = .ready
+        cursor = nil; match = nil; phase = .ready; direction = .forward
     }
     @discardableResult
     func find() -> Task<Void, Never>? {
@@ -62,7 +68,15 @@ final class FocusedStringSearch {
         return advance()
     }
     @discardableResult
-    func advance() -> Task<Void, Never>? {
+    func advance(direction requested: StringValueSearch.Direction? = nil) -> Task<Void, Never>? {
+        if let requested, let current = cursor, requested != current.direction {
+            guard match != nil else { return nil }
+            do { cursor = try current.searching(requested) }
+            catch { return nil }
+            generation = UUID(); work?.cancel(); work = nil
+            direction = requested
+            phase = .matched
+        }
         guard phase != .running, let cursor else { return nil }
         guard phase == .ready || canAdvance else { return nil }
         let request = generation, runner = runner

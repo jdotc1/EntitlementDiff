@@ -261,3 +261,13 @@ Page byte offsets are indexed off-main alongside existing scalar page ranges;
 rendering visits only that page. Query clearing removes styling/pending reveal;
 teardown drops pending layout work. Existing search generation/cancellation guards
 remain authoritative. Cross-page portions have explicit continuation guidance.
+
+StringValueSearch retains a last-match UTF-8 index and original byte/scalar offsets.
+Direction switching excludes the current start, includes overlapping occurrences,
+and moves at most1,024 bytes near that anchor. A bounded reversed KMP pattern
+scans backward in32KiB explicit steps, carrying partial multibyte matches. It never
+materializes full source bytes or rescans a prefix to locate its anchor. Model
+direction changes cancel prior work and replace generations, including a deliberately
+late return. Each pane has its own cursor/direction; Find restarts forward. Reaching
+an endpoint disables only that direction. Query edits/dismissal clear both directions.
+See FOCUSED_STRING_SEARCH.md. Highlight bridge coordinator is explicitly MainActor.

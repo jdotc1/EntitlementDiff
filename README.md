@@ -204,7 +204,8 @@ See [Ancestor navigation](docs/ANCESTOR_NAVIGATION.md).
 ## Find text inside focused strings
 
 Each string pane in Focused Value offers literal UTF-8 Find and overlapping Find
-Next. Search runs in explicit32KiB steps; Continue Search examines more without
+Next. Find Previous searches backward from the current match, with explicit
+Continue Backward steps and a nonwrapping beginning. Search runs in explicit32KiB steps; Continue Search examines more without
 raising rendering limits. Matches navigate to the original start page and show
 byte position. Raw edits and dismissal invalidate pending results. Data/base64
 search is excluded. Included in v0.1.18 (build19).
@@ -341,3 +342,5 @@ Focused string search reveals and highlights the current match within its bounde
 page, including successive occurrences on the same page. Cross-page matches show
 continuation guidance. Raw UTF-8 identity, complete copied values and reports are
 preserved. Included in v0.1.19 (build20).
+
+Find Previous in Focused String Values is included in v0.1.20 (build21), retaining exact UTF-8 matches, overlapping occurrences, bounded backward continuation and explicit beginning-of-string feedback.

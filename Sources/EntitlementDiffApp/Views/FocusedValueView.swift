@@ -123,8 +123,14 @@ private struct LeafValuePane: View {
                     Button("Find") { search.find() }
                 }
                 HStack {
-                    Button(search.phase == .paused ? "Continue Search" : "Find Next") { search.advance() }
-                        .disabled(!search.canAdvance)
+                    Button(search.phase == .paused && search.direction == .backward ? "Continue Backward" : "Find Previous") {
+                        search.advance(direction: .backward)
+                    }
+                    .disabled(!search.canSearch(.backward))
+                    Button(search.phase == .paused && search.direction == .forward ? "Continue Search" : "Find Next") {
+                        search.advance(direction: .forward)
+                    }
+                    .disabled(!search.canSearch(.forward))
                     if search.phase == .running { ProgressView().controlSize(.small) }
                 }
                 Text(search.message).font(.caption).foregroundStyle(.secondary)
