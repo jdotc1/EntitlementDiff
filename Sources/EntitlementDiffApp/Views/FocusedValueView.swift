@@ -64,15 +64,27 @@ private struct LeafValuePane: View {
             Text(side.label).font(.headline)
             Text(value?.typeName ?? "Absent").foregroundStyle(.secondary)
             if let document {
-                ScrollView {
-                    Text(verbatim: document.text(onPage: navigation.index))
-                        .font(.system(.body, design: .monospaced))
-                        .textSelection(.enabled)
-                        .frame(maxWidth: .infinity, alignment: .topLeading)
-                        .padding(8)
+                if let page = document.stringPage(onPage: navigation.index, matching: search?.matchByteRange) {
+                    HighlightedStringPageView(page: page, pageIndex: navigation.index,
+                                              revealRevision: search?.matchRevision)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .background(.quaternary.opacity(0.3), in: RoundedRectangle(cornerRadius: 6))
+                    if page.continuesBefore || page.continuesAfter {
+                        Text(page.continuesBefore && page.continuesAfter ? "Match continues from the previous page and onto the next." :
+                             page.continuesBefore ? "Match continues from the previous page." : "Match continues onto the next page.")
+                            .font(.caption).foregroundStyle(.secondary)
+                    }
+                } else {
+                    ScrollView {
+                        Text(verbatim: document.text(onPage: navigation.index))
+                            .font(.system(.body, design: .monospaced))
+                            .textSelection(.enabled)
+                            .frame(maxWidth: .infinity, alignment: .topLeading)
+                            .padding(8)
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(.quaternary.opacity(0.3), in: RoundedRectangle(cornerRadius: 6))
                 }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background(.quaternary.opacity(0.3), in: RoundedRectangle(cornerRadius: 6))
                 Text("Page \(navigation.index + 1) of \(document.pageCount)").font(.caption).monospacedDigit()
                 HStack {
                     Button("First") { navigation.select(0, pageCount: document.pageCount) }.disabled(navigation.index == 0)

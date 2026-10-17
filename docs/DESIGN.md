@@ -252,3 +252,12 @@ queries and32KiB steps, continuation, overlapping Find Next and nonwrapping end.
 Original byte/scalar offsets navigate to the start page without changing rendering
 limits or complete copying. Cancellation plus query/session generations suppress
 stale publication. No data/base64 search. See FOCUSED_STRING_SEARCH.md.
+
+Focused string rendering maps the original match byte range into escaped UTF-16
+ranges for the selected512-scalar page. A narrow read-only NSTextView bridge uses
+semantic selected-text colors and reveals the start on a new match revision or
+page. It never assigns the match as the user's text selection or changes focus.
+Page byte offsets are indexed off-main alongside existing scalar page ranges;
+rendering visits only that page. Query clearing removes styling/pending reveal;
+teardown drops pending layout work. Existing search generation/cancellation guards
+remain authoritative. Cross-page portions have explicit continuation guidance.

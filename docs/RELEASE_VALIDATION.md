@@ -286,3 +286,25 @@ Find Next/end without wrap, composed-to-decomposed query edits and fresh reopeni
 Screenshot inspected. These receipts are reused for v0.1.18. Existing rendering,
 copy, paging, parser, reports and source-generation checks reused. No full suite,
 performance sweep or accessibility work.
+
+## Reveal and Highlight the Current String Match — local feature evidence
+
+Completed2026-10-17; see FOCUSED_STRING_SEARCH.md. Four new focused methods:
+Core453 reused after native-only refinements, native coordinator453/457 and
+viewport probe456/457. Final actual bundle build/launch458. Native same-page
+successive reveal459–460, cross-page UTF-8 portions/guidance461–462, query-clear463
+and fresh reopening464 visually inspected. Original search/generation433–440,
+complete copy139–144, page378–383 and parser/report receipts reused. No full suite,
+accessibility, packaging, distribution signing, Applications update or push.
+These are local development receipts, not a new release or installed acceptance.
+
+## v0.1.19 release preparation
+
+Version0.1.19/build20 packages Reveal and Highlight the Current String Match.
+Accepted focused tests453/456/457, development build458 and native459–464 are
+reused. The arm64 release-optimized build465 has new version/optimization inputs;
+it completed with previously observed missing-PCM debug-module warnings, and its
+new payload passed the configured private-marker scan. Developer ID signing466
+uses Jeffrey Cooney (5HR49PU83V), hardened runtime and secure timestamp, without
+exception entitlements. Apple approval, export and publication are separate
+release receipts, not implied by preparation. No full suite or accessibility work.

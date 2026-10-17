@@ -28,11 +28,14 @@ public struct LeafValueDocument: Sendable {
     public let leaf: InspectorLeaf
     public let pageCount: Int
     private let stringPages: [Range<String.Index>]
+    private let stringPageByteOffsets: [Int]
 
     public init(leaf: InspectorLeaf) throws {
         try Task.checkCancellation()
         self.leaf = leaf
         var pages: [Range<String.Index>] = []
+        var byteOffsets: [Int] = []
+        var byteOffset = 0
         switch leaf.value {
         case .string(let string):
             let scalars = string.unicodeScalars
@@ -41,10 +44,12 @@ public struct LeafValueDocument: Sendable {
                 try Task.checkCancellation()
                 let end = scalars.index(start, offsetBy: Self.stringScalarsPerPage,
                                         limitedBy: scalars.endIndex) ?? scalars.endIndex
+                byteOffsets.append(byteOffset)
+                byteOffset += string.utf8.distance(from: start, to: end)
                 pages.append(start..<end)
                 start = end
             }
-            if pages.isEmpty { pages.append(start..<start) }
+            if pages.isEmpty { pages.append(start..<start); byteOffsets.append(0) }
             pageCount = pages.count
         case .data(let data):
             pageCount = max(1, data.count / Self.dataBytesPerPage + (data.count % Self.dataBytesPerPage == 0 ? 0 : 1))
@@ -52,6 +57,43 @@ public struct LeafValueDocument: Sendable {
             pageCount = 1
         }
         stringPages = pages
+        stringPageByteOffsets = byteOffsets
+    }
+
+    public struct StringPage: Sendable {
+        public let text: String
+        public let highlight: NSRange?
+        public let continuesBefore: Bool
+        public let continuesAfter: Bool
+    }
+
+    /// Maps original UTF-8 byte positions into escaped display UTF-16, visiting only this page.
+    public func stringPage(onPage requestedPage: Int, matching range: Range<Int>?) -> StringPage? {
+        guard case .string(let string) = leaf.value else { return nil }
+        let page = max(0, min(requestedPage, pageCount - 1))
+        let startByte = stringPageByteOffsets[page]
+        var byte = startByte, utf16 = 1
+        var first: Int?, last: Int?
+        var text = "\""
+        for scalar in string.unicodeScalars[stringPages[page]] {
+            let raw = String(scalar)
+            let endByte = byte + raw.utf8.count
+            let escaped = scalar == "\"" ? "\\\"" : DisplayText.escaped(raw)
+            let endUTF16 = utf16 + escaped.utf16.count
+            if let range, byte >= range.lowerBound, endByte <= range.upperBound {
+                if first == nil { first = utf16 }
+                last = endUTF16
+            }
+            text += escaped
+            byte = endByte; utf16 = endUTF16
+        }
+        text += "\""
+        let highlight: NSRange?
+        if let first, let last { highlight = NSRange(location: first, length: last - first) }
+        else { highlight = nil }
+        return StringPage(text: text, highlight: highlight,
+                          continuesBefore: highlight != nil && (range?.lowerBound ?? startByte) < startByte,
+                          continuesAfter: highlight != nil && (range?.upperBound ?? byte) > byte)
     }
 
     public func text(onPage requestedPage: Int) -> String {

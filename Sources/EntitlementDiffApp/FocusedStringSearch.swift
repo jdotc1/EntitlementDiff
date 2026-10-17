@@ -16,6 +16,10 @@ final class FocusedStringSearch {
     @ObservationIgnored private var generation = UUID()
     @ObservationIgnored private var work: Task<Void, Never>?
     var canAdvance: Bool { phase == .paused || phase == .matched }
+    var matchByteRange: Range<Int>? {
+        guard let match else { return nil }
+        return match.byteOffset..<(match.byteOffset + input.value.utf8.count)
+    }
     var message: String {
         switch phase {
         case .ready: "Literal UTF-8 · 1–1,024 query bytes."

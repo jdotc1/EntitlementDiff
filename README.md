@@ -94,7 +94,7 @@ synthetic demonstration.
 | View | Behavior and limits |
 | --- | --- |
 | Nested search | 50 rows per page, 2,000 inspected nodes, 12 levels, and 256 Unicode scalars per preview. Scan/depth limits are explicit; paging does not bypass them. |
-| **View Value…** | A focused Previous/Current sheet for a scalar leaf. Strings page in 512 Unicode scalars; data pages in 768 bytes displayed as base64. First/Previous/Next/Last controls show page counts. |
+| **View Value…** | A focused Previous/Current sheet for a scalar leaf. Strings page in 512 Unicode scalars; data pages in 768 bytes displayed as base64. First/Previous/Next/Last controls show page counts. Literal string search reveals and highlights the current match, with guidance when it continues across pages. |
 | **Browse Branches** | Up to 50 immediate children per step, including values beyond the search traversal limit. Open Branch descends; Up restores the parent page; First/Previous/Next Children pages siblings. Arrays also offer a zero-based Go to Index. |
 
 **Copy Selected JSON** retains the complete selected entitlement as tagged values,
@@ -336,3 +336,8 @@ interface acceptance.
   examples and review reports for sensitive metadata first.
 
 Licensed under [MIT](LICENSE).
+
+Focused string search reveals and highlights the current match within its bounded
+page, including successive occurrences on the same page. Cross-page matches show
+continuation guidance. Raw UTF-8 identity, complete copied values and reports are
+preserved. Included in v0.1.19 (build20).
