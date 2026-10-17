@@ -130,6 +130,14 @@ reveals its row. Hidden matches offer explicit Show in All Keys; missing matches
 preserve filters and selection. Sorting, full exports and saved provenance remain
 unchanged. Find Entitlement is included in v0.1.6. See docs/EXACT_FIND.md.
 
+## Copy exact keys
+
+Copy Exact Key beside the selected detail and in the Comparison menu copies the
+current row's complete raw key as plain UTF-8 text. Display quotes/escaping and
+preview limits do not affect it. No selection means no copy. Existing JSON/report
+copying is unchanged. Copy Exact Key is included in v0.1.7.
+See docs/COPY_EXACT_KEY.md.
+
 ## Reusable libraries
 
 `EntitlementDiffCore` provides typed property-list values, bounded Foundation
@@ -197,9 +205,9 @@ intended for developer-controlled builds, not bulk malware triage.
 
 ## Downloads and development builds
 
-The published release is **v0.1.6 (build 7)**, including Reload/Retry and Input
+The published release is **v0.1.7 (build 8)**, including Reload/Retry and Input
 Identity. The arm64 app is Developer ID signed and Apple notarized. Download the
-app or sanitized source from https://github.com/jdotc1/EntitlementDiff/releases/tag/v0.1.6.
+app or sanitized source from https://github.com/jdotc1/EntitlementDiff/releases/tag/v0.1.7.
 Local development builds are ad-hoc signed and are separate from that published app.
 The current local Phase 1 export/source-packaging, comparison/browser computation,
 focused-value viewer/copy, branch-navigation and All Keys changes are not in v0.1.2.

@@ -36,6 +36,8 @@ struct EntitlementDiffApp: App {
                     .disabled(actions.isBusy)
             }
             CommandMenu("Comparison") {
+                Button("Copy Exact Key") { actions.copyExactKey() }
+                    .disabled(!actions.canCopyExactKey)
                 Button("Find Entitlement…") { actions.beginFindEntitlement() }
                     .keyboardShortcut("f", modifiers: .command)
                     .disabled(model.report == nil || actions.isBusy)

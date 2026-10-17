@@ -138,7 +138,7 @@ struct ContentView: View {
                         }
                     }
                     .frame(minHeight: 180, idealHeight: 260)
-                ChangeDetailView(change: browser.selectedRow, copy: actions.copySelected,
+                ChangeDetailView(change: browser.selectedRow, copy: actions.copySelected, copyKey: actions.copyExactKey,
                                  inspect: actions.inspectValue, busy: actions.isBusy)
                     .id(model.reportRevision).id(browser.selectedRow?.id)
                     .frame(minHeight: 155, idealHeight: 205)

@@ -22,7 +22,27 @@ final class AppActions {
     private(set) var findRevealRevision = UUID()
     var isBusy: Bool { isFindingEntitlement || isPresentingPanel || isWritingReport || isReadingSavedReport || focusedValue != nil || savedReport != nil }
 
-    init(model: ComparisonModel) { self.model = model }
+    @ObservationIgnored private let writeExactKey: (String) -> Bool
+    var canCopyExactKey: Bool { !isBusy && model.browser.selectedRow != nil }
+
+    init(model: ComparisonModel, writeExactKey: ((String) -> Bool)? = nil) {
+        self.model = model
+        self.writeExactKey = writeExactKey ?? { key in
+            let clipboard = NSPasteboard.general
+            clipboard.clearContents()
+            return clipboard.setData(Data(key.utf8), forType: .string)
+        }
+    }
+
+    func copyExactKey() {
+        guard canCopyExactKey, let key = model.browser.selectedRow?.key else { return }
+        statusMessage = ""
+        if writeExactKey(key) {
+            statusMessage = "Complete exact key copied as raw UTF-8 text."
+        } else {
+            errorMessage = "The system clipboard did not accept the entitlement key."
+        }
+    }
 
     func beginFindEntitlement() {
         guard !isBusy, model.report != nil else { return }

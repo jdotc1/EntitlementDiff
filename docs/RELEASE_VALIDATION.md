@@ -150,3 +150,13 @@ The real development app built/launched. Native 100-row acceptance selected and
 scrolled to the final row, confirmed hidden-key reveal, and preserved selection
 and filters on a missing lookup. These receipts are reused for v0.1.6. No full
 suite was rerun; accessibility remains stopped.
+
+## Copy Exact Key — accepted feature evidence
+
+Three new focused methods passed, including raw UTF-8 fidelity on a unique named
+native pasteboard, current selection/filter/clear/busy guards, clipboard failure,
+unchanged complete report JSON and saved provenance. Unicode variants, whitespace,
+control characters, empty keys and keys beyond preview limits were covered. The
+real app built/launched; native button/menu copy pasted correct unquoted keys into
+Find, including after selection changed. These receipts are reused for v0.1.7.
+No full suite was rerun; accessibility remains stopped.

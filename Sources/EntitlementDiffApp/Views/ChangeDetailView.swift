@@ -4,6 +4,7 @@ import EntitlementDiffCore
 struct ChangeDetailView: View {
     let change: EntitlementChange?
     let copy: (EntitlementChange) -> Void
+    let copyKey: () -> Void
     let inspect: (EntitlementChange, InspectorRow) -> Void
     let busy: Bool
     @State private var browsingBranch = false
@@ -19,6 +20,7 @@ struct ChangeDetailView: View {
                     Text(EntitlementValue.string(change.key).preview(maxCharacters: 512))
                         .font(.system(.headline, design: .monospaced)).lineLimit(2).textSelection(.enabled)
                     Spacer()
+                    Button("Copy Exact Key", action: copyKey).disabled(busy)
                     Button("Copy Selected JSON") { copy(change) }
                     Button("Browse Branches") { browsingBranch = true }.disabled(busy || browsingBranch)
                     Button("Collapse") { browsingBranch = false; expanded = []; query = ""; page = 0 }
