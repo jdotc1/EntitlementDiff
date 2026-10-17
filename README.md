@@ -203,11 +203,18 @@ Decoder budgets do not bound Apple's earlier parser allocations, and cancellatio
 cannot forcibly interrupt a synchronous operating-system call. This release is
 intended for developer-controlled builds, not bulk malware triage.
 
+## Incomplete comparisons
+
+The waiting view names missing, loading and failed inputs. Choose the missing
+side directly, retry failed inspection when its local source is retained, or open
+a saved report. Saved-baseline guidance explicitly asks for a Current app. A failed
+inspection never becomes an empty comparison. Included in v0.1.8.
+
 ## Downloads and development builds
 
-The published release is **v0.1.7 (build 8)**, including Reload/Retry and Input
+The published release is **v0.1.8 (build 9)**, including Reload/Retry and Input
 Identity. The arm64 app is Developer ID signed and Apple notarized. Download the
-app or sanitized source from https://github.com/jdotc1/EntitlementDiff/releases/tag/v0.1.7.
+app or sanitized source from https://github.com/jdotc1/EntitlementDiff/releases/tag/v0.1.8.
 Local development builds are ad-hoc signed and are separate from that published app.
 The current local Phase 1 export/source-packaging, comparison/browser computation,
 focused-value viewer/copy, branch-navigation and All Keys changes are not in v0.1.2.

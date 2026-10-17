@@ -160,3 +160,14 @@ control characters, empty keys and keys beyond preview limits were covered. The
 real app built/launched; native button/menu copy pasted correct unquoted keys into
 Find, including after selection changed. These receipts are reused for v0.1.7.
 No full suite was rerun; accessibility remains stopped.
+
+## Comparison guidance — accepted feature evidence
+
+Five new focused methods passed for empty, one-sided, saved-baseline, loading,
+failed-input and report-error presentation, including retained-source Retry policy.
+The real development app built and launched. Native empty/saved-baseline/failure
+layouts, contextual saved-report and app pickers, completed comparison, missing
+Previous guidance and failed-input Retry were accepted. Loading and both-failed
+states have focused model coverage, not separate native visual acceptance. These
+receipts are reused for v0.1.8. Reader, generations, typed values, report encoding
+and browser behavior are unchanged. No full suite; accessibility remains stopped.

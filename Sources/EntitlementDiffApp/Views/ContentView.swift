@@ -147,18 +147,31 @@ struct ContentView: View {
     }
 
     private var waitingState: some View {
-        VStack(spacing: 12) {
+        let guidance = ComparisonGuidance(
+            previous: model.previous, current: model.current,
+            retryableSides: Set(ComparisonSide.allCases.filter { model.canReload($0) }),
+            reportError: model.reportError)
+        return VStack(spacing: 12) {
             Image(systemName: model.isLoading ? "doc.text.magnifyingglass" : "square.split.2x1")
                 .font(.system(size: 32)).foregroundStyle(.secondary)
-            Text(model.isLoading ? "Reading selected application metadata…" : "Choose two app builds to begin")
+            Text(guidance.title)
                 .font(.title3.weight(.medium))
-            Text(model.reportError ?? "Previous → Current. Unsigned or unreadable inputs do not become empty comparisons.")
+            Text(guidance.message)
                 .foregroundStyle(.secondary).multilineTextAlignment(.center)
-            if !model.isLoading {
-                Button("Load Synthetic Example") { actions.loadExample() }.disabled(actions.isBusy)
+            VStack(spacing: 8) {
+                ForEach(guidance.actions, id: \.self) { action in
+                    Button(action.label) {
+                        switch action {
+                        case .choose(let side): actions.choose(side)
+                        case .retry(let side): actions.reload(side)
+                        case .openSavedReport: actions.openSavedReport()
+                        case .cancel: actions.clear()
+                        }
+                    }.disabled(actions.isBusy)
+                }
             }
-            if model.isLoading {
-                Button("Cancel and Clear") { actions.clear() }.disabled(actions.isBusy)
+            if model.previous.isEmpty && model.current.isEmpty {
+                Button("Load Synthetic Example") { actions.loadExample() }.disabled(actions.isBusy)
             }
         }
         .padding(30).frame(maxWidth: .infinity, maxHeight: .infinity)
