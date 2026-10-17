@@ -184,6 +184,15 @@ existing paging buttons synchronize the field. Each side navigates independently
 and reopening starts at page1. Rendering bounds and complete leaf copying remain
 unchanged. Included in v0.1.15 (build16). See [Page navigation](docs/LEAF_PAGE_JUMP.md).
 
+## Copy a complete branch
+
+Browse Branches offers Copy Previous Branch JSON and Copy Current Branch JSON for
+the current array or dictionary, including children outside the displayed page.
+Empty containers are valid; absent/scalar sides are disabled. The clipboard holds
+a complete tagged value fragment, not a saved comparison report. Encoding runs
+off-main with revision/selection guards. Included in v0.1.16 (build17).
+See [Branch copying](docs/COPY_BRANCH_JSON.md).
+
 ## Build from source
 
 Requires macOS 14+, a Swift 6 toolchain, and macOS command-line developer tools.

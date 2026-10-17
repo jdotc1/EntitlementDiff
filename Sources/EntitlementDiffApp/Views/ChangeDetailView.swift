@@ -8,6 +8,7 @@ struct ChangeDetailView: View {
     let copy: (EntitlementChange) -> Void
     let copyKey: () -> Void
     let inspect: (EntitlementChange, InspectorRow) -> Void
+    let copyBranch: (ComparisonSide, InspectorRow, String, UUID) -> Void
     let busy: Bool
     @State private var browsingBranch = false
     @State private var session: InspectorProjectionSession?
@@ -22,10 +23,11 @@ struct ChangeDetailView: View {
                     Button("Copy Exact Key", action: copyKey).disabled(busy)
                     Button("Copy Selected JSON") { copy(change) }
                     Button("Browse Branches") { browsingBranch = true }.disabled(busy || browsingBranch)
-                    Button("Collapse") { browsingBranch = false; session?.collapse() }
+                    Button("Collapse") { browsingBranch = false; session?.collapse() }.disabled(busy)
                 }
                 if browsingBranch {
                     InspectorBranchView(change: change, inspect: inspect,
+                                        copyBranch: { side, row in copyBranch(side, row, change.id, comparisonRevision) },
                                         close: { browsingBranch = false }, busy: busy)
                 } else if let session,
                           session.comparisonRevision == comparisonRevision,

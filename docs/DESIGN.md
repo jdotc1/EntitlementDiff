@@ -235,3 +235,9 @@ Focused leaf panes support independent explicit one-based page jumps using the
 existing document index. Invalid input preserves the page; editing clears range
 feedback. Existing navigation synchronizes the field, and new presentations reset
 all state. Rendering limits and complete copying are unchanged. See LEAF_PAGE_JUMP.md.
+
+Browse Branches can copy each complete current container side as tagged value JSON.
+Encoding runs off-main from immutable captured values, with revision/selection
+guards and busy navigation/selection blocking. Empty containers remain valid;
+absent/scalar sides are disabled. This is a value fragment, not a schema-1 saved
+report. Rendering/full report contracts are unchanged. See COPY_BRANCH_JSON.md.

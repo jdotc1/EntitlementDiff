@@ -135,6 +135,7 @@ struct ContentView: View {
             VSplitView {
                 ChangeTable(rows: visibleRows, selection: $model.browser.selection, sortOrder: $model.browser.sortOrder,
                             revealID: actions.findRevealID, revealRevision: actions.findRevealRevision)
+                    .disabled(actions.isCopyingBranch)
                     .overlay {
                         if let guidance = browser.recoveryGuidance {
                             VStack(spacing: 8) {
@@ -152,7 +153,9 @@ struct ContentView: View {
                     }
                     .frame(minHeight: 180, idealHeight: 260)
                 ChangeDetailView(change: browser.selectedRow, comparisonRevision: model.reportRevision, copy: actions.copySelected, copyKey: actions.copyExactKey,
-                                 inspect: actions.inspectValue, busy: actions.isBusy)
+                                 inspect: actions.inspectValue, copyBranch: { side, row, id, revision in
+                                     actions.copyBranch(side, row: row, entitlementID: id, comparisonRevision: revision)
+                                 }, busy: actions.isBusy)
                     .id(model.reportRevision).id(browser.selectedRow?.id)
                     .frame(minHeight: 155, idealHeight: 205)
             }

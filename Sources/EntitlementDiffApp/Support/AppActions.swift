@@ -12,6 +12,7 @@ final class AppActions {
     @ObservationIgnored private let model: ComparisonModel
     private(set) var isPresentingPanel = false
     private(set) var isWritingReport = false
+    private(set) var isCopyingBranch = false
     var errorMessage: String?
     private(set) var statusMessage = ""
     var focusedValue: FocusedValueSelection?
@@ -249,6 +250,37 @@ final class AppActions {
                 statusMessage = "Complete \(side.label.lowercased()) leaf JSON copied. It includes the value and its type."
             } catch {
                 statusMessage = "Could not copy leaf JSON: \(error.localizedDescription)"
+            }
+        }
+    }
+
+    /// Validate view ownership and capture the complete chosen container before suspension.
+    @discardableResult
+    func copyBranch(_ side: ComparisonSide, row: InspectorRow, entitlementID: String,
+                    comparisonRevision: UUID, to clipboard: NSPasteboard = .general) -> Task<Void, Never>? {
+        guard !isBusy, comparisonRevision == model.reportRevision,
+              model.browser.selectedRow?.id == entitlementID,
+              let branch = BranchJSONValue(side == .previous ? row.previous : row.current) else { return nil }
+        isWritingReport = true
+        isCopyingBranch = true
+        statusMessage = "Preparing complete \(side.label.lowercased()) branch JSON…"
+        return Task {
+            defer { isWritingReport = false; isCopyingBranch = false }
+            do {
+                let data = try await Task.detached(priority: .userInitiated) { try branch.jsonData() }.value
+                guard comparisonRevision == model.reportRevision,
+                      model.browser.selectedRow?.id == entitlementID else {
+                    statusMessage = "Comparison or selection changed; branch JSON was not copied."
+                    return
+                }
+                clipboard.clearContents()
+                guard clipboard.setString(String(decoding: data, as: UTF8.self), forType: .string) else {
+                    statusMessage = "Could not copy branch JSON: the system clipboard did not accept it."
+                    return
+                }
+                statusMessage = "Complete \(side.label.lowercased()) branch JSON copied. It includes all children and their types."
+            } catch {
+                statusMessage = "Could not copy branch JSON: \(error.localizedDescription)"
             }
         }
     }

@@ -254,3 +254,14 @@ middle text, invalid range feedback preserving both pages, Return recovery and
 fresh page1 on reopening. Screenshot was visually inspected. These receipts are
 reused for v0.1.15. Existing slicing/type/copy, parser, reports and cancellation
 checks are reused. No full suite, performance sweep or accessibility work.
+
+## Copy Branch JSON — accepted feature evidence
+
+Three focused methods passed for complete branch copying beyond the first page,
+UTF-8 keys, integer precision, array ordering, Previous/Current direction, empty
+versus absent/scalar, busy/revision/selection guards, stale write suppression and
+encoding-failure clipboard preservation. Real development app built/launched.
+Native copies at children51–100 retained all118 Previous/119 Current entries,
+exact types and side-only data while excluding the parent sibling. Screenshot
+inspected. These receipts are reused for v0.1.16. Existing encoder/report, parser,
+reader-generation and navigation checks reused; no full suite or accessibility.

@@ -1,9 +1,11 @@
 import SwiftUI
 import EntitlementDiffCore
+import EntitlementDiffModel
 
 struct InspectorBranchView: View {
     let change: EntitlementChange
     let inspect: (EntitlementChange, InspectorRow) -> Void
+    let copyBranch: (ComparisonSide, InspectorRow) -> Void
     let close: () -> Void
     let busy: Bool
     @State private var navigation: InspectorBranchNavigator
@@ -13,7 +15,9 @@ struct InspectorBranchView: View {
     @State private var childMissing = false
 
     init(change: EntitlementChange, inspect: @escaping (EntitlementChange, InspectorRow) -> Void,
+         copyBranch: @escaping (ComparisonSide, InspectorRow) -> Void,
          close: @escaping () -> Void, busy: Bool) {
+        self.copyBranch = copyBranch
         self.change = change; self.inspect = inspect; self.close = close; self.busy = busy
         _navigation = State(initialValue: InspectorBranchNavigator(previous: change.previous, current: change.current))
     }
@@ -32,6 +36,14 @@ struct InspectorBranchView: View {
                 }
                 Text("Path (tail preview): \(navigation.root.displayPath)")
                     .font(.caption).lineLimit(2).textSelection(.enabled)
+                HStack {
+                    Button("Copy Previous Branch JSON") { copyBranch(.previous, navigation.root) }
+                        .disabled(BranchJSONValue(navigation.root.previous) == nil)
+                    Button("Copy Current Branch JSON") { copyBranch(.current, navigation.root) }
+                        .disabled(BranchJSONValue(navigation.root.current) == nil)
+                }
+                Text("Copies the complete chosen container, including children outside this page. Tagged value JSON, not a saved comparison report.")
+                    .font(.caption).foregroundStyle(.secondary)
                 if let count = navigation.arrayCount {
                     HStack {
                         TextField("Array index", text: $arrayIndex).textFieldStyle(.roundedBorder).frame(width: 125)
