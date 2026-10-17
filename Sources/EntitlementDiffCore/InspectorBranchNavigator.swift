@@ -13,6 +13,7 @@ public struct InspectorBranchNavigator: Sendable {
     private var frame: Frame
     private var ancestors: [Frame] = []
     public private(set) var rows: [InspectorRow] = []
+    public private(set) var exactChild: InspectorRow?
     private var next = Cursor()
     public private(set) var hasNext = false
     public var root: InspectorRow { frame.root }
@@ -27,6 +28,44 @@ public struct InspectorBranchNavigator: Sendable {
         case (.none, .array(let b)): b.count
         default: nil
         }
+    }
+
+    private var dictionaryEntries: ([EntitlementEntry], [EntitlementEntry])? {
+        switch (root.previous, root.current) {
+        case (.dictionary(let a), .dictionary(let b)): (a.entries, b.entries)
+        case (.dictionary(let a), .none): (a.entries, [])
+        case (.none, .dictionary(let b)): ([], b.entries)
+        default: nil
+        }
+    }
+    public var canFindChildKey: Bool { dictionaryEntries != nil }
+
+    public mutating func clearExactChild() { exactChild = nil }
+
+    /// Two lower-bound searches over immediate children; no normalization or subtree comparison.
+    @discardableResult
+    public mutating func findExactChild(_ key: String) -> Bool {
+        exactChild = nil
+        guard let (a, b) = dictionaryEntries else { return false }
+        func lowerBound(_ entries: [EntitlementEntry]) -> Int {
+            var low = 0, high = entries.count
+            while low < high {
+                let mid = low + (high - low) / 2
+                if entries[mid].key.utf8.lexicographicallyPrecedes(key.utf8) { low = mid + 1 }
+                else { high = mid }
+            }
+            return low
+        }
+        let i = lowerBound(a), j = lowerBound(b)
+        let old = i < a.count && a[i].key.utf8.elementsEqual(key.utf8) ? a[i].value : nil
+        let new = j < b.count && b[j].key.utf8.elementsEqual(key.utf8) ? b[j].value : nil
+        guard old != nil || new != nil else { return false }
+        let label = EntitlementValue.string(key).preview(maxCharacters: 256)
+        exactChild = .init(id: root.id + "/k\(i):\(j)", depth: 0, label: label,
+                          displayPath: String((root.displayPath + " / " + label).unicodeScalars.suffix(512)),
+                          previous: old, current: new,
+                          expandable: Self.isContainer(old) || Self.isContainer(new))
+        return true
     }
 
     public init(previous: EntitlementValue?, current: EntitlementValue?) {
@@ -68,7 +107,8 @@ public struct InspectorBranchNavigator: Sendable {
 
     @discardableResult
     public mutating func enter(_ id: String) -> Bool {
-        guard let row = rows.first(where: { $0.id == id }), row.hasContainerValue else { return false }
+        guard let row = rows.first(where: { $0.id == id }) ?? (exactChild?.id == id ? exactChild : nil),
+              row.hasContainerValue else { return false }
         ancestors.append(frame)
         frame = Frame(root: row)
         refresh()
@@ -86,6 +126,7 @@ public struct InspectorBranchNavigator: Sendable {
     }
 
     private mutating func refresh() {
+        exactChild = nil
         let parent = root
         var cursor = frame.cursor
         var result: [InspectorRow] = []

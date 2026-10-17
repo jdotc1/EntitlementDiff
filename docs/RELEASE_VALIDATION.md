@@ -218,3 +218,17 @@ Native 100-row acceptance skipped 98 unchanged rows and revealed the last change
 menu navigation followed reversed sort; a one-change search disabled both endpoints
 after selection. These receipts are reused for v0.1.12. No full suite or timing
 sweep. Reader/parser/generation/inspector/report checks reused; accessibility stopped.
+
+## Find Exact Child Key — accepted feature evidence
+
+Four distinct focused methods passed for immediate dictionary binary lookup beyond
+2,000 children, byte-distinct Unicode keys, empty/whitespace keys, exact types and
+large integers, page/open/back continuity, missing keys and invalidation. A failing
+assertion preceded the input equality repair. A narrow NSTextField bridge delivers
+raw edits and clears old matches; its edit callback passed a focused native test.
+Real development app built/launched. Native lookup reached a later container and
+UInt64.max leaf; Up restored the parent page. Replacing composed with decomposed
+UTF-8 cleared the old match and found the correct side. Missing lookup preserved
+page; Swap reset captured branch state. Branch content scrolls together in short
+panes. These accepted receipts are reused for v0.1.13. No full suite, performance
+sweep or accessibility work. Parser, reports, generations and export gates reused.

@@ -217,3 +217,11 @@ invalidates pending reads and live URLs, selects the saved architecture and crea
 a new report/navigation revision. Saved labels and report notices remain explicit;
 Reload/Reveal require a live URL. Parser and schema-1 encoding remain unchanged.
 See SAVED_COMPARISON.md.
+
+## Exact immediate child lookup
+
+Dictionary branches support exact raw UTF-8 key lookup with two binary searches,
+one bounded result and existing typed leaf/container actions. Lookup leaves paging
+unchanged; Up restores the parent page. Edits/navigation/revision changes clear
+results. A narrow native text field preserves canonically equivalent byte-distinct
+edits. Branch controls and children scroll together. See EXACT_CHILD_KEY.md.

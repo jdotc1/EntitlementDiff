@@ -15,12 +15,12 @@ DOCS = {
     "docs/SOURCES.md", "docs/PUBLISHING.md", "docs/RELEASE_VALIDATION.md",
     "docs/MACOS_ACCEPTANCE.md", "docs/RELOAD_INPUTS.md",
     "docs/SHARED_COMPARISON.md", "docs/FOCUSED_VALUE.md", "docs/BRANCH_NAVIGATION.md",
-    "docs/COMPARISON_BROWSER.md", "docs/SAVED_BASELINE.md", "docs/SAVED_COMPARISON.md", "docs/EXACT_FIND.md", "docs/COPY_EXACT_KEY.md", "docs/COMPARISON_GUIDANCE.md", "docs/INSPECTOR_PROJECTION_REUSE.md", "docs/FILTER_RECOVERY.md", "docs/FINDER_REPORTS.md", "docs/CHANGE_NAVIGATION.md",
+    "docs/COMPARISON_BROWSER.md", "docs/SAVED_BASELINE.md", "docs/SAVED_COMPARISON.md", "docs/EXACT_FIND.md", "docs/COPY_EXACT_KEY.md", "docs/COMPARISON_GUIDANCE.md", "docs/INSPECTOR_PROJECTION_REUSE.md", "docs/FILTER_RECOVERY.md", "docs/FINDER_REPORTS.md", "docs/CHANGE_NAVIGATION.md", "docs/EXACT_CHILD_KEY.md",
 }
 ROOT_FILES = {"Package.swift", "LICENSE", "README.md", ".gitignore", ".gitattributes"}
 REQUIRED = ROOT_FILES | {"docs/PUBLISHING.md", "docs/RELEASE_VALIDATION.md", "docs/MACOS_ACCEPTANCE.md", "docs/RELOAD_INPUTS.md",
     "docs/SHARED_COMPARISON.md", "docs/FOCUSED_VALUE.md", "docs/BRANCH_NAVIGATION.md",
-    "docs/COMPARISON_BROWSER.md", "docs/SAVED_BASELINE.md", "docs/SAVED_COMPARISON.md", "docs/EXACT_FIND.md", "docs/COPY_EXACT_KEY.md", "docs/COMPARISON_GUIDANCE.md", "docs/INSPECTOR_PROJECTION_REUSE.md", "docs/FILTER_RECOVERY.md", "docs/FINDER_REPORTS.md", "docs/CHANGE_NAVIGATION.md", "Resources/Info.plist", "script/package_source.py"}
+    "docs/COMPARISON_BROWSER.md", "docs/SAVED_BASELINE.md", "docs/SAVED_COMPARISON.md", "docs/EXACT_FIND.md", "docs/COPY_EXACT_KEY.md", "docs/COMPARISON_GUIDANCE.md", "docs/INSPECTOR_PROJECTION_REUSE.md", "docs/FILTER_RECOVERY.md", "docs/FINDER_REPORTS.md", "docs/CHANGE_NAVIGATION.md", "docs/EXACT_CHILD_KEY.md", "Resources/Info.plist", "script/package_source.py"}
 PATTERNS = {
     "private key": rb"-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----",
     "GitHub token": rb"gh[pousr]_[A-Za-z0-9]{30,}",

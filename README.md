@@ -160,6 +160,15 @@ declined rather than queued. Finder opening supports one local report, including
 cold launch, and uses the same bounded review path as the picker. JSON is
 registered as an alternate viewer without changing the system default app.
 
+## Find an exact child key
+
+Browse Branches offers Find Child Key in dictionary branches. Enter the raw key
+without JSON quotes; matching preserves exact UTF-8 bytes, case and whitespace.
+A separate typed match leaves the current child page unchanged and supports Open
+Branch or View Value. Up restores the parent page. Editing or changing the branch
+clears the match. Lookup searches immediate keys without scanning descendants.
+Included in v0.1.13 (build 14). See [Exact child lookup](docs/EXACT_CHILD_KEY.md).
+
 ## Build from source
 
 Requires macOS 14+, a Swift 6 toolchain, and macOS command-line developer tools.

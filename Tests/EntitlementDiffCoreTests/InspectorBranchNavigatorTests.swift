@@ -3,6 +3,56 @@ import XCTest
 @testable import EntitlementDiffCore
 
 final class InspectorBranchNavigatorTests: XCTestCase {
+    func testExactChildBeyondPrefixPreservesPageTypesAndReturn() throws {
+        let nested = EntitlementValue.dictionary(.init(["leaf": .unsignedInteger(UInt64.max)]))
+        let entries = (0..<2_100).map { EntitlementEntry(key: String(format: "k%04d", $0), value: .integer(Int64($0))) }
+        let old = try EntitlementDictionary(entries: entries + [.init(key: "target", value: nested)])
+        let new = try EntitlementDictionary(entries: entries + [.init(key: "target", value: .boolean(true))])
+        var nav = InspectorBranchNavigator(previous: .dictionary(old), current: .dictionary(new))
+        nav.nextPage()
+        let ids = nav.rows.map(\.id)
+        XCTAssertTrue(nav.findExactChild("target"))
+        let match = try XCTUnwrap(nav.exactChild)
+        XCTAssertEqual(match.previous, nested)
+        XCTAssertEqual(match.current, .boolean(true))
+        XCTAssertEqual(nav.offset, 50)
+        XCTAssertEqual(nav.rows.map(\.id), ids)
+        XCTAssertTrue(nav.enter(match.id))
+        XCTAssertNil(nav.exactChild)
+        nav.back()
+        XCTAssertEqual(nav.offset, 50)
+        XCTAssertEqual(nav.rows.map(\.id), ids)
+        XCTAssertNil(nav.exactChild)
+        XCTAssertFalse(nav.findExactChild("missing"))
+        XCTAssertEqual(nav.rows.map(\.id), ids)
+    }
+
+    func testExactChildUTF8IdentityAndLookupInvalidation() throws {
+        let old = try EntitlementDictionary(entries: [.init(key: "é", value: .integer(1)), .init(key: "", value: .data(Data()))])
+        let new = try EntitlementDictionary(entries: [.init(key: "e\u{301}", value: .boolean(true)), .init(key: " spaced ", value: .string("x"))])
+        var nav = InspectorBranchNavigator(previous: .dictionary(old), current: .dictionary(new))
+        XCTAssertTrue(nav.findExactChild("é"))
+        let oldID = try XCTUnwrap(nav.exactChild).id
+        XCTAssertEqual(nav.exactChild?.previous, .integer(1))
+        XCTAssertNil(nav.exactChild?.current)
+        XCTAssertTrue(nav.findExactChild("e\u{301}"))
+        XCTAssertNotEqual(nav.exactChild?.id, oldID)
+        XCTAssertNil(nav.exactChild?.previous)
+        XCTAssertEqual(nav.exactChild?.current, .boolean(true))
+        XCTAssertTrue(nav.findExactChild(" spaced "))
+        XCTAssertFalse(nav.findExactChild("spaced"))
+        XCTAssertNil(nav.exactChild)
+        XCTAssertTrue(nav.findExactChild(""))
+        nav.clearExactChild()
+        XCTAssertNil(nav.exactChild)
+        XCTAssertTrue(nav.findExactChild("é"))
+        nav.firstPage()
+        XCTAssertNil(nav.exactChild)
+        let replacement = InspectorBranchNavigator(previous: nil, current: .array([]))
+        XCTAssertFalse(replacement.canFindChildKey)
+        XCTAssertNil(replacement.exactChild)
+    }
+
     func testExplicitArrayJumpReachesBeyondSearchPrefixAndKeepsExactLeaf() throws {
         let values = (0..<2_100).map { EntitlementValue.integer(Int64($0)) }
         var navigation = InspectorBranchNavigator(previous: .array(values), current: .array(values + [.unsignedInteger(UInt64.max)]))
