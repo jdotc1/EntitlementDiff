@@ -38,6 +38,11 @@ struct EntitlementDiffApp: App {
                     .disabled(actions.isBusy)
             }
             CommandMenu("Comparison") {
+                Button("Previous Change") { actions.moveToChange(.previous) }
+                    .disabled(!actions.canMoveToChange(.previous))
+                Button("Next Change") { actions.moveToChange(.next) }
+                    .disabled(!actions.canMoveToChange(.next))
+                Divider()
                 Button("Copy Exact Key") { actions.copyExactKey() }
                     .disabled(!actions.canCopyExactKey)
                 Button("Find Entitlement…") { actions.beginFindEntitlement() }

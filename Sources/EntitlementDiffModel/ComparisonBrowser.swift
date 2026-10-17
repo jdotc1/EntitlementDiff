@@ -46,6 +46,43 @@ public struct BrowserSort: SortComparator, Sendable {
 /// Session presentation only; never changes comparison or report contents.
 /// The UI reads stored projections instead of filtering/sorting during body evaluation.
 public struct ComparisonBrowser {
+    public enum ChangeDirection: Sendable { case previous, next }
+
+    /// Resolve only against the current stored visible order; hidden keys never participate.
+    public func changeTarget(_ direction: ChangeDirection) -> String? {
+        guard !visibleChangeIndices.isEmpty else { return nil }
+        guard let selection, let index = visibleIndexByID[selection] else {
+            let target = direction == .next ? visibleChangeIndices[0] : visibleChangeIndices[visibleChangeIndices.count - 1]
+            return visibleRows[target].id
+        }
+        // Lower bound of the first change strictly after (next) or at (previous)
+        // the selected visible index. Previous then chooses the preceding entry.
+        var low = 0, high = visibleChangeIndices.count
+        while low < high {
+            let middle = low + (high - low) / 2
+            if visibleChangeIndices[middle] < index || (direction == .next && visibleChangeIndices[middle] == index) {
+                low = middle + 1
+            } else { high = middle }
+        }
+        let ordinal = direction == .next ? low : low - 1
+        guard visibleChangeIndices.indices.contains(ordinal) else { return nil }
+        return visibleRows[visibleChangeIndices[ordinal]].id
+    }
+
+    @discardableResult
+    public mutating func moveToChange(_ direction: ChangeDirection) -> String? {
+        guard let target = changeTarget(direction) else { return nil }
+        selection = target
+        return target
+    }
+
+    public var changePositionText: String {
+        if let selection, let ordinal = changeOrdinalByID[selection] {
+            return "Change \(ordinal) of \(visibleChangeIndices.count) in this view"
+        }
+        return "Visible changes: \(visibleChangeIndices.count)"
+    }
+
     public enum ExactFindResult: Equatable, Sendable {
         case found(String), hidden, missing
     }
@@ -73,6 +110,9 @@ public struct ComparisonBrowser {
     private var sourceRows: [EntitlementChange] = []
     private var countsByKind: [ChangeKind: Int] = [:]
     private var visibleRowsByID: [String: EntitlementChange] = [:]
+    private var visibleIndexByID: [String: Int] = [:]
+    private var visibleChangeIndices: [Int] = []
+    private var changeOrdinalByID: [String: Int] = [:]
     public private(set) var visibleRows: [EntitlementChange] = []
 
     public var filter: BrowserFilter {
@@ -170,7 +210,15 @@ public struct ComparisonBrowser {
         guard hasStoredSource else { return }
         visibleRows = visibleRows(in: sourceRows)
         visibleRowsByID = [:]
-        for row in visibleRows { visibleRowsByID[row.id] = row }
+        visibleIndexByID = [:]; visibleChangeIndices = []; changeOrdinalByID = [:]
+        for (index, row) in visibleRows.enumerated() {
+            visibleRowsByID[row.id] = row
+            visibleIndexByID[row.id] = index
+            if row.kind != .unchanged {
+                visibleChangeIndices.append(index)
+                changeOrdinalByID[row.id] = visibleChangeIndices.count
+            }
+        }
         if let selection, visibleRowsByID[selection] == nil { self.selection = nil }
     }
 }

@@ -124,6 +124,14 @@ struct ContentView: View {
                 Text("\(visibleRows.count) shown · \(model.report?.changes.count ?? 0) changes · \(model.report?.unchangedCount ?? 0) unchanged")
                     .font(.caption).monospacedDigit().foregroundStyle(.secondary)
             }.padding(.horizontal, 16).padding(.vertical, 10)
+            HStack(spacing: 12) {
+                Button("Previous Change") { actions.moveToChange(.previous) }
+                    .disabled(!actions.canMoveToChange(.previous))
+                Button("Next Change") { actions.moveToChange(.next) }
+                    .disabled(!actions.canMoveToChange(.next))
+                Text(browser.changePositionText).font(.caption).monospacedDigit().foregroundStyle(.secondary)
+                Spacer()
+            }.padding(.horizontal, 16).padding(.bottom, 8)
             VSplitView {
                 ChangeTable(rows: visibleRows, selection: $model.browser.selection, sortOrder: $model.browser.sortOrder,
                             revealID: actions.findRevealID, revealRevision: actions.findRevealRevision)

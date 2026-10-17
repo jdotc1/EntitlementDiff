@@ -239,11 +239,18 @@ Cancel and invalid input preserve the current comparison. Finish an active panel
 export or review before opening another report. JSON is registered as an alternate
 viewer; this does not change the default application. Included in v0.1.11.
 
+## Review changes sequentially
+
+Previous Change and Next Change follow the visible sort order, respect filters,
+skip unchanged rows and select/reveal current typed details. The controls and
+Comparison-menu commands stop at endpoints; the position indicator describes
+visible changes. Counts and complete reports remain unchanged. Included in v0.1.12.
+
 ## Downloads and development builds
 
-The published release is **v0.1.11 (build 12)**, including Reload/Retry and Input
+The published release is **v0.1.12 (build 13)**, including Reload/Retry and Input
 Identity. The arm64 app is Developer ID signed and Apple notarized. Download the
-app or sanitized source from https://github.com/jdotc1/EntitlementDiff/releases/tag/v0.1.11.
+app or sanitized source from https://github.com/jdotc1/EntitlementDiff/releases/tag/v0.1.12.
 Local development builds are ad-hoc signed and are separate from that published app.
 The current local Phase 1 export/source-packaging, comparison/browser computation,
 focused-value viewer/copy, branch-navigation and All Keys changes are not in v0.1.2.

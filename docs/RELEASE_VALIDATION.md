@@ -208,3 +208,13 @@ as the existing default. Cold post-review capture does not prove the intervening
 adoption action; native multiple gestures and closed-window reopening are untested.
 These receipts are reused for v0.1.11. Parser/type/generation/report checks reused;
 no full suite. Accessibility remains stopped.
+
+## Next/Previous Change Navigation — accepted feature evidence
+
+Four new focused methods passed for visible ordering, filters, unchanged skipping,
+endpoints, source replacement/clear, exact UTF-8/type identity, busy guards, reveal
+identity and unchanged complete report bytes/revision. The real app built/launched.
+Native 100-row acceptance skipped 98 unchanged rows and revealed the last change;
+menu navigation followed reversed sort; a one-change search disabled both endpoints
+after selection. These receipts are reused for v0.1.12. No full suite or timing
+sweep. Reader/parser/generation/inspector/report checks reused; accessibility stopped.

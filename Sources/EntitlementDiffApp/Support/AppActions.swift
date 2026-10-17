@@ -53,6 +53,18 @@ final class AppActions {
         }
     }
 
+    func canMoveToChange(_ direction: ComparisonBrowser.ChangeDirection) -> Bool {
+        !isBusy && model.report != nil && model.browser.changeTarget(direction) != nil
+    }
+
+    func moveToChange(_ direction: ComparisonBrowser.ChangeDirection) {
+        guard canMoveToChange(direction), let id = model.browser.moveToChange(direction) else { return }
+        // Share the existing table reveal mechanism used by exact Find.
+        findRevealID = id
+        findRevealRevision = UUID()
+        statusMessage = ""
+    }
+
     func beginFindEntitlement() {
         guard !isBusy, model.report != nil else { return }
         isFindingEntitlement = true
