@@ -223,11 +223,19 @@ including same-key replacement. Existing display limits, exact types and complet
 exports are preserved. No measured speedup or bound on full equality is claimed.
 Included in v0.1.9.
 
+## Contextual filter recovery
+
+Empty results distinguish zero-key snapshots, matching entitlement values, empty
+categories and search-hidden keys. Clear Search preserves category and sort;
+Show All Changes or Show All Keys changes only the necessary preferences. Combined
+restrictions are named explicitly. Recovery preserves counts and selection rules;
+complete schema-1 reports are independent of the view. Included in v0.1.10.
+
 ## Downloads and development builds
 
-The published release is **v0.1.9 (build 10)**, including Reload/Retry and Input
+The published release is **v0.1.10 (build 11)**, including Reload/Retry and Input
 Identity. The arm64 app is Developer ID signed and Apple notarized. Download the
-app or sanitized source from https://github.com/jdotc1/EntitlementDiff/releases/tag/v0.1.9.
+app or sanitized source from https://github.com/jdotc1/EntitlementDiff/releases/tag/v0.1.10.
 Local development builds are ad-hoc signed and are separate from that published app.
 The current local Phase 1 export/source-packaging, comparison/browser computation,
 focused-value viewer/copy, branch-navigation and All Keys changes are not in v0.1.2.

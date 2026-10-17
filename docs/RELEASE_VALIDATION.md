@@ -183,3 +183,15 @@ were accepted. These receipts are reused for v0.1.9. Branch listing retains lazy
 classification; native-read generations, types, reports and export boundaries are
 unchanged. Display bounds do not bound recursive equality time. No measured speedup
 is claimed. No full suite was rerun; accessibility remains stopped.
+
+## Contextual Filter Recovery — accepted feature evidence
+
+Five new focused methods passed for search/category/combined/no-change/zero-key
+recovery, nondefault sorting, counts, selection reconciliation, stale-action guards,
+UTF-8/type fidelity and byte-identical complete schema-1 report JSON. The real app
+built and launched. Native search recovery restored descending rows; Show All Keys
+revealed unchanged keys; combined restrictions recovered to available changes;
+zero-key saved snapshots retained provenance and offered no misleading action.
+Final count wording was refined and compiled without behavioral changes; accepted
+flows were reused. These receipts are reused for v0.1.10. Reader, parser, report
+encoding and export boundaries are unchanged. No full suite; accessibility stopped.
