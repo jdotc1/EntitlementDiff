@@ -35,7 +35,15 @@ Integer storage width/signedness is not treated as a semantic change when the
 mathematical value is equal. Real equality uses the underlying Double bit pattern;
 string equality uses UTF-8 bytes. The JSON real tag requires downstream consumers
 to preserve real-number semantics, including negative zero, rather than coercing
-the token into an integer. No JSON import/round-trip decoder is part of v0.1.
+the token into an integer.
+
+`SavedReport` provides bounded schema-1 import for saved baselines and complete
+saved comparisons. Imported snapshots retain the report's `origin` field, but
+are marked in session state as saved/unverified metadata; this is not a fresh
+native inspection. The session-only saved marker and app identity metadata are
+excluded from the schema-1 snapshot fields. Comparisons and notices are
+recomputed from the imported values. See [Saved baseline](SAVED_BASELINE.md) and
+[Saved comparison](SAVED_COMPARISON.md) for review behavior and import limits.
 
 Every change includes `key`, `kind` and the applicable `previous`/`current` typed
 values. For `added`, `previous` is **omitted**. For `removed`, `current` is omitted.

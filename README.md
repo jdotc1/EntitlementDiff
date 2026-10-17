@@ -4,150 +4,201 @@
 
 # EntitlementDiff
 
-A lightweight Swift library and native SwiftUI macOS app for comparing embedded
-app entitlements between builds.
+**See what changed in a macOS app's declared entitlements.**
 
-Choose a previous and current `.app`, select **arm64** or **x86_64**, and inspect
-added, removed, and changed declarations. Unknown keys remain visible; the tool
-does not assign risk scores or interpret an entitlement as proof of a vulnerability.
+EntitlementDiff is a native SwiftUI app and a set of Swift libraries for comparing
+embedded entitlements between two builds. Choose a Previous and Current `.app`,
+select **arm64** or **x86_64**, and review added, removed, changed, and unchanged
+keys with their exact typed values. The inspected apps are never launched.
 
-**Scope:** the requested architecture of the main executable only. No nested-code
-audit, signature verification, Gatekeeper assessment, notarization check, or
-claim about effective permissions.
+Use it to review signing-configuration changes, check your builds before a
+release, or share a comparison that a colleague can reopen without the original
+apps.
 
-## Build and run
+**[Download the app](https://github.com/jdotc1/EntitlementDiff/releases/latest)** ·
+**[Build from source](#build-from-source)** ·
+**[See an example report](Examples/example-report.txt)** ·
+**[Report an issue](https://github.com/jdotc1/EntitlementDiff/issues)**
 
-Requires macOS 14+ and a Swift 6 toolchain with macOS command-line developer tools.
-No external package dependencies, project generators, credentials, or administrator
-access are required for the development build.
+The published app is for Apple silicon with a macOS 14+ deployment target. Release
+notes identify the Developer ID signed, hardened, notarized app and source
+archives. Intel-host and minimum-OS runtime acceptance remain outside the recorded
+checks; see [validation and limits](#validation-and-limits).
+
+> **What the comparison means:** declarations from the requested architecture of
+> the **main executable only**. EntitlementDiff does not establish effective
+> permissions, verify signatures, assess Gatekeeper/notarization, audit nested
+> code, or assign a security verdict. Unknown entitlement keys remain visible.
+
+## Try a comparison
+
+1. Open EntitlementDiff and choose **Load Synthetic Example** to explore the
+   interface without reading an installed app. The example has five changes and
+   one unchanged key and is labelled as synthetic in the interface and exports.
+2. For your own builds, choose the requested architecture, then select Previous
+   with **Command-1** and Current with **Command-2**. You can also drop one local
+   `.app` onto either pane.
+3. Select a key to inspect its Previous and Current values. Use **All Changes**,
+   search, or the **Show** picker to focus the table; **All Keys** includes
+   unchanged entries. **Previous Change** and **Next Change** step through the
+   visible changes and reveal their typed details.
+4. Use **Copy Report** for a readable change report or **Export JSON** for both
+   complete snapshots and every change. Review names, identifiers, and values
+   before sharing.
+
+Both apps must contain the selected architecture and readable signing metadata;
+ad-hoc signatures are accepted. Unsigned, unsupported, and unreadable inputs show
+errors. Multiple dropped items, web URLs, and non-app files are rejected. The
+synthetic example is a demonstration, not a recommended entitlement configuration.
+
+## Review the details
+
+### Find and organize keys
+
+Search filters raw key text. The Show picker isolates Added, Removed, Changed,
+or Unchanged entries. Category counts describe the full comparison; the shown
+count reflects the category and search together. Click **Change** or
+**Entitlement** to sort and click again to reverse. Key sorting preserves UTF-8
+byte identity.
+
+**Previous Change** and **Next Change**, also in the Comparison menu, follow the
+current visible sort order and respect search/category filters. They skip
+unchanged rows in All Keys; from an unchanged selection they move to the nearest
+change in the requested direction. With no visible selection, Next starts at the
+first change and Previous at the last. Navigation stops at endpoints without
+wrapping, and unavailable directions are disabled. The position indicator
+describes changes in the current view; full counts and complete reports are
+unchanged. This navigation is included in
+[v0.1.12 (build 13)](https://github.com/jdotc1/EntitlementDiff/releases/tag/v0.1.12).
+
+**Find Entitlement…** (**Command-F**) looks up a complete key by UTF-8 bytes.
+A hidden match offers **Show in All Keys**; a missing match preserves the current
+filters and selection. **Copy Exact Key**, beside the selected detail or in the
+Comparison menu, copies the complete raw key without display escaping or preview
+limits. It is unavailable when no row is selected.
+
+**Reset View** clears search and restores All Changes with ascending key order.
+Selection survives sorting and filters that keep its row, and clears when the row
+leaves the view. Empty-result guidance distinguishes zero-key snapshots, matching
+values, empty categories, and search-hidden keys. **Clear Search**, **Show All
+Changes**, and **Show All Keys** change only the preferences named by the action.
+
+### Inspect nested and long values
+
+The selected-entitlement inspector expands dictionaries and positional arrays,
+showing typed values and change labels for each path. Search reaches through
+collapsed descendants; **Changes only**, **Previous Page**, and **Reveal More**
+help navigate the inspected portion. **Nested Example** loads a separate
+synthetic demonstration.
+
+| View | Behavior and limits |
+| --- | --- |
+| Nested search | 50 rows per page, 2,000 inspected nodes, 12 levels, and 256 Unicode scalars per preview. Scan/depth limits are explicit; paging does not bypass them. |
+| **View Value…** | A focused Previous/Current sheet for a scalar leaf. Strings page in 512 Unicode scalars; data pages in 768 bytes displayed as base64. First/Previous/Next/Last controls show page counts. |
+| **Browse Branches** | Up to 50 immediate children per step, including values beyond the search traversal limit. Open Branch descends; Up restores the parent page; First/Previous/Next Children pages siblings. Arrays also offer a zero-based Go to Index. |
+
+**Copy Selected JSON** retains the complete selected entitlement as tagged values,
+independent of search, paging, or expansion. Each side's **Copy Leaf JSON** copies
+its complete original typed scalar; absent or container sides cannot be copied
+as leaves. The focused sheet captures its values when opened and disables source
+actions until closed. Close the sheet to use whole-entitlement copying.
+
+Branch browsing preserves exact Previous/Current pairs without recursively
+searching or comparing descendants. **Back to Search** restores the bounded
+search view and its incomplete-search notice. Replacing inputs, swapping sides,
+or selecting another entitlement resets captured branch navigation. Inspector
+projections are reused across unrelated view updates and replaced when their
+comparison or selected entitlement changes; no measured speedup or bound on full
+recursive equality is claimed.
+
+### Refresh and identify inputs
+
+**Reload** rereads a selected app after rebuilding it at the same path. A failed
+input offers **Retry**. **Reload Both** in the toolbar or Comparison menu
+(**Shift-Command-R**) refreshes both live selections using the explicit
+architecture. Old results disappear immediately; failures keep the URL for retry.
+Reload is unavailable for synthetic or saved inputs and during reads or report
+operations.
+
+**Swap** reverses comparison direction. Changing architecture clears both inputs
+so that you choose each slice explicitly. Replacing or clearing an input
+invalidates the old report immediately, even if an earlier read finishes later.
+Missing, loading, and failed inputs are named in the waiting view, with direct
+choose/retry actions where available. Failed inspection never becomes an empty
+comparison.
+
+**Input Details** separates bundle and signing identifiers, shows version/build
+and the session-only selected location, and offers **Reveal in Finder**. Optional
+metadata is bounded and unverified. Report schema 1 excludes this identity
+metadata and selected locations.
+
+## Save, reopen, and share comparisons
+
+**Export JSON** writes schema-1 reports containing both full snapshots and all
+changes, regardless of table filters. **Copy Report** includes the complete
+change report. Reports omit source file URLs but include potentially sensitive
+app names, signing identifiers, and entitlement values. Export into a selected
+app bundle is rejected.
+
+Open **Saved Report…** (**Command-O**), or use **Finder → Open With →
+EntitlementDiff** on one local JSON report. Review the saved snapshots before
+choosing either action:
+
+| Action | Result |
+| --- | --- |
+| **Use as Previous** | Adopt one snapshot as Previous, select its saved architecture, and clear Current. Choose a Current app for a fresh inspection against that baseline. |
+| **Open Saved Comparison** | Open both saved snapshots immediately. Either side can later be replaced with a live app. |
+
+Saved snapshots are labelled **unverified metadata**, retain no original app
+location, and have no Reload/Reveal action. Results are recomputed from their
+values. Imports are bounded to 8 MiB, 96 JSON levels, 100,000 JSON nodes, and
+1 MiB per decoded string.
+
+Cancel and invalid input preserve the current comparison. Finish an active
+panel, export, or review before opening another report; busy requests are
+declined rather than queued. Finder opening supports one local report, including
+cold launch, and uses the same bounded review path as the picker. JSON is
+registered as an alternate viewer without changing the system default app.
+
+## Build from source
+
+Requires macOS 14+, a Swift 6 toolchain, and macOS command-line developer tools.
+The package has no external package dependencies. Development builds need no
+credentials or administrator access.
 
 ```sh
-./script/verify.sh
+git clone https://github.com/jdotc1/EntitlementDiff.git
+cd EntitlementDiff
 ./script/build_and_run.sh
 ```
 
-The second command builds the executable, stages and ad-hoc signs a real
-`dist/EntitlementDiff.app`, and opens it. Do not launch this GUI using a raw
-`swift run` executable. The Codex **Run** action calls the same script.
+The script builds, stages, ad-hoc signs, and opens `dist/EntitlementDiff.app`.
+It stops only this checkout's staged app before rebuilding. Use the bundle when
+running the GUI; a bare `swift run` executable is not the supported launch path.
+The configured Codex Run action uses the same script.
 
-`./script/build_and_run.sh --build-only` stages without launching;
-`--verify` checks that this checkout's process appeared after launch, not that
-its UI works. `CONFIGURATION=release ./script/build_and_run.sh --build-only`
-produces a release-optimized **development** bundle. It is not a Developer ID
-signed, hardened, sandboxed, or notarized distribution release.
+```sh
+./script/verify.sh
+./script/build_and_run.sh --build-only
+CONFIGURATION=release ./script/build_and_run.sh --build-only
+```
 
-Open `Package.swift` in Xcode for editing and debugging. The SwiftPM manifest is
-canonical; there is no generated `.xcodeproj` to keep synchronized.
+`--build-only` stages without launching. `--verify` checks that the staged process
+appeared, not that its interface or inspection behavior works. `--debug` starts
+LLDB; `--logs` streams the app's system process logs. Release configuration produces
+an optimized **development** bundle. Local builds are ad-hoc signed and are not
+Developer ID signed, hardened, sandboxed, or notarized distribution builds.
 
-## Workflow
+Open [Package.swift](Package.swift) in Xcode for editing and debugging. The
+SwiftPM manifest is canonical; no generated `.xcodeproj` needs synchronization.
 
-Select the previous build with Command-1 and the current build with Command-2.
-You can also drop one local `.app` onto the Previous or Current pane to select or
-replace that input. Drops use the same requested architecture and native validation
-as the file panel. Multiple items, web URLs and non-app files are rejected.
-Native Finder drops into both panes, explicit architecture rejection and invalid-file
-recovery passed locally. Focused drop policy/action tests and the app build also passed.
-The app reads each selection without launching it. Both must contain the selected
-architecture and readable signing metadata; ad-hoc signatures are accepted.
-Unsigned, unsupported, and unreadable inputs show errors, not empty comparisons.
+## Use the Swift libraries
 
-Use the table to select a key and inspect its previous/current typed values.
-Search filters raw key text; the **Show** picker isolates Added, Removed, Changed or Unchanged entries.
-**All Changes** is the default. **All Keys** shows changed and unchanged keys together.
-Category counts describe the full comparison;
-the shown count reflects both category and key search. Click the **Change** or
-**Entitlement** table header to sort; click again to reverse. Key sorting preserves
-UTF-8 byte identity. **Reset View** clears search and restores All Changes and
-ascending key order. Selected details survive sorting and filters that keep the
-row, and clear when the selected row leaves the view.
-The selected-entitlement inspector expands nested dictionaries and positional
-arrays with typed Previous/Current values and per-path change labels. Display is
-bounded to 50 rows per page, 2,000 inspected nodes, 12 levels and 256 scalars per
-preview. Search nested paths through collapsed descendants, enable Changes only,
-and use Previous Page / Reveal More to navigate the inspected portion. Scan/depth
-limits are explicit; paging does not bypass them. Copy Selected JSON retains the
-complete selected entitlement using tagged values; browser filters and expansion
-do not reduce it. Nested Example loads a separate synthetic demonstration.
-
-**View Value…** opens a focused Previous/Current sheet for a scalar leaf. Read long
-strings in pages of 512 Unicode scalars or data in pages of 768 bytes (base64),
-with explicit page counts and First/Previous/Next/Last controls. Strings escape
-control characters. Each side's **Copy Leaf JSON** copies its complete original
-typed value regardless of the page; absent/container sides cannot be copied as
-leaves. The sheet captures values when opened and disables source actions until
-closed. Whole-entitlement Copy Selected JSON remains available.
-
-**Browse Branches** reaches values beyond the search inspector's traversal limit.
-It shows up to 50 immediate children per step. Use **Open Branch** to descend,
-**Up** to restore the parent page, and **First/Previous/Next Children** to page
-through siblings. Arrays also offer **Go to Index** with zero-based indices.
-Branch navigation preserves exact Previous/Current pairs without recursively
-searching or comparing descendants. **Back to Search** restores the bounded
-search view and its incomplete-search notice. Replacing inputs, swapping sides
-or selecting a different entitlement resets captured branch navigation.
-
-**Reload** rereads a selected app after rebuilding it at the same path. Failed
-inputs offer **Retry**. **Reload Both** in the toolbar or Comparison menu
-(Shift-Command-R) refreshes both live selections using the explicit architecture.
-Old results disappear immediately; failures preserve the URL for retry. Reload
-is unavailable for synthetic examples and disabled during reads or report operations.
-
-**Swap** reverses comparison direction. Changing architecture clears both inputs
-rather than silently choosing another slice. Replacing or clearing an input
-invalidates its old report immediately, including when a previous read finishes late.
-
-**Load Synthetic Example** exercises the interface without reading any installed
-app. It produces five changes and one unchanged key. The example is labelled in
-the UI and exports and is not a recommended entitlement configuration.
-
-**Copy Report** copies the full change report. **Export JSON** includes both full
-snapshots and every change, regardless of filters. Source file URLs are not
-exported, but names, signing identifiers, and entitlement values can be sensitive.
-Review reports before sharing. Export into a selected app bundle is rejected.
-
-The UI uses native semantic colors, standard controls, keyboard commands, and
-selectable monospaced values. Control/bidirectional-formatting characters are
-escaped in human-readable displays. Table key/value previews and detail views are
-bounded; complete values remain in JSON. See `docs/DESIGN.md` for the layout.
-
-## Saved baselines
-
-Open Saved Report… (Command-O) reviews a schema-1 JSON report and lets you choose
-one saved snapshot as Previous. Adoption clears Current and selects the saved
-architecture; choose a Current app for a fresh inspection. Saved data is labelled
-unverified, has no retained file location or Reload action, and results are
-recomputed. Imports are bounded to 8 MiB, 96 JSON levels, 100,000 value nodes and
-1 MiB per decoded string. Schema-1 exports remain path-free and retain typed values.
-Open Saved Baseline is included in v0.1.4.
-
-## Saved comparisons
-
-The saved-report review also offers Open Saved Comparison, which opens both
-validated saved snapshots immediately. Both remain labelled unverified, with no
-Reload/Reveal or retained app paths. Either side can be replaced with a live app;
-reports remain complete, recomputed and schema 1. Open Saved Comparison is included in v0.1.5. See docs/SAVED_COMPARISON.md.
-
-## Exact key lookup
-
-Find Entitlement… (Command-F) matches a complete key by UTF-8 bytes and selects and
-reveals its row. Hidden matches offer explicit Show in All Keys; missing matches
-preserve filters and selection. Sorting, full exports and saved provenance remain
-unchanged. Find Entitlement is included in v0.1.6. See docs/EXACT_FIND.md.
-
-## Copy exact keys
-
-Copy Exact Key beside the selected detail and in the Comparison menu copies the
-current row's complete raw key as plain UTF-8 text. Display quotes/escaping and
-preview limits do not affect it. No selection means no copy. Existing JSON/report
-copying is unchanged. Copy Exact Key is included in v0.1.7.
-See docs/COPY_EXACT_KEY.md.
-
-## Reusable libraries
-
-`EntitlementDiffCore` provides typed property-list values, bounded Foundation
-conversion, snapshots, comparison, and deterministic tagged JSON/text reports.
-`EntitlementDiffModel` owns the session state and injectable asynchronous reader.
-`EntitlementDiffSecurity` supplies the macOS Security.framework adapter.
+| Module | Responsibility |
+| --- | --- |
+| `EntitlementDiffCore` | Typed property-list values, bounded Foundation conversion, snapshots, comparisons, and deterministic tagged JSON/text reports. |
+| `EntitlementDiffModel` | Session state and an injectable asynchronous reader. |
+| `EntitlementDiffSecurity` | The macOS Security.framework adapter. |
 
 ```swift
 import EntitlementDiffCore
@@ -165,107 +216,73 @@ let json = try report.jsonData()
 The macOS reader is an actor conforming to `SnapshotReading`:
 
 ```swift
+import Foundation
+import EntitlementDiffSecurity
+
+let reader = SecurityEntitlementReader()
+let applicationURL = URL(fileURLWithPath: "/path/to/YourApp.app")
 let snapshot = try await reader.read(at: applicationURL, architecture: .arm64)
 ```
 
-Initialize `reader` as `SecurityEntitlementReader()` from `EntitlementDiffSecurity`.
-Only conventional local-file-URL `.app` bundles with a Mach-O main executable
-are accepted. A file URL can still reside on a network-mounted filesystem; this
-is not a guarantee that the underlying storage is physically local.
+The reader accepts conventional local-file-URL `.app` bundles with a Mach-O main
+executable. A file URL may still point to network-mounted storage.
 
 ## Comparison and report contract
 
-Booleans, integers, real numbers, strings, data, dates, arrays and dictionaries
-remain distinct. Absent differs from `false`; a missing dictionary representation
-also differs from a dictionary that is present but empty. Dictionary order is
-ignored; array order and multiplicity are preserved. Keys and string values use
-UTF-8 byte identity rather than Swift's Unicode canonical-equivalence equality.
+Booleans, integers, real numbers, strings, data, dates, arrays, and dictionaries
+remain distinct. Absence differs from `false`; an absent dictionary representation
+differs from a present, empty dictionary. Dictionary order is ignored, while
+array order and multiplicity are preserved. Keys and strings use UTF-8 byte
+identity rather than Swift's Unicode canonical-equivalence equality.
 
-The report uses tagged values. Integers are decimal strings to prevent loss in
-JSON consumers limited to 53-bit numeric precision; dictionary entries are sorted
-arrays so differently encoded Unicode keys do not collapse. See
-`docs/REPORT_FORMAT.md`, `docs/report.schema.json`, and `Examples/`.
+Reports use tagged values. Integers are decimal strings to avoid loss in JSON
+consumers limited to 53-bit numeric precision. Dictionary entries are sorted
+arrays so differently encoded Unicode keys do not collapse. See the
+[report format](docs/REPORT_FORMAT.md), [JSON schema](docs/report.schema.json),
+and [examples](Examples/).
 
-This compares the values returned by the system decoder, not the original bytes
-of the signature/DER/XML encoding. It cannot recover normalization or information
-loss that occurred upstream. Library callers constructing values directly must
-provide finite real/date values; JSON encoding rejects nonfinite values.
+Comparison uses values returned by the system decoder, rather than original
+signature/DER/XML bytes; it cannot recover upstream normalization or information
+loss. Library callers must provide finite real/date values because JSON encoding
+rejects nonfinite values.
 
-## Security and privacy boundaries
+## Security, privacy, and validation limits
 
-The production reader invokes public Security/CoreFoundation APIs directly; it
+The production reader calls public Security/CoreFoundation APIs directly and
 contains no shell, subprocess, plug-in loader, or target-code execution. No custom
 history, telemetry, network client, updater, or background scanner is implemented.
-macOS may maintain its own panel/recent-location metadata; this tool does not
-promise forensic erasure or control system logging.
+macOS may keep its own panel/recent-location metadata and system logs.
 
 Successful extraction **does not establish signature validity**. Apple's API can
-return partial information from unverified signing data. See `docs/SOURCES.md`.
-Inspection is not an atomic filesystem snapshot and is not hardened isolation for
-actively hostile inputs. A concurrent writer can defeat filesystem preflights.
-Decoder budgets do not bound Apple's earlier parser allocations, and cancellation
-cannot forcibly interrupt a synchronous operating-system call. This release is
-intended for developer-controlled builds, not bulk malware triage.
+return partial information from unverified signing data. Inspection is not an
+atomic filesystem snapshot or hardened isolation for actively hostile inputs:
+concurrent writes can defeat filesystem preflights, decoder budgets do not bound
+Apple's earlier parser allocations, and cancellation cannot forcibly interrupt a
+synchronous operating-system call. Use this release with developer-controlled
+builds. [Sources and rationale](docs/SOURCES.md) explain these boundaries.
 
-## Incomplete comparisons
+### Validation and limits
 
-The waiting view names missing, loading and failed inputs. Choose the missing
-side directly, retry failed inspection when its local source is retained, or open
-a saved report. Saved-baseline guidance explicitly asks for a Current app. A failed
-inspection never becomes an empty comparison. Included in v0.1.8.
+[Release validation](docs/RELEASE_VALIDATION.md) and
+[macOS acceptance](docs/MACOS_ACCEPTANCE.md) record the accepted baseline, focused
+checks, reused evidence, and remaining limits. Read the relevant release notes
+for the specific downloaded app. Existing evidence does not establish clean-Mac,
+minimum-macOS-14, or Intel-host runtime acceptance; a process-launch check is not
+interface acceptance.
 
-## Inspector projection reuse
+## Documentation and contribution
 
-Nested inspection retains its projection across unrelated view updates and reuses
-rendered row change kinds. Search, expansion, Changes only and paging update it
-explicitly. A changed comparison or selected entitlement replaces the session,
-including same-key replacement. Existing display limits, exact types and complete
-exports are preserved. No measured speedup or bound on full equality is claimed.
-Included in v0.1.9.
+- [Design](docs/DESIGN.md) and [comparison browser](docs/COMPARISON_BROWSER.md)
+  describe presentation and navigation.
+- [Previous/Next Change](docs/CHANGE_NAVIGATION.md) details sequential review and
+  its focused acceptance evidence.
+- [Focused values](docs/FOCUSED_VALUE.md), [branch navigation](docs/BRANCH_NAVIGATION.md),
+  and [saved comparisons](docs/SAVED_COMPARISON.md) document the detailed contracts.
+- [Publishing](docs/PUBLISHING.md) describes source packaging and release preparation.
+  There is no automatic hosted CI or publication workflow.
+- [Issues](https://github.com/jdotc1/EntitlementDiff/issues) are the place for a
+  reproducible problem or a proposed improvement. Include the app version,
+  requested architecture, and observed behavior; use synthetic or shareable
+  examples and review reports for sensitive metadata first.
 
-## Contextual filter recovery
-
-Empty results distinguish zero-key snapshots, matching entitlement values, empty
-categories and search-hidden keys. Clear Search preserves category and sort;
-Show All Changes or Show All Keys changes only the necessary preferences. Combined
-restrictions are named explicitly. Recovery preserves counts and selection rules;
-complete schema-1 reports are independent of the view. Included in v0.1.10.
-
-## Open saved reports from Finder
-
-The app can receive a JSON report through Finder's Open With
-menu. It presents the existing saved-report review before replacing the session;
-Cancel and invalid input preserve the current comparison. Finish an active panel,
-export or review before opening another report. JSON is registered as an alternate
-viewer; this does not change the default application. Included in v0.1.11.
-
-## Review changes sequentially
-
-Previous Change and Next Change follow the visible sort order, respect filters,
-skip unchanged rows and select/reveal current typed details. The controls and
-Comparison-menu commands stop at endpoints; the position indicator describes
-visible changes. Counts and complete reports remain unchanged. Included in v0.1.12.
-
-## Downloads and development builds
-
-The published release is **v0.1.12 (build 13)**, including Reload/Retry and Input
-Identity. The arm64 app is Developer ID signed and Apple notarized. Download the
-app or sanitized source from https://github.com/jdotc1/EntitlementDiff/releases/tag/v0.1.12.
-Local development builds are ad-hoc signed and are separate from that published app.
-The current local Phase 1 export/source-packaging, comparison/browser computation,
-focused-value viewer/copy, branch-navigation and All Keys changes are not in v0.1.2.
-
-Input Details separates bundle and signing identifiers, shows version/build and the
-session-only selected location, and offers Reveal in Finder. Optional metadata is
-bounded and unverified. Report schema 1 excludes identity metadata and locations.
-
-Accepted baseline and later focused checks are summarized in docs/RELEASE_VALIDATION.md.
-The baseline passed 58 methods in both debug and release, including eight native
-integration methods. These are reused receipts, not a fresh suite on the current
-candidate. docs/MACOS_ACCEPTANCE.md records reuse decisions and remaining limits.
-Accessibility work remains stopped. Minimum macOS 14 and Intel-host runtime
-acceptance have not been established by the newer Apple-silicon test environment.
-
-Source packaging copies approved tracked working-tree files without rewriting
-documentation. See docs/PUBLISHING.md. No automatic hosted CI or publication
-workflow is configured. LICENSE is MIT.
+Licensed under [MIT](LICENSE).
