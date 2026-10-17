@@ -186,3 +186,73 @@ unchanged rendering behavior. Complete leaf copy139–144, page378–383, raw te
 parser/report and other unaffected receipts reused. No full suite, corpus/timing
 sweep, unchanged signature/hash checks, accessibility, broad appearance work,
 Applications update, packaging, release or push. Installed/public v0.1.19 unchanged.
+
+## Find First Difference in Focused String Values — 2026-10-17
+
+Completed locally against private977b01f / released v0.1.20. When both captured
+sides are strings, Find First Difference explicitly begins at the start. At a
+step boundary, Continue Comparison examines the next portion. No comparison runs
+on query edits or every view update. Completed equality reports No difference;
+a partial prefix never does. Data, absent and non-string pairs have no new action.
+This is first differing Unicode scalar or end boundary, not byte-level offset
+within a multibyte scalar, insertion/deletion alignment or a complete text diff.
+Byte/scalar positions in the UI are one-based and refer to the scalar's beginning.
+
+StringFirstDifference stores two immutable original strings, scalar indices and
+common-prefix byte/scalar counters. Scalar equality compares original numeric
+values, preserving exact UTF-8 spellings and composed/decomposed distinctions.
+No normalization or source replacement occurs. Each explicit step consumes at
+most32,768 UTF-8 bytes across both inputs combined; it reserves eight bytes before
+reading a pair, so it can stop slightly short of that ceiling. Smaller test budgets
+have an eight-byte minimum. No full-source byte array, prefix rescan, match history
+or exhaustive per-keystroke comparison is introduced. Cancellation is checked at
+entry/every64 pairs. Work is bounded per action; existing source/page-index storage
+remains proportional to captured values. No elapsed-time or constant-memory claim.
+
+FocusedStringDifference runs steps in cancellable detached tasks and guards output
+with a request generation as well as cancellation. Restart/dismissal invalidate
+old work. Captured selection identity owns a new pair session. Leaf preparation
+handles a result that arrives before its page document is ready. Found positions
+select each side's page independently; EOF clamps to that side's final page, marks
+the closing quote and states that the string ends there. The differing scalar is
+mapped into the existing escaped page (up to512 scalars). No full-string rendering.
+
+Find queries/cursors/results remain independent and unchanged by comparison.
+Explicit Find results choose their own highlight; Reveal Difference switches both
+panes back and emits a presentation revision without rerunning the comparison.
+Manual page navigation remains independent. Complete tagged copying, saved
+provenance and path-free schema-1 exports remain unchanged.
+
+Focused evidence:
+
+- 501/502: specification compilation failures for missing new APIs, not reproduced
+ behavioral defects or passing tests. No pre-existing behavioral defect confirmed.
+- 503: `swift test --filter 'StringFirstDifferenceTests|FocusedStringDifferenceTests' -Xswiftc -warnings-as-errors`
+ passed five new methods (three Core/two App). Covers composed/decomposed identity,
+ emoji and page positions, exact highlighted scalar, prefix/end markers including
+ a full final page, empty/equal pairs, byte-budget continuation, no early equality,
+ independent Find, reveal revision, restart, terminal guards and a deliberately
+ computed late difference after cancellation. The restart also supersedes old work.
+- 504 and505: `./script/build_and_run.sh` built/staged/launched the actual app.
+ Second build followed scalar-position wording clarification (not unchanged inputs).
+ Final505 emitted no warnings. Development ad-hoc signing is not distribution proof.
+- 506: synthetic late difference paused with explicit Continue Comparison, preserving
+ an existing Previous suffix query/match and independent Current page.
+- 507: Continue Comparison found scalar16386/start byte16386 (composed é versus
+ decomposed e+accent), navigated both panes to page33 and highlighted each scalar.
+ The original suffix query/result remained. Screenshot visually inspected. Native
+ shaping can render composed/decomposed forms alike; original scalar ranges and
+ values remain distinct, not normalized to the displayed glyph.
+- 508/509: Find reused its original query/result; Reveal Difference restored the
+ difference presentation without comparison work.
+- 510: Previous512 emoji ended at scalar513/byte2049 while Current continued with x.
+ Previous stayed page1/1 and revealed its marked closing quote with EOF label;
+ Current revealed x on page2/2. Screenshot visually inspected.
+- 511: equal original strings completed with explicit No difference.
+- 512: Done/reopen reset pair comparison and Find state; development app open.
+
+Accepted search479, renderer453/456/457, raw field, leaf copy139–144, page378–383
+and parser/report/source-generation checks reused for unchanged boundaries. Only
+new difference tests ran; no full suite, corpus/timing sweep, unchanged hashes or
+signatures, accessibility, broad appearance work, Applications update, packaging,
+release or push. Installed/public v0.1.20 remains unchanged; audit preserved.

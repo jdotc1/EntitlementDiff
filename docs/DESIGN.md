@@ -271,3 +271,15 @@ direction changes cancel prior work and replace generations, including a deliber
 late return. Each pane has its own cursor/direction; Find restarts forward. Reaching
 an endpoint disables only that direction. Query edits/dismissal clear both directions.
 See FOCUSED_STRING_SEARCH.md. Highlight bridge coordinator is explicitly MainActor.
+
+Focused string pairs support an explicit first-difference cursor over original
+Unicode scalars, with no normalization, text alignment or complete byte arrays.
+Each step reserves room for a scalar pair before reading, consuming at most32KiB
+combined source UTF-8 bytes, and checks cancellation every64 pairs. Indices,
+common-prefix byte/scalar offsets and immutable sources persist across continuation.
+A MainActor session publishes only for its generation; dismissal/restart invalidate
+old output. The first differing scalar (or end boundary) drives both existing page
+navigators, clamped independently at EOF. Only its bounded escaped page is styled.
+EOF marks the closing quote with an explicit label. Find cursors/results remain
+independent; latest explicit Find/difference reveal chooses the displayed highlight.
+Reveal Difference republishes a presentation revision without comparing again.

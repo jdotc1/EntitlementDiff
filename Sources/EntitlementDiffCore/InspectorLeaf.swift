@@ -96,6 +96,20 @@ public struct LeafValueDocument: Sendable {
                           continuesAfter: highlight != nil && (range?.upperBound ?? byte) > byte)
     }
 
+    /// A zero-length difference marks the closing quote at the exact end of the original string.
+    public func stringDifferencePage(onPage requestedPage: Int, byteOffset: Int, scalarByteCount: Int) -> StringPage? {
+        guard byteOffset >= 0, (0...4).contains(scalarByteCount), byteOffset <= Int.max - scalarByteCount else { return nil }
+        guard let page = stringPage(onPage: requestedPage,
+                                    matching: byteOffset..<(byteOffset + scalarByteCount)) else { return nil }
+        guard scalarByteCount == 0, case .string(let string) = leaf.value else { return page }
+        let index = max(0, min(requestedPage, pageCount - 1))
+        let end = stringPageByteOffsets[index] + string.utf8.distance(from: stringPages[index].lowerBound,
+                                                                     to: stringPages[index].upperBound)
+        guard index == pageCount - 1, byteOffset == end else { return page }
+        return StringPage(text: page.text, highlight: NSRange(location: page.text.utf16.count - 1, length: 1),
+                          continuesBefore: false, continuesAfter: false)
+    }
+
     public func text(onPage requestedPage: Int) -> String {
         let page = max(0, min(requestedPage, pageCount - 1))
         switch leaf.value {

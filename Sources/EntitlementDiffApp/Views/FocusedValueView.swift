@@ -18,6 +18,7 @@ struct FocusedValueSelection: Identifiable {
 struct FocusedValueView: View {
     let selection: FocusedValueSelection
     @Bindable var actions: AppActions
+    @State private var difference: FocusedStringDifference?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -26,10 +27,23 @@ struct FocusedValueView: View {
                 .font(.system(.headline, design: .monospaced)).textSelection(.enabled)
             Text("Path (preview): \(EntitlementValue.string(selection.pathPreview).preview(maxCharacters: 512))")
                 .foregroundStyle(.secondary).lineLimit(3).textSelection(.enabled)
+            if let difference {
+                HStack {
+                    Button(difference.phase == .paused ? "Continue Comparison" : "Find First Difference") {
+                        if difference.phase == .paused { difference.advance() } else { difference.find() }
+                    }
+                    .disabled(difference.phase == .running)
+                    if difference.position != nil { Button("Reveal Difference") { difference.reveal() } }
+                    if difference.phase == .running { ProgressView().controlSize(.small) }
+                }
+                Text(difference.message).font(.caption).foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
             HStack(alignment: .top, spacing: 16) {
                 ForEach(ComparisonSide.allCases, id: \.self) { side in
                     LeafValuePane(side: side, value: selection.value(for: side),
-                                  copying: actions.isWritingReport, copy: { actions.copyLeaf(side) })
+                                  copying: actions.isWritingReport, copy: { actions.copyLeaf(side) },
+                                  differencePosition: difference?.position, differenceRevision: difference?.revision)
                 }
             }
             Text("Values are captured when opened. Strings escape control characters; data is base64. Copy Leaf JSON includes the complete typed value, regardless of the page.")
@@ -46,6 +60,13 @@ struct FocusedValueView: View {
         .padding(20)
         .frame(width: 880, height: 560)
         .interactiveDismissDisabled(actions.isWritingReport)
+        .task(id: selection.id) {
+            difference?.cancel()
+            if case .string(let previous) = selection.previous, case .string(let current) = selection.current {
+                difference = FocusedStringDifference(previous: previous, current: current)
+            } else { difference = nil }
+        }
+        .onDisappear { difference?.cancel() }
     }
 }
 
@@ -54,6 +75,9 @@ private struct LeafValuePane: View {
     let value: EntitlementValue?
     let copying: Bool
     let copy: () -> Void
+    let differencePosition: StringFirstDifference.Position?
+    let differenceRevision: UUID?
+    @State private var showingDifference = false
     @State private var document: LeafValueDocument?
     @State private var navigation = LeafPageNavigation()
     @State private var preparationError: String?
@@ -64,9 +88,9 @@ private struct LeafValuePane: View {
             Text(side.label).font(.headline)
             Text(value?.typeName ?? "Absent").foregroundStyle(.secondary)
             if let document {
-                if let page = document.stringPage(onPage: navigation.index, matching: search?.matchByteRange) {
+                if let page = stringPage(document) {
                     HighlightedStringPageView(page: page, pageIndex: navigation.index,
-                                              revealRevision: search?.matchRevision)
+                                              revealRevision: showingDifference ? differenceRevision : search?.matchRevision)
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .background(.quaternary.opacity(0.3), in: RoundedRectangle(cornerRadius: 6))
                     if page.continuesBefore || page.continuesAfter {
@@ -84,6 +108,11 @@ private struct LeafValuePane: View {
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .background(.quaternary.opacity(0.3), in: RoundedRectangle(cornerRadius: 6))
+                }
+                if showingDifference, let position = differencePosition,
+                   byteCount(position) == 0, navigation.index == document.pageCount - 1 {
+                    Text("End of string at difference (closing quote marked).")
+                        .font(.caption).foregroundStyle(.secondary)
                 }
                 Text("Page \(navigation.index + 1) of \(document.pageCount)").font(.caption).monospacedDigit()
                 HStack {
@@ -140,8 +169,16 @@ private struct LeafValuePane: View {
                 .disabled(InspectorLeaf(value) == nil || copying)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .onChange(of: differenceRevision) { _, _ in revealDifference() }
+        .onChange(of: differencePosition) { _, position in
+            if position == nil { showingDifference = false }
+        }
+        .onChange(of: search?.phase) { _, phase in
+            if phase == .running { showingDifference = false }
+        }
         .onChange(of: search?.matchRevision) { _, _ in
             if let page = search?.match?.pageIndex, let document {
+                showingDifference = false
                 navigation.select(page, pageCount: document.pageCount)
             }
         }
@@ -157,6 +194,7 @@ private struct LeafValuePane: View {
                 }
                 try Task.checkCancellation()
                 document = prepared
+                revealDifference()
                 if case .string(let text) = leaf.value { search = FocusedStringSearch(source: text) }
             } catch is CancellationError {
                 // The sheet was dismissed; never publish a late preparation result.
@@ -165,4 +203,21 @@ private struct LeafValuePane: View {
             }
         }
     }
+
+    private func byteCount(_ position: StringFirstDifference.Position) -> Int {
+        side == .previous ? position.previousByteCount : position.currentByteCount
+    }
+    private func stringPage(_ document: LeafValueDocument) -> LeafValueDocument.StringPage? {
+        if showingDifference, let position = differencePosition {
+            return document.stringDifferencePage(onPage: navigation.index, byteOffset: position.byteOffset,
+                                                 scalarByteCount: byteCount(position))
+        }
+        return document.stringPage(onPage: navigation.index, matching: search?.matchByteRange)
+    }
+    private func revealDifference() {
+        guard let document, let position = differencePosition else { return }
+        showingDifference = true
+        navigation.select(min(position.pageIndex, document.pageCount - 1), pageCount: document.pageCount)
+    }
+
 }

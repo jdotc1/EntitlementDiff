@@ -211,6 +211,16 @@ byte position. Raw edits and dismissal invalidate pending results. Data/base64
 search is excluded. Included in v0.1.18 (build19).
 See [Focused string search](docs/FOCUSED_STRING_SEARCH.md).
 
+## Find the first difference in focused strings
+
+When both focused values are strings, **Find First Difference** compares their
+original Unicode scalars without normalization. **Continue Comparison** examines
+another bounded portion. A found difference reveals both panes, with an explicit
+end marker when one string is a prefix of the other. **Reveal Difference** returns
+to that location while preserving each pane's independent Find query and results.
+This locates the first differing scalar; it does not align insertions or produce
+a complete text diff. Reports and complete typed copies are unchanged.
+
 ## Build from source
 
 Requires macOS 14+, a Swift 6 toolchain, and macOS command-line developer tools.
@@ -344,3 +354,5 @@ continuation guidance. Raw UTF-8 identity, complete copied values and reports ar
 preserved. Included in v0.1.19 (build20).
 
 Find Previous in Focused String Values is included in v0.1.20 (build21), retaining exact UTF-8 matches, overlapping occurrences, bounded backward continuation and explicit beginning-of-string feedback.
+
+Find First Difference in Focused String Values is included in v0.1.21 (build22), preserving exact Unicode scalar identity, bounded comparison and independent Find state.

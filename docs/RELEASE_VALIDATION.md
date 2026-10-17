@@ -329,3 +329,23 @@ new arm64 release-optimized candidate and its configured private-marker scan are
 recorded489; signing and Apple distribution receipts follow separately. Preserve
 exact UTF-8,32KiB steps,1,024-byte queries,512-scalar rendering and schema-1 reports.
 No full suite or accessibility work. Preparation alone does not establish release.
+
+## Find First Difference — local feature evidence
+
+Five new focused Core/App methods passed503. Initial specification compilations
+501/502 lacked new APIs; they are not behavioral failures/passes. Builds504/505
+staged/launched the actual development bundle;505 includes clearer scalar-position
+wording and emitted no warnings. Native506–512 confirms explicit continuation,
+composed/decomposed difference on page33, independent Find and Reveal Difference,
+prefix EOF closing-quote marker with independent page clamping, completed equality
+and fresh reopening. Screenshots507/510 visually inspected. Existing search479,
+renderer453/456/457, copy139–144, page378–383 and report/parser receipts reused.
+No full suite, accessibility, timing/corpus sweep, release or push. Installed/public
+v0.1.20 unchanged. This is development acceptance, not a distribution receipt.
+
+## v0.1.21 release preparation
+
+Version0.1.21/build22 packages Find First Difference from private2917316. Accepted
+focused tests503, final build505 and native506–512 are reused. The new arm64 release
+build and configured private-marker scan are recorded513; signing, Apple approval
+and delivery have separate release receipts. No full suite or accessibility work.
