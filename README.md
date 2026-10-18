@@ -426,3 +426,5 @@ crossing pages and reaching EOF without wrap. Original context and copying follo
 the step; selected differences and their copied details remain separate.
 
 Find Hex Bytes locates exact sequences in focused data values using bounded explicit portions, retaining overlapping matches across portions. Each pane preserves independent manual navigation and comparison state. See docs/HEX_BYTE_SEARCH.md.
+
+Find Previous Hex revisits earlier exact byte matches using bounded reverse portions. Continue Backward distinguishes incomplete search from reaching the beginning; direction switches retain overlaps. See docs/HEX_PREVIOUS_MATCH.md.

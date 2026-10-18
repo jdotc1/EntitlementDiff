@@ -6,8 +6,11 @@ struct HexByteCursor: Sendable {
     enum Step: Equatable { case match(Int), more, end }
     static let byteLimit = 32_768
     let source: Data
-    let pattern: [UInt8]
-    private let failure: [Int]
+    private(set) var pattern: [UInt8]
+    enum Direction: Sendable { case forward, backward }
+    private(set) var direction: Direction = .forward
+    private var anchor: Int?
+    private var failure: [Int]
     private var offset = 0
     private var matched = 0
     init(source: Data, query: String) throws {
@@ -28,16 +31,31 @@ struct HexByteCursor: Sendable {
         }
         guard high == nil, !bytes.isEmpty, bytes.count <= 128 else { throw Invalid.query }
         pattern = bytes; self.source = source
+        failure = Self.prefixTable(bytes)
+    }
+    private static func prefixTable(_ bytes: [UInt8]) -> [Int] {
         var table = Array(repeating: 0, count: bytes.count), prefix = 0
         for i in bytes.indices.dropFirst() {
             while prefix > 0 && bytes[i] != bytes[prefix] { prefix = table[prefix - 1] }
             if bytes[i] == bytes[prefix] { prefix += 1 }
             table[i] = prefix
         }
-        failure = table
+        return table
     }
-    enum Invalid: Error { case query }
+    enum Invalid: Error { case query, noMatch }
+    /// Excludes the selected start; reversing at its end retains overlapping matches.
+    func searching(_ requested: Direction) throws -> Self {
+        guard requested != direction else { return self }
+        guard let anchor else { throw Invalid.noMatch }
+        var next = self
+        next.direction = requested; next.pattern.reverse()
+        next.failure = Self.prefixTable(next.pattern); next.matched = 0
+        next.offset = requested == .forward ? anchor + 1 : anchor + pattern.count - 1
+        return next
+    }
     mutating func step(limit: Int = Self.byteLimit) throws -> Step {
+        try Task.checkCancellation()
+        if direction == .backward { return try backwardStep(limit: limit) }
         let budget = min(Self.byteLimit, max(1, limit))
         var consumed = 0
         while offset < source.count && consumed < budget {
@@ -49,11 +67,30 @@ struct HexByteCursor: Sendable {
             if matched == pattern.count {
                 let start = offset - matched
                 matched = failure[matched - 1]
+                anchor = start
                 return .match(start)
             }
         }
         try Task.checkCancellation()
         return offset == source.count ? .end : .more
+    }
+    private mutating func backwardStep(limit: Int) throws -> Step {
+        let budget = min(Self.byteLimit, max(1, limit))
+        var consumed = 0
+        while offset > 0 && consumed < budget {
+            if consumed % 256 == 0 { try Task.checkCancellation() }
+            offset -= 1
+            let byte = source[source.index(source.startIndex, offsetBy: offset)]
+            while matched > 0 && byte != pattern[matched] { matched = failure[matched - 1] }
+            if byte == pattern[matched] { matched += 1 }
+            consumed += 1
+            if matched == pattern.count {
+                anchor = offset; matched = failure[matched - 1]
+                return .match(offset)
+            }
+        }
+        try Task.checkCancellation()
+        return offset == 0 ? .end : .more
     }
 }
 
@@ -61,6 +98,7 @@ struct HexByteCursor: Sendable {
 final class FocusedHexSearch {
     enum Phase { case ready, running, paused, matched, end, invalid, failed }
     typealias Runner = @Sendable (HexByteCursor) async throws -> (HexByteCursor, HexByteCursor.Step)
+    private(set) var direction: HexByteCursor.Direction = .forward
     private(set) var query = ""
     private(set) var phase: Phase = .ready
     private(set) var matchOffset: Int?
@@ -72,13 +110,17 @@ final class FocusedHexSearch {
     @ObservationIgnored private var generation = UUID()
     @ObservationIgnored private var work: Task<Void, Never>?
     var canAdvance: Bool { phase == .paused || phase == .matched }
+    func canSearch(_ requested: HexByteCursor.Direction) -> Bool {
+        guard phase != .running, let cursor else { return false }
+        return requested == cursor.direction ? canAdvance : matchOffset != nil
+    }
     var message: String {
         switch phase {
         case .ready: "Hex pairs · 1–128 bytes · optional spaces."
-        case .running: "Searching this portion…"
-        case .paused: "No next match yet. Continue Search to examine more."
+        case .running: direction == .backward ? "Searching backward through this portion…" : "Searching this portion…"
+        case .paused: direction == .backward ? "No previous match yet. Continue Backward to examine more." : "No next match yet. Continue Search to examine more."
         case .matched: "Match at byte \((matchOffset ?? 0) + 1) (1-based). Brackets mark matched bytes; context preview is bounded."
-        case .end: "Reached the end. No further match; search does not wrap."
+        case .end: direction == .backward ? "Reached the beginning. No earlier match; search does not wrap." : "Reached the end. No further match; search does not wrap."
         case .invalid: "Enter 1–128 hex byte pairs, optionally separated by spaces."
         case .failed: "Search could not complete. Use Find Hex to restart."
         }
@@ -102,7 +144,7 @@ final class FocusedHexSearch {
     }
     func cancel() {
         generation = UUID(); work?.cancel(); work = nil; cursor = nil
-        matchOffset = nil; context = nil; phase = .ready
+        matchOffset = nil; context = nil; phase = .ready; direction = .forward
     }
     @discardableResult func find() -> Task<Void, Never>? {
         cancel()
@@ -110,7 +152,14 @@ final class FocusedHexSearch {
         catch { phase = .invalid; return nil }
         return advance()
     }
-    @discardableResult func advance() -> Task<Void, Never>? {
+    @discardableResult func advance(direction requested: HexByteCursor.Direction? = nil) -> Task<Void, Never>? {
+        guard phase != .running else { return nil }
+        if let requested, let current = cursor, requested != current.direction {
+            do { cursor = try current.searching(requested) }
+            catch { return nil }
+            generation = UUID(); work?.cancel(); work = nil
+            direction = requested; phase = .matched
+        }
         guard phase == .ready || canAdvance, let cursor else { return nil }
         let request = generation, runner = runner
         phase = .running

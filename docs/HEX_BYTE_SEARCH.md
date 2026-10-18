@@ -23,3 +23,8 @@ dependencies unchanged. No new OS API or permissions.
 
 
 Four focused development tests passed. Native acceptance confirmed exact matches and page reveal, bounded continuation and completed no-match results, malformed input, independent panes, preserved manual/difference state and clean reopening. Existing checks are reused; no suite or accessibility work was rerun.
+
+Find Previous Hex / Continue Backward scans original bytes in bounded reverse
+portions with overlapping matches retained. Direction switches exclude the current
+match start and resume relative to it, preserving manual/difference state. Query
+edits and dismissal cancel/invalidate requests. See HEX_PREVIOUS_MATCH.md.

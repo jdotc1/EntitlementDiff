@@ -379,3 +379,8 @@ Pane-local hex search reads original data with a retained KMP cursor, bounded
 32768-byte portions and128-byte patterns; generation/cancellation guards reject
 stale results. Exact range and bounded hex preview accompany page reveal,
 independent of manual navigation and comparison history. See HEX_BYTE_SEARCH.md.
+
+Find Previous Hex / Continue Backward scans original bytes in bounded reverse
+portions with overlapping matches retained. Direction switches exclude the current
+match start and resume relative to it, preserving manual/difference state. Query
+edits and dismissal cancel/invalidate requests. See HEX_PREVIOUS_MATCH.md.

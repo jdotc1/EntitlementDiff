@@ -457,8 +457,14 @@ private struct HexSearchControls: View {
                 Button("Find Hex") { search.find() }.disabled(search.phase == .running)
             }
             HStack {
-                Button(search.phase == .paused ? "Continue Hex Search" : "Find Next Hex") { search.advance() }
-                    .disabled(!search.canAdvance)
+                Button(search.phase == .paused && search.direction == .backward ? "Continue Backward" : "Find Previous Hex") {
+                    search.advance(direction: .backward)
+                }
+                .disabled(!search.canSearch(.backward))
+                Button(search.phase == .paused && search.direction == .forward ? "Continue Hex Search" : "Find Next Hex") {
+                    search.advance(direction: .forward)
+                }
+                .disabled(!search.canSearch(.forward))
                 if search.phase == .running { ProgressView().controlSize(.small) }
             }
             Text(search.message).font(.caption).foregroundStyle(.secondary)

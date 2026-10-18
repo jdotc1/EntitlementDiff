@@ -1,3 +1,7 @@
+v0.1.37 (38) — Find Previous Hex Match
+
+Bounded backward hex search preserves original bytes, overlapping matches and independent pane/navigation/difference state. Four focused development tests and native acceptance are reused; distribution checks are recorded separately.
+
 v0.1.36 (37) — Find Hex Bytes
 
 Exact original-byte search uses bounded portions, pane-local cursors, cancellation and request generations. Four focused development tests and native acceptance are reused; distribution checks are recorded separately.
