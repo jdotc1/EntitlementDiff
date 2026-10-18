@@ -22,6 +22,18 @@ struct StringScalarNavigation {
         }
         position = found; error = nil; revision = UUID(); return true
     }
+    enum Direction { case previous, next }
+    func canStep(_ direction: Direction, document: LeafValueDocument) -> Bool {
+        guard let position, let count = document.stringScalarCount else { return false }
+        return direction == .previous ? position.scalarOffset > 0 : position.scalarOffset < count
+    }
+    @discardableResult
+    mutating func step(_ direction: Direction, document: LeafValueDocument) -> Bool {
+        guard canStep(direction, document: document), let position,
+              let found = document.scalarPosition(at: position.scalarOffset + (direction == .previous ? -1 : 1)) else { return false }
+        self.position = found; input = String(found.scalarOffset + 1); error = nil; revision = UUID()
+        return true
+    }
     static let copyByteLimit = 1024
     /// Captured original scalar/EOF only; never pending or rejected field text.
     func copyText(side: ComparisonSide) -> String? {

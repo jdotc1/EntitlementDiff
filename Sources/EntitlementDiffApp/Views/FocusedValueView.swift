@@ -192,8 +192,14 @@ private struct LeafValuePane: View {
                             .font(.caption).foregroundStyle(.secondary)
                         Text(verbatim: position.detail.scalarLabel + " · UTF-8: " + (position.detail.utf8Bytes ?? "EOF"))
                             .font(.system(.caption, design: .monospaced)).textSelection(.enabled)
-                        Button("Copy Scalar Details") { copyScalarDetails(scalarNavigation) }
-                            .disabled(copying)
+                        HStack {
+                            Button("Previous Scalar") { stepScalar(.previous, document) }
+                                .disabled(search?.phase == .running || !scalarNavigation.canStep(.previous, document: document))
+                            Button("Next Scalar") { stepScalar(.next, document) }
+                                .disabled(search?.phase == .running || !scalarNavigation.canStep(.next, document: document))
+                            Button("Copy Scalar Details") { copyScalarDetails(scalarNavigation) }
+                                .disabled(copying)
+                        }
                     }
                 }
                 if let page = stringPage(document) {
@@ -317,6 +323,13 @@ private struct LeafValuePane: View {
                 preparationError = error.localizedDescription
             }
         }
+    }
+
+    private func stepScalar(_ direction: StringScalarNavigation.Direction, _ document: LeafValueDocument) {
+        guard search?.phase != .running, scalarNavigation.step(direction, document: document),
+              let position = scalarNavigation.position else { return }
+        showingDifference = false
+        navigation.select(position.pageIndex, pageCount: document.pageCount)
     }
 
     private func goToScalar(_ document: LeafValueDocument) {

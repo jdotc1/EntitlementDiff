@@ -1,3 +1,7 @@
+v0.1.34 (35) — Previous/Next Scalar
+
+Per-pane stepping uses the last successfully viewed original scalar, bounded prepared-page lookup and exact UTF-8 details. Four focused development tests and native acceptance are reused; distribution validation is recorded separately.
+
 v0.1.33 (34) — Copy Viewed Scalar Details
 
 Per-pane copying uses the last successfully viewed original scalar or EOF, with bounded path-free Unicode and UTF-8 details. Three focused development tests and native acceptance are reused; distribution evidence is recorded separately.

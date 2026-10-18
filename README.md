@@ -416,3 +416,7 @@ search and selected-difference state independent; Reveal Difference returns to i
 Copy Scalar Details copies a pane’s last successfully viewed original scalar or
 EOF with exact Unicode and UTF-8 details. Pending edits and invalid positions do
 not change it; selected-difference copying retains its separate meaning.
+
+Previous Scalar and Next Scalar inspect neighbors of a manually viewed scalar,
+crossing pages and reaching EOF without wrap. Exact UTF-8 details and copied
+scalar content follow the step; search and selected-difference state stay separate.
