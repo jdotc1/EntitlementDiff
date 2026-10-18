@@ -1,3 +1,7 @@
+v0.1.49 (50) — Match Context Previews
+
+Three focused development methods and native preview/Open Match acceptance reused. Arm64 app includes comparison CLI. Distribution checks recorded separately.
+
 v0.1.48 (49) — Search Side Scope
 
 Three focused development methods and native scope/state/copy acceptance reused. Arm64 app includes comparison CLI. Distribution checks recorded separately.

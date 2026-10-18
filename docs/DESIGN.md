@@ -479,3 +479,7 @@ Tree text search captures Both/Previous/Current scope before traversal; excluded
 roots are never visited. Scope change invalidates work/results while retaining query
 and requiring explicit Search. Clear retains scope. Copy/completion name scope;
 full comparison/schema1 remain unchanged. See TREE_SEARCH_SCOPE.md.
+
+Tree match context is captured from the retained UTF8 anchor:24scalars eachside,
+48matchscalars,escaped controls and explicit omission. Prepared preview reused by
+rows;exact copy/OpenMatch/report payloads unchanged. See TREE_MATCH_CONTEXT.md.

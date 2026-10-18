@@ -452,3 +452,5 @@ Copy Selected Result Details captures the complete typed tree path and exact UTF
 Clear Tree Search resets query/results/selection and cancels work without changing comparison selection or clipboard contents. See docs/CLEAR_TREE_SEARCH.md.
 
 Find Tree Text supports Both/Previous/Current scope. Scope changes retain the query and require explicit Search; Clear retains scope. See docs/TREE_SEARCH_SCOPE.md.
+
+Tree search results show bounded context around matches, with escaped controls and omission markers. Exact copy and Open Match remain unchanged. See docs/TREE_MATCH_CONTEXT.md.

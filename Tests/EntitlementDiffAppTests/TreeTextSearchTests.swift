@@ -6,6 +6,45 @@ import EntitlementDiffCore
 @testable import EntitlementDiffApp
 
 @MainActor final class TreeTextSearchTests: XCTestCase {
+    func testTreeContextPreviewLongPrefixUnicodeControlsAndCaps() throws {
+        let text = String(repeating: "x", count: 40000) + "🙂e\u{301}\nneedle\t後"
+        var search = try EntitlementTreeSearch(previous: .string(text), current: nil, query: "needle")
+        try search.step(); XCTAssertTrue(search.hits.isEmpty)
+        while !search.complete { try search.step() }
+        let hit = try XCTUnwrap(search.hits.first), preview = try XCTUnwrap(search.hits.first?.contextPreview)
+        XCTAssertTrue(preview.hasPrefix("…")); XCTAssertTrue(preview.contains("🙂e\u{301}\\u{000A}⟦needle⟧\\u{0009}後"))
+        XCTAssertEqual(hit.match.byteOffset, 40008)
+        XCTAssertLessThan(preview.utf8.count, 2048)
+        var long = try EntitlementTreeSearch(previous: .string(String(repeating: "a", count: 1024)), current: nil, query: String(repeating: "a", count: 1024))
+        try long.step()
+        let truncated = try XCTUnwrap(long.hits.first?.contextPreview)
+        XCTAssertEqual(truncated, "⟦" + String(repeating: "a", count: 48) + "…[match continues]⟧")
+        XCTAssertEqual(long.hits.first?.queryByteCount, 1024)
+    }
+    func testContextPreviewEdgesExactSpellingsAndRetainedAnchor() throws {
+        var cursor = try StringValueSearch(source: "e\u{301}\tée\u{301}", query: "e\u{301}")
+        _ = try cursor.step()
+        XCTAssertEqual(cursor.matchContextPreview(), "⟦e\u{301}⟧\\u{0009}ée\u{301}")
+        _ = try cursor.step()
+        XCTAssertEqual(cursor.matchContextPreview(), "e\u{301}\\u{0009}é⟦e\u{301}⟧")
+        cursor = try cursor.searching(.backward); _ = try cursor.step()
+        XCTAssertEqual(cursor.matchContextPreview(), "⟦e\u{301}⟧\\u{0009}ée\u{301}")
+        var middle = try StringValueSearch(source: String(repeating: "z", count: 30) + "x" + String(repeating: "y", count: 30), query: "x")
+        _ = try middle.step()
+        XCTAssertEqual(middle.matchContextPreview(), "…" + String(repeating: "z", count: 24) + "⟦x⟧" + String(repeating: "y", count: 24) + "…")
+    }
+    func testContextPreviewCannotPublishAfterQueryOrScopeChange() async throws {
+        let change = EntitlementComparison(previous: .init(["key": .string("x")]), current: .init()).changes[0]
+        let session = TreeTextSearchSession(change: change, revision: UUID(), runner: { cursor in
+            let work = Task.detached { try await Task.sleep(for: .milliseconds(20)); var next = cursor; try next.step(); return next }
+            return try await work.value
+        })
+        session.setQuery(.init(value: "x")); let old = try XCTUnwrap(session.search())
+        session.setQuery(.init(value: "y")); await old.value; XCTAssertNil(session.cursor)
+        session.setQuery(.init(value: "x")); let next = try XCTUnwrap(session.search())
+        session.setScope(.current); await next.value
+        XCTAssertNil(session.cursor); XCTAssertNil(session.selectedHit)
+    }
     func testTreeScopeExcludesTraversalAndRetainsBothOrder() throws {
         let huge = EntitlementValue.array(Array(repeating: .string("x"), count: 500))
         var current = try EntitlementTreeSearch(previous: huge, current: .string("e\u{301}"), query: "e\u{301}", scope: .current)

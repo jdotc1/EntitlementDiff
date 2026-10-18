@@ -25,6 +25,7 @@ public struct EntitlementTreeSearch: Sendable {
         public let value: String
         public let match: StringValueSearch.Match
         public let queryByteCount: Int
+        public let contextPreview: String?
         public var pathPreview: String {
             "Value" + path.map {
                 switch $0 {
@@ -66,7 +67,7 @@ public struct EntitlementTreeSearch: Sendable {
                 switch result {
                 case .match(let match):
                     hits.append(Hit(side: roots[rootIndex].0, path: work.path, value: work.value,
-                                    match: match, queryByteCount: queryByteCount))
+                                    match: match, queryByteCount: queryByteCount, contextPreview: work.cursor.matchContextPreview()))
                     active = nil
                     if hits.count == Self.resultLimit { limited = true }
                 case .more: active = work

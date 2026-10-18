@@ -100,6 +100,37 @@ public struct StringValueSearch: Sendable {
         return index == bytes.endIndex ? .end : .more
     }
 
+    /// Uses the retained match anchor: at most 24 scalars per context side,
+    /// 48 displayed match scalars and 1,024 bytes to locate the match end.
+    /// Escaping is performed once over these bounded fragments.
+    public func matchContextPreview() -> String? {
+        guard let anchor else { return nil }
+        let scalars = source.unicodeScalars
+        let start = anchor.index
+        let end = source.utf8.index(start, offsetBy: pattern.count)
+        var before = start
+        for _ in 0..<24 {
+            guard before != scalars.startIndex else { break }
+            scalars.formIndex(before: &before)
+        }
+        var after = end
+        for _ in 0..<24 {
+            guard after != scalars.endIndex else { break }
+            scalars.formIndex(after: &after)
+        }
+        var shownEnd = start
+        for _ in 0..<48 {
+            guard shownEnd != end else { break }
+            scalars.formIndex(after: &shownEnd)
+        }
+        let prefix = before == scalars.startIndex ? "" : "…"
+        let suffix = after == scalars.endIndex ? "" : "…"
+        let matchSuffix = shownEnd == end ? "" : "…[match continues]"
+        return prefix + DisplayText.escaped(String(scalars[before..<start]))
+            + "⟦" + DisplayText.escaped(String(scalars[start..<shownEnd])) + matchSuffix + "⟧"
+            + DisplayText.escaped(String(scalars[end..<after])) + suffix
+    }
+
     private mutating func backwardStep(byteLimit: Int) throws -> Step {
         let bytes = source.utf8
         let limit = min(Self.stepByteLimit, max(1, byteLimit))

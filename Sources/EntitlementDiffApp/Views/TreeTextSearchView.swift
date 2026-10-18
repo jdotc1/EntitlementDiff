@@ -51,6 +51,11 @@ struct TreeTextSearchView: View {
                                 Text(verbatim: hit.side.label + " · " + hit.pathPreview).lineLimit(3)
                                 Text("Match at UTF-8 byte \(hit.match.byteOffset + 1), scalar \(hit.match.scalarOffset + 1) · \(hit.queryByteCount) query bytes")
                                     .font(.caption)
+                                if let preview = hit.contextPreview {
+                                    Text(verbatim: "Context preview · ⟦match⟧: " + preview)
+                                        .font(.system(.caption, design: .monospaced))
+                                        .lineLimit(3)
+                                }
                             }
                             Spacer()
                             Button(session.selectedHitID == hit.id ? "Selected" : "Select") { session.selectHit(hit.id) }
