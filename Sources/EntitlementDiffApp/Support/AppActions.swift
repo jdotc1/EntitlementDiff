@@ -44,6 +44,18 @@ final class AppActions {
         }
     }
 
+    func copyScalarDetails(_ navigation: StringScalarNavigation, side: ComparisonSide,
+                           selectionID: UUID, to clipboard: NSPasteboard = .general) {
+        guard focusedValue?.id == selectionID, !isWritingReport,
+              let text = navigation.copyText(side: side), text.utf8.count <= StringScalarNavigation.copyByteLimit else { return }
+        clipboard.clearContents()
+        if clipboard.setData(Data(text.utf8), forType: .string) {
+            statusMessage = "\(side.label) viewed scalar details copied. Includes original Unicode and UTF-8 values."
+        } else {
+            errorMessage = "The system clipboard did not accept the scalar details."
+        }
+    }
+
     func copyByteContext(_ navigation: DataByteNavigation, side: ComparisonSide,
                          selectionID: UUID, to clipboard: NSPasteboard = .general) {
         guard focusedValue?.id == selectionID, !isWritingReport,

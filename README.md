@@ -412,3 +412,7 @@ change it; Copy Difference Details continues to describe the selected mismatch.
 Go to Scalar in each focused string pane reveals a1-based original Unicode scalar
 or EOF with exact code-point and UTF-8 details. Manual navigation keeps literal
 search and selected-difference state independent; Reveal Difference returns to it.
+
+Copy Scalar Details copies a pane’s last successfully viewed original scalar or
+EOF with exact Unicode and UTF-8 details. Pending edits and invalid positions do
+not change it; selected-difference copying retains its separate meaning.

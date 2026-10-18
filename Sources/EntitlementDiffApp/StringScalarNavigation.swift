@@ -1,5 +1,6 @@
 import Foundation
 import EntitlementDiffCore
+import EntitlementDiffModel
 
 /// Pane-local navigation, independent of literal search and difference history.
 struct StringScalarNavigation {
@@ -20,6 +21,15 @@ struct StringScalarNavigation {
             error = "Enter a scalar position from 1 through \(count + 1) (EOF)."; return false
         }
         position = found; error = nil; revision = UUID(); return true
+    }
+    static let copyByteLimit = 1024
+    /// Captured original scalar/EOF only; never pending or rejected field text.
+    func copyText(side: ComparisonSide) -> String? {
+        guard let position else { return nil }
+        return "\(side.label) viewed scalar details\nScalar position: \(position.scalarOffset + 1) (1-based)\n" +
+            "UTF-8 byte position: \(position.byteOffset + 1) (1-based)\n" +
+            "Scalar: \(position.detail.scalarLabel)\nUTF-8: \(position.detail.utf8Bytes ?? "EOF")\n" +
+            "Positions refer to original Unicode scalars, without normalization.\n"
     }
     mutating func reset() { self = .init() }
 }

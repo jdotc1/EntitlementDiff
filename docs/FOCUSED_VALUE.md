@@ -359,3 +359,8 @@ with exact code points and UTF-8 positions/bytes. Prepared page checkpoints boun
 lookup to512 scalars; no prefix rescan. Manual display preserves difference/search
 sessions, and Reveal Difference or new search restores its corresponding display.
 Strict bounded input and exact-state/native evidence736–745: see GO_TO_SCALAR.md.
+
+Copy Scalar Details uses a pane’s last successful manual scalar/EOF and exact
+UTF-8 position/bytes, independently of pending/rejected text. Output is path-free
+and capped1024 UTF-8 bytes, with focused-selection UUID clipboard guard. Search/
+reveal resets remove manual actions. See COPY_VIEWED_SCALAR_DETAILS.md,758–766.

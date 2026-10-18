@@ -77,6 +77,7 @@ struct FocusedValueView: View {
             HStack(alignment: .top, spacing: 16) {
                 ForEach(ComparisonSide.allCases, id: \.self) { side in
                     LeafValuePane(side: side, value: selection.value(for: side),
+                                  copyScalarDetails: { actions.copyScalarDetails($0, side: side, selectionID: selection.id) },
                                   copyByteContext: { actions.copyByteContext($0, side: side, selectionID: selection.id) },
                                   copying: actions.isWritingReport, copy: { actions.copyLeaf(side) },
                                   differencePosition: difference?.position, differenceRevision: difference?.revision,
@@ -114,6 +115,7 @@ struct FocusedValueView: View {
 private struct LeafValuePane: View {
     let side: ComparisonSide
     let value: EntitlementValue?
+    let copyScalarDetails: (StringScalarNavigation) -> Void
     let copyByteContext: (DataByteNavigation) -> Void
     let copying: Bool
     let copy: () -> Void
@@ -190,6 +192,8 @@ private struct LeafValuePane: View {
                             .font(.caption).foregroundStyle(.secondary)
                         Text(verbatim: position.detail.scalarLabel + " · UTF-8: " + (position.detail.utf8Bytes ?? "EOF"))
                             .font(.system(.caption, design: .monospaced)).textSelection(.enabled)
+                        Button("Copy Scalar Details") { copyScalarDetails(scalarNavigation) }
+                            .disabled(copying)
                     }
                 }
                 if let page = stringPage(document) {

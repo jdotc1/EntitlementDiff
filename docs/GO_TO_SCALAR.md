@@ -24,3 +24,8 @@ Swift6/macOS14, zero dependencies and schema1 exports preserved.
 
 
 Four focused development tests passed after correcting a test-setup type error. Native acceptance confirmed exact Unicode and independent UTF-8 positions, invisible scalars, EOF, invalid-input preservation, search continuity and difference restoration. Existing checks are reused; no suite or accessibility work was rerun.
+
+Copy Scalar Details uses a pane’s last successful manual scalar/EOF and exact
+UTF-8 position/bytes, independently of pending/rejected text. Output is path-free
+and capped1024 UTF-8 bytes, with focused-selection UUID clipboard guard. Search/
+reveal resets remove manual actions. See COPY_VIEWED_SCALAR_DETAILS.md,758–766.

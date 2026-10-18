@@ -1,3 +1,7 @@
+v0.1.33 (34) — Copy Viewed Scalar Details
+
+Per-pane copying uses the last successfully viewed original scalar or EOF, with bounded path-free Unicode and UTF-8 details. Three focused development tests and native acceptance are reused; distribution evidence is recorded separately.
+
 v0.1.32 (33) — Go to Unicode Scalar
 
 Independent original-scalar navigation reuses prepared page checkpoints and preserves literal-search and difference state. Four focused development tests and native acceptance are reused; distribution evidence is recorded separately.
