@@ -280,6 +280,7 @@ private struct LeafValuePane: View {
                                   placeholder: "Find literal text", submit: { search.find() }, edited: {})
                         .frame(height: 24)
                     Button("Find") { search.find() }
+                    Button("Clear Text Search") { search.clear() }
                 }
                 HStack {
                     Button(search.phase == .paused && search.direction == .backward ? "Continue Backward" : "Find Previous") {
@@ -483,6 +484,7 @@ private struct HexSearchControls: View {
                 TextField("Find hex bytes", text: Binding(get: { search.query }, set: { search.setQuery($0) }))
                     .textFieldStyle(.roundedBorder).onSubmit { search.find() }
                 Button("Find Hex") { search.find() }.disabled(search.phase == .running)
+                Button("Clear Hex Search") { search.clear() }
             }
             HStack {
                 Button(search.phase == .paused && search.direction == .backward ? "Continue Backward" : "Find Previous Hex") {

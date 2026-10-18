@@ -157,6 +157,9 @@ final class FocusedHexSearch {
         guard query != bounded else { return }
         query = bounded; cancel()
     }
+    func clear() {
+        query = ""; cancel()
+    }
     func cancel() {
         generation = UUID(); work?.cancel(); work = nil; cursor = nil
         matchOffset = nil; context = nil; matchDetails = nil; phase = .ready; direction = .forward

@@ -438,3 +438,8 @@ Copy Text Match Details records the last successful exact UTF-8 match with side,
 byte range/length, scalar start, complete scalar escapes and bytes in at most16384
 UTF-8 output bytes. Query/running/current-selection guards reject stale copies;
 search/navigation/difference state remains intact. See COPY_TEXT_MATCH_DETAILS.md.
+
+Focused string/data panes expose explicit per-pane Clear Search actions. These
+empty query and cancel/reset search using generation guards, without scanning or
+mutating page/manual navigation/difference state. Late results cannot restore
+cleared matches. Existing type fidelity, rendering and schema-1 reports remain.

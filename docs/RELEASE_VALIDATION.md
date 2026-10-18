@@ -1,3 +1,7 @@
+v0.1.42 (43) — Clear Find in Focused Values
+
+Three focused development tests and native text/data clear acceptance are reused. Clearing preserves navigation and difference state and rejects stale results. Distribution checks are recorded separately.
+
 v0.1.41 (42) — Copy Current Text Match Details
 
 Complete text-match copying preserves exact UTF-8 spelling, bounded output and current-selection behavior. Four focused development tests and native clipboard acceptance are reused; distribution checks are recorded separately.

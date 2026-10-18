@@ -81,6 +81,9 @@ final class FocusedStringSearch {
         self.input = input
         cancel()
     }
+    func clear() {
+        input = .init(value: ""); cancel()
+    }
     func cancel() {
         generation = UUID(); work?.cancel(); work = nil
         cursor = nil; match = nil; phase = .ready; direction = .forward
