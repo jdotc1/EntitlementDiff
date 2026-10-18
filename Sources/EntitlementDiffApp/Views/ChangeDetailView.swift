@@ -10,6 +10,7 @@ struct ChangeDetailView: View {
     let inspect: (EntitlementChange, InspectorRow) -> Void
     let copyBranch: (ComparisonSide, InspectorRow, String, UUID) -> Void
     let openTreeHit: (TreeTextSearchSession, EntitlementTreeSearch.Hit) -> Void
+    let copyTreeResult: (TreeTextSearchSession) -> Void
     let busy: Bool
     @State private var searchingTree = false
     @State private var treeSession: TreeTextSearchSession?
@@ -41,7 +42,7 @@ struct ChangeDetailView: View {
                 }
                 Button(searchingTree ? "Show Inspector" : "Find Tree Text…") { searchingTree.toggle() }.disabled(busy)
                 if searchingTree, let treeSession {
-                    TreeTextSearchView(session: treeSession, open: { openTreeHit(treeSession, $0) }, busy: busy)
+                    TreeTextSearchView(session: treeSession, open: { openTreeHit(treeSession, $0) }, copy: { copyTreeResult(treeSession) }, busy: busy)
                 } else if browsingBranch {
                     InspectorBranchView(change: change, inspect: inspect,
                                         copyBranch: { side, row in copyBranch(side, row, change.id, comparisonRevision) },

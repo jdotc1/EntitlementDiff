@@ -5,6 +5,7 @@ import EntitlementDiffCore
 struct TreeTextSearchView: View {
     @Bindable var session: TreeTextSearchSession
     let open: (EntitlementTreeSearch.Hit) -> Void
+    let copy: () -> Void
     let busy: Bool
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -30,6 +31,8 @@ struct TreeTextSearchView: View {
                     if let hit = session.selectedHit { open(hit) }
                 }.disabled(busy || session.running || session.selectedHit == nil)
             }
+            Button("Copy Selected Result Details", action: copy)
+                .disabled(busy || session.running || session.selectedHit == nil)
             ScrollViewReader { proxy in
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 8) {

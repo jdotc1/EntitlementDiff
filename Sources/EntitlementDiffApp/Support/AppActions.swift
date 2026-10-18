@@ -283,6 +283,23 @@ final class AppActions {
         model.loadExample()
     }
 
+    func copyTreeResultDetails(_ session: TreeTextSearchSession, to clipboard: NSPasteboard = .general) {
+        guard !isBusy, !session.running, session.comparisonRevision == model.reportRevision,
+              session.selectionID == model.browser.selectedRow?.id,
+              let key = model.browser.selectedRow?.key, let hit = session.selectedHit,
+              let cursor = session.cursor else { return }
+        do {
+            let text = try TreeResultDetails.text(key: key, hit: hit, query: session.input.value,
+                                                  complete: cursor.complete, limited: cursor.limited)
+            clipboard.clearContents()
+            if clipboard.setData(Data(text.utf8), forType: .string) {
+                statusMessage = "Selected tree result details copied. Includes complete typed path and exact UTF-8 match."
+            } else { errorMessage = "The system clipboard did not accept the tree result details." }
+        } catch {
+            errorMessage = "The complete tree result details exceed the 64 KiB copy limit. Clipboard unchanged."
+        }
+    }
+
     func openTreeHit(_ session: TreeTextSearchSession, hit: EntitlementTreeSearch.Hit) {
         guard !isBusy, !session.running, session.comparisonRevision == model.reportRevision,
               session.selectionID == model.browser.selectedRow?.id,

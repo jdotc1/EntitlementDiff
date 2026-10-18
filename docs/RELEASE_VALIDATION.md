@@ -1,3 +1,7 @@
+v0.1.46 (47) — Copy Selected Tree Result Details
+
+Two focused development methods and native copy/state acceptance reused. Arm64 app includes comparison CLI. Distribution checks recorded separately.
+
 v0.1.45 (46) — Previous/Next Result Navigation
 
 Two focused development methods and native navigation/continuity/open/reset/scroll acceptance reused. Arm64 app includes comparison CLI. Distribution checks recorded separately.

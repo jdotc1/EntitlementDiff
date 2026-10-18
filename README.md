@@ -446,3 +446,5 @@ The app includes a comparison CLI at Contents/MacOS/entitlementdiff-cli. Use exp
 Find Tree Text searches string leaves inside the selected entitlement with bounded Search/Continue actions, exact UTF-8 paths and side-qualified results. Open Match reveals the captured original range. First occurrence per leaf;200-result/depth128 ceilings remain explicitly incomplete. See docs/TREE_TEXT_SEARCH.md.
 
 Find Tree Text now includes Previous/Next Result navigation, retained selection across continuation and Open Selected Match. Navigation walks found results without wrapping or searching further. See docs/TREE_RESULT_NAVIGATION.md.
+
+Copy Selected Result Details captures the complete typed tree path and exact UTF-8 match within64KiB. Oversized records are rejected without changing the clipboard. See docs/COPY_TREE_RESULT_DETAILS.md.

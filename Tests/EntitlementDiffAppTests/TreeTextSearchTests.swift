@@ -1,10 +1,61 @@
 import EntitlementDiffModel
 import Foundation
+import AppKit
 import XCTest
 import EntitlementDiffCore
 @testable import EntitlementDiffApp
 
 @MainActor final class TreeTextSearchTests: XCTestCase {
+    func testSelectedTreeCopyExactPathBytesAndBounds() async throws {
+        let nested = try EntitlementDictionary(entries: [.init(key: "e\u{301}\n", value: .array([.string("🙂e\u{301}")]))])
+        var cursor = try EntitlementTreeSearch(previous: .dictionary(nested), current: nil, query: "e\u{301}")
+        while !cursor.complete { try cursor.step() }
+        let hit = try XCTUnwrap(cursor.hits.first)
+        let text = try TreeResultDetails.text(key: "é", hit: hit, query: "e\u{301}", complete: true, limited: false)
+        XCTAssertTrue(text.contains("Entitlement key: \"\\u{E9}\""))
+        XCTAssertTrue(text.contains("dictionary key: \"\\u{65}\\u{301}\\u{A}\""))
+        XCTAssertTrue(text.contains("array index (0-based): 0"))
+        XCTAssertTrue(text.contains("byte start (1-based): 5"))
+        XCTAssertTrue(text.contains("scalar start (1-based): 2"))
+        XCTAssertTrue(text.contains("65 CC 81")); XCTAssertTrue(text.contains("status: complete"))
+        XCTAssertLessThanOrEqual(text.utf8.count, TreeResultDetails.byteLimit)
+        XCTAssertThrowsError(try TreeResultDetails.text(key: String(repeating: "a", count: 20000), hit: hit, query: "e\u{301}", complete: false, limited: true))
+    }
+    func testSelectedTreeClipboardPreservedOnLimitAndStaleSelection() async throws {
+        let model = ComparisonModel(reader: TreeUnusedReader()); model.loadExample()
+        _ = model.browser.findExactKey("example.feature-labels", revealHidden: true)
+        let session = TreeTextSearchSession(change: try XCTUnwrap(model.browser.selectedRow), revision: model.reportRevision)
+        session.setQuery(.init(value: "local")); await session.search()?.value
+        while session.cursor?.complete == false { await session.advance()?.value }
+        session.nextResult(); let selected = session.selectedHitID
+        let board = NSPasteboard.withUniqueName(); defer { board.releaseGlobally() }
+        let actions = AppActions(model: model)
+        actions.copyTreeResultDetails(session, to: board)
+        XCTAssertTrue(try XCTUnwrap(board.string(forType: .string)).contains("6C 6F 63 61 6C"))
+        XCTAssertEqual(session.selectedHitID, selected); XCTAssertTrue(session.cursor?.complete == true)
+        board.clearContents(); board.setString("sentinel", forType: .string)
+        session.setQuery(.init(value: "research")); actions.copyTreeResultDetails(session, to: board)
+        XCTAssertEqual(board.string(forType: .string), "sentinel")
+        model.loadExample(); actions.copyTreeResultDetails(session, to: board)
+        XCTAssertEqual(board.string(forType: .string), "sentinel")
+        let longKey = String(repeating: "a", count: 20000)
+        // Use an independent formatter boundary for oversized complete paths.
+        var cursor = try EntitlementTreeSearch(previous: .dictionary(try EntitlementDictionary(entries: [.init(key: longKey, value: .string("x"))])), current: nil, query: "x")
+        while !cursor.complete { try cursor.step() }
+        XCTAssertThrowsError(try TreeResultDetails.text(key: "key", hit: XCTUnwrap(cursor.hits.first), query: "x", complete: false, limited: false))
+        XCTAssertEqual(board.string(forType: .string), "sentinel")
+        let previous = EntitlementSnapshot(sourceName: "Before.app", signingIdentifier: "example", architecture: .arm64,
+            entitlements: try EntitlementDictionary(entries: [.init(key: "key", value: .dictionary(try EntitlementDictionary(entries: [.init(key: longKey, value: .string("x"))])))]))
+        let current = EntitlementSnapshot(sourceName: "After.app", signingIdentifier: "example", architecture: .arm64, entitlements: .init())
+        model.openSavedComparison(try SavedReport.parse(ComparisonReport(previous: previous, current: current).jsonData()))
+        _ = model.browser.findExactKey("key", revealHidden: true)
+        let oversized = TreeTextSearchSession(change: try XCTUnwrap(model.browser.selectedRow), revision: model.reportRevision)
+        oversized.setQuery(.init(value: "x")); await oversized.search()?.value
+        while oversized.cursor?.complete == false { await oversized.advance()?.value }
+        oversized.nextResult(); actions.copyTreeResultDetails(oversized, to: board)
+        XCTAssertEqual(board.string(forType: .string), "sentinel")
+        XCTAssertTrue(actions.errorMessage?.contains("64 KiB") == true)
+    }
     func testResultNavigationRetainsSelectionAcrossContinuationAndStopsAtEnds() async throws {
         let change = EntitlementComparison(previous: .init(["key": .array(Array(repeating: .string("x"), count: 80))]), current: .init()).changes[0]
         let session = TreeTextSearchSession(change: change, revision: UUID())

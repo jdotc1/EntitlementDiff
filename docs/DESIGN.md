@@ -464,3 +464,8 @@ Tree text results retain stable selected hit identity across continuation. Previ
 walk discovered hits without wrap or search. Query/restart clears selection; existing
 comparison/entitlement generation guards protect Open Selected Match. Search detail
 scrolls within split pane so controls remain reachable. See TREE_RESULT_NAVIGATION.md.
+
+Selected tree result copy serializes complete typed paths/scalar escapes and exact
+match bytes incrementally within64KiB; overflow rejects before clipboard mutation.
+Current comparison/entitlement/query authority guards preserve selection and search.
+Schema1 unchanged; see COPY_TREE_RESULT_DETAILS.md.
