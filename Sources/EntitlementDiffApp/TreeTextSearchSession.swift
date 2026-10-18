@@ -12,6 +12,26 @@ import EntitlementDiffCore
     private(set) var input = ExactKeyInput()
     private(set) var cursor: EntitlementTreeSearch?
     private(set) var selectedHitID: UUID?
+    private(set) var resultInput = ""
+    private(set) var resultInputError: String?
+    private(set) var resultRevealRevision = UUID()
+    var canGoToResult: Bool { !running && !(cursor?.hits.isEmpty ?? true) }
+    func setResultInput(_ text: String) {
+        resultInput = String(decoding: text.utf8.prefix(21), as: UTF8.self)
+        resultInputError = nil
+    }
+    func goToResult() {
+        guard canGoToResult, let hits = cursor?.hits else { return }
+        let bytes = Array(resultInput.utf8.prefix(21))
+        guard !bytes.isEmpty, bytes.count <= 20,
+              bytes.allSatisfy({ $0 >= 48 && $0 <= 57 }),
+              let number = Int(resultInput), number >= 1, number <= hits.count else {
+            resultInputError = "Enter a result number from 1 through \(hits.count) found so far."
+            return
+        }
+        selectHit(hits[number - 1].id)
+    }
+    private func resetResultInput() { resultInput = ""; resultInputError = nil }
     var selectedIndex: Int? { cursor?.hits.firstIndex { $0.id == selectedHitID } }
     var selectedHit: EntitlementTreeSearch.Hit? {
         guard let index = selectedIndex else { return nil }
@@ -28,14 +48,17 @@ import EntitlementDiffCore
     func selectHit(_ id: UUID) {
         guard !running, cursor?.hits.contains(where: { $0.id == id }) == true else { return }
         selectedHitID = id
+        resultInput = String((selectedIndex ?? 0) + 1)
+        resultInputError = nil
+        resultRevealRevision = UUID()
     }
     func previousResult() {
         guard canSelectPrevious, let index = selectedIndex else { return }
-        selectedHitID = cursor?.hits[index - 1].id
+        if let hit = cursor?.hits[index - 1] { selectHit(hit.id) }
     }
     func nextResult() {
         guard canSelectNext else { return }
-        selectedHitID = cursor?.hits[selectedIndex.map { $0 + 1 } ?? 0].id
+        if let hit = cursor?.hits[selectedIndex.map { $0 + 1 } ?? 0] { selectHit(hit.id) }
     }
     private(set) var running = false
     private(set) var message = "Search string values. First occurrence per leaf; Previous then Current."
@@ -53,17 +76,17 @@ import EntitlementDiffCore
     }
     func setScope(_ value: EntitlementTreeSearch.Scope) {
         guard value != scope else { return }
-        cancel(); scope = value; cursor = nil; selectedHitID = nil
+        resetResultInput(); cancel(); scope = value; cursor = nil; selectedHitID = nil
         message = "Scope changed to \(value.rawValue). Use Search Tree."
     }
     func setQuery(_ value: ExactKeyInput) {
         let bounded = ExactKeyInput(value: String(decoding: value.value.utf8.prefix(1025), as: UTF8.self))
         guard input != bounded else { return }
-        cancel(); selectedHitID = nil; input = bounded; cursor = nil; message = "Query changed. Use Search Tree."
+        resetResultInput(); cancel(); selectedHitID = nil; input = bounded; cursor = nil; message = "Query changed. Use Search Tree."
     }
     var canClear: Bool { running || cursor != nil || selectedHitID != nil || !input.value.isEmpty }
     func clear() {
-        cancel()
+        resetResultInput(); cancel()
         input = ExactKeyInput()
         cursor = nil
         selectedHitID = nil
@@ -71,7 +94,7 @@ import EntitlementDiffCore
     }
     func cancel() { generation = UUID(); task?.cancel(); task = nil; running = false }
     @discardableResult func search() -> Task<Void, Never>? {
-        cancel(); selectedHitID = nil
+        resetResultInput(); cancel(); selectedHitID = nil
         do { cursor = try EntitlementTreeSearch(previous: previous, current: current, query: input.value, scope: scope) }
         catch { cursor = nil; message = "Enter 1–1,024 UTF-8 query bytes."; return nil }
         return advance()

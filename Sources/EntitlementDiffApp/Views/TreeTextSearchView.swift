@@ -40,6 +40,18 @@ struct TreeTextSearchView: View {
                     if let hit = session.selectedHit { open(hit) }
                 }.disabled(busy || session.running || session.selectedHit == nil)
             }
+            HStack {
+                TextField("Result number (1-based)", text: Binding(get: { session.resultInput }, set: { session.setResultInput($0) }))
+                    .textFieldStyle(.roundedBorder).frame(width: 180)
+                    .disabled(busy || !session.canGoToResult)
+                    .onSubmit { if !busy { session.goToResult() } }
+                Button("Go to Result") { session.goToResult() }
+                    .disabled(busy || !session.canGoToResult)
+                Text("Jump within results found so far.").font(.caption).foregroundStyle(.secondary)
+            }
+            if let error = session.resultInputError {
+                Text(error).font(.caption).foregroundStyle(.red)
+            }
             Button("Copy Selected Result Details", action: copy)
                 .disabled(busy || session.running || session.selectedHit == nil)
             ScrollViewReader { proxy in
@@ -69,8 +81,8 @@ struct TreeTextSearchView: View {
                     }
                 }
             }
-            .onChange(of: session.selectedHitID) { _, id in
-                if let id { proxy.scrollTo(id, anchor: .center) }
+            .onChange(of: session.resultRevealRevision) { _, _ in
+                if let id = session.selectedHitID { proxy.scrollTo(id, anchor: .center) }
             }
             }
         }

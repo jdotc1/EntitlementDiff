@@ -6,6 +6,44 @@ import EntitlementDiffCore
 @testable import EntitlementDiffApp
 
 @MainActor final class TreeTextSearchTests: XCTestCase {
+    func testTreeResultJumpBoundariesInvalidInputAndContinuity() async throws {
+        let change = EntitlementComparison(previous: .init(["key": .array(Array(repeating: .string("x"), count: 5))]), current: .init()).changes[0]
+        let session = TreeTextSearchSession(change: change, revision: UUID())
+        session.setQuery(.init(value: "x")); await session.search()?.value
+        while (session.cursor?.hits.count ?? 0) < 3 { await session.advance()?.value }
+        session.setResultInput("2"); session.goToResult()
+        let selected = session.selectedHitID, reveal = session.resultRevealRevision
+        XCTAssertEqual(session.selectedIndex, 1)
+        for input in ["", "0", "4", "-1", " 2", "2.0", "２", "999999999999999999999999999"] {
+            session.setResultInput(input); session.goToResult()
+            XCTAssertNotNil(session.resultInputError); XCTAssertEqual(session.selectedHitID, selected)
+            XCTAssertEqual(session.resultRevealRevision, reveal)
+        }
+        XCTAssertLessThanOrEqual(session.resultInput.utf8.count, 21)
+        await session.advance()?.value; XCTAssertEqual(session.selectedHitID, selected)
+        while session.cursor?.complete == false { await session.advance()?.value }
+        for ordinal in [1, 3, 5] {
+            session.setResultInput(String(ordinal)); session.goToResult()
+            XCTAssertEqual(session.selectedIndex, ordinal - 1); XCTAssertNil(session.resultInputError)
+        }
+        session.previousResult(); XCTAssertEqual(session.selectedIndex, 3); XCTAssertEqual(session.resultInput, "4")
+        session.nextResult(); XCTAssertEqual(session.selectedIndex, 4); XCTAssertEqual(session.resultInput, "5")
+        let prior = session.resultRevealRevision
+        session.goToResult(); XCTAssertNotEqual(session.resultRevealRevision, prior)
+    }
+    func testTreeJumpResetAndRunningProtection() async throws {
+        let change = EntitlementComparison(previous: .init(["key": .array([.string("x"), .string("x")])]), current: .init()).changes[0]
+        let session = TreeTextSearchSession(change: change, revision: UUID())
+        session.setQuery(.init(value: "x")); await session.search()?.value
+        session.setResultInput("1"); session.goToResult(); let selected = session.selectedHitID
+        let work = session.advance(); session.setResultInput("2"); session.goToResult()
+        XCTAssertEqual(session.selectedHitID, selected); await work?.value
+        session.setScope(.previous); XCTAssertEqual(session.resultInput, ""); XCTAssertNil(session.resultInputError)
+        session.setResultInput("1"); session.setQuery(.init(value: "y")); XCTAssertEqual(session.resultInput, "")
+        session.setResultInput("7"); session.clear(); XCTAssertEqual(session.resultInput, "")
+        session.setQuery(.init(value: "x")); session.setResultInput("3"); await session.search()?.value
+        XCTAssertEqual(session.resultInput, ""); XCTAssertNil(session.selectedHitID)
+    }
     func testTreeContextPreviewLongPrefixUnicodeControlsAndCaps() throws {
         let text = String(repeating: "x", count: 40000) + "🙂e\u{301}\nneedle\t後"
         var search = try EntitlementTreeSearch(previous: .string(text), current: nil, query: "needle")

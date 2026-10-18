@@ -483,3 +483,7 @@ full comparison/schema1 remain unchanged. See TREE_SEARCH_SCOPE.md.
 Tree match context is captured from the retained UTF8 anchor:24scalars eachside,
 48matchscalars,escaped controls and explicit omission. Prepared preview reused by
 rows;exact copy/OpenMatch/report payloads unchanged. See TREE_MATCH_CONTEXT.md.
+
+Go to Result strictly validates boundedASCIIordinal input against discoveredhits.
+Successfulselection requestsreveal;invalidinput preservesselection. Query/scope/
+Clear/restart resetjumpstate. No search is initiated. See TREE_RESULT_JUMP.md.
