@@ -403,3 +403,8 @@ Previous Scalar and Next Scalar move from the last successfully viewed original
 scalar through bounded prepared-page lookup, updating highlight/UTF-8 details/copy
 together. First/EOF stop without wrap; pending input and search/difference state
 remain independent. See SCALAR_STEPPING.md for evidence779–790.
+
+Previous Byte and Next Byte step from the last successfully viewed original
+byte/EOF, updating fixed hex context, base64 page and copied context together.
+First/EOF stop without wrap. Pending/rejected input and selected-difference state
+remain independent. See BYTE_STEPPING.md for evidence803–813.

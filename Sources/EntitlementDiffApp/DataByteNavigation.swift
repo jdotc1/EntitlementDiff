@@ -27,6 +27,19 @@ struct DataByteNavigation {
         byteOffset = number - 1; context = next; error = nil
         return true
     }
+    enum Direction { case previous, next }
+    func canStep(_ direction: Direction, dataCount: Int) -> Bool {
+        guard let byteOffset, byteOffset >= 0, byteOffset <= dataCount else { return false }
+        return direction == .previous ? byteOffset > 0 : byteOffset < dataCount
+    }
+    @discardableResult
+    mutating func step(_ direction: Direction, data: Data) -> Bool {
+        guard canStep(direction, dataCount: data.count), let byteOffset else { return false }
+        let offset = byteOffset + (direction == .previous ? -1 : 1)
+        guard let next = DataDifferenceContext(data: data, byteOffset: offset) else { return false }
+        self.byteOffset = offset; context = next; input = String(offset + 1); error = nil
+        return true
+    }
     /// Uses the last successful position, never pending or rejected field input.
     func copyText(side: ComparisonSide) -> String? {
         guard let context, let byteOffset else { return nil }

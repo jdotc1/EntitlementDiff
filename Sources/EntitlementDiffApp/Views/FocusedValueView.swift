@@ -168,8 +168,14 @@ private struct LeafValuePane: View {
                 if let context = byteNavigation.context {
                     Text("Manual byte context · selected difference unchanged").font(.caption).foregroundStyle(.secondary)
                     DataHexContextView(context: context)
-                    Button("Copy Byte Context") { copyByteContext(byteNavigation) }
-                        .disabled(copying)
+                    HStack {
+                        Button("Previous Byte") { stepByte(.previous, data) }
+                            .disabled(!byteNavigation.canStep(.previous, dataCount: data.count))
+                        Button("Next Byte") { stepByte(.next, data) }
+                            .disabled(!byteNavigation.canStep(.next, dataCount: data.count))
+                        Button("Copy Byte Context") { copyByteContext(byteNavigation) }
+                            .disabled(copying)
+                    }
                 } else if let dataContext { DataHexContextView(context: dataContext) }
             }
             if let document {
@@ -337,6 +343,13 @@ private struct LeafValuePane: View {
               let position = scalarNavigation.position else { return }
         showingDifference = false
         navigation.select(position.pageIndex, pageCount: document.pageCount)
+    }
+
+    private func stepByte(_ direction: DataByteNavigation.Direction, _ data: Data) {
+        guard byteNavigation.step(direction, data: data), let offset = byteNavigation.byteOffset,
+              let document else { return }
+        navigation.select(min(offset / LeafValueDocument.dataBytesPerPage, document.pageCount - 1),
+                          pageCount: document.pageCount)
     }
 
     private func goToByte(_ data: Data) {

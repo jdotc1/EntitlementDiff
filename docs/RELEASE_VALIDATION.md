@@ -1,3 +1,7 @@
+v0.1.35 (36) — Previous/Next Byte
+
+Per-pane byte stepping preserves exact original bytes, bounded context and selected-difference state. Four focused development tests and native acceptance are reused; distribution checks are recorded separately.
+
 v0.1.34 (35) — Previous/Next Scalar
 
 Per-pane stepping uses the last successfully viewed original scalar, bounded prepared-page lookup and exact UTF-8 details. Four focused development tests and native acceptance are reused; distribution validation is recorded separately.

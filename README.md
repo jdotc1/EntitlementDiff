@@ -420,3 +420,7 @@ not change it; selected-difference copying retains its separate meaning.
 Previous Scalar and Next Scalar inspect neighbors of a manually viewed scalar,
 crossing pages and reaching EOF without wrap. Exact UTF-8 details and copied
 scalar content follow the step; search and selected-difference state stay separate.
+
+Previous Byte and Next Byte inspect neighbors of a manually viewed data byte,
+crossing pages and reaching EOF without wrap. Original context and copying follow
+the step; selected differences and their copied details remain separate.

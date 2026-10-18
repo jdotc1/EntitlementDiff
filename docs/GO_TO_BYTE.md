@@ -28,3 +28,8 @@ for an explicit side, independently of pending/rejected field text and selected
 difference. Original hex bytes and positions remain bounded/path-free; clipboard
 output limit1024 UTF-8 bytes and focused-selection UUID guard apply. Reveal
 Difference clears manual copy actions. See COPY_VIEWED_BYTE_CONTEXT.md,716–723.
+
+Previous Byte and Next Byte step from the last successfully viewed original
+byte/EOF, updating fixed hex context, base64 page and copied context together.
+First/EOF stop without wrap. Pending/rejected input and selected-difference state
+remain independent. See BYTE_STEPPING.md for evidence803–813.
