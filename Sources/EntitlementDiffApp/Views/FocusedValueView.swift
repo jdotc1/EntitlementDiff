@@ -129,6 +129,7 @@ private struct LeafValuePane: View {
     @State private var scalarNavigation = StringScalarNavigation()
     @State private var byteNavigation = DataByteNavigation()
     @State private var showingDifference = false
+    @State private var showingTextMatch = false
     @State private var document: LeafValueDocument?
     @State private var navigation = LeafPageNavigation()
     @State private var preparationError: String?
@@ -213,7 +214,8 @@ private struct LeafValuePane: View {
                 }
                 if let page = stringPage(document) {
                     HighlightedStringPageView(page: page, pageIndex: navigation.index,
-                                              revealRevision: scalarNavigation.position != nil ? scalarNavigation.revision :
+                                              revealRevision: showingTextMatch ? search?.revealRevision :
+                                                scalarNavigation.position != nil ? scalarNavigation.revision :
                                                 (showingDifference ? differenceRevision : search?.matchRevision))
                         .frame(minHeight: 80)
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -290,6 +292,9 @@ private struct LeafValuePane: View {
                 }
                 Text(search.message).font(.caption).foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
+                if search.match != nil {
+                    Button("Reveal Text Match") { search.reveal() }.disabled(!search.canReveal)
+                }
             }
             if let hexSearch { HexSearchControls(search: hexSearch, copying: copying, copy: { copyHexMatch(hexSearch) }) }
             Button("Copy \(side.label) Leaf JSON", action: copy)
@@ -305,13 +310,22 @@ private struct LeafValuePane: View {
             if position == nil { showingDifference = false }
         }
         .onChange(of: search?.phase) { _, phase in
-            if phase == .running { showingDifference = false; scalarNavigation.reset() }
+            if phase == .running { showingTextMatch = false; showingDifference = false; scalarNavigation.reset() }
         }
         .onChange(of: search?.matchRevision) { _, _ in
             if let page = search?.match?.pageIndex, let document {
-                showingDifference = false; scalarNavigation.reset()
+                showingTextMatch = false; showingDifference = false; scalarNavigation.reset()
                 navigation.select(page, pageCount: document.pageCount)
             }
+        }
+        .onChange(of: search?.revealRevision) { _, _ in
+            if let search, search.canReveal, let page = search.match?.pageIndex, let document {
+                showingTextMatch = true; showingDifference = false
+                navigation.select(page, pageCount: document.pageCount)
+            }
+        }
+        .onChange(of: search?.matchByteRange) { _, range in
+            if range == nil { showingTextMatch = false }
         }
         .onChange(of: hexSearch?.revision) { _, _ in
             if let offset = hexSearch?.matchOffset, let document {
@@ -344,14 +358,14 @@ private struct LeafValuePane: View {
     private func stepScalar(_ direction: StringScalarNavigation.Direction, _ document: LeafValueDocument) {
         guard search?.phase != .running, scalarNavigation.step(direction, document: document),
               let position = scalarNavigation.position else { return }
-        showingDifference = false
+        showingTextMatch = false; showingDifference = false
         navigation.select(position.pageIndex, pageCount: document.pageCount)
     }
 
     private func goToScalar(_ document: LeafValueDocument) {
         guard search?.phase != .running, scalarNavigation.go(document: document),
               let position = scalarNavigation.position else { return }
-        showingDifference = false
+        showingTextMatch = false; showingDifference = false
         navigation.select(position.pageIndex, pageCount: document.pageCount)
     }
 
@@ -373,6 +387,9 @@ private struct LeafValuePane: View {
         side == .previous ? position.previousByteCount : position.currentByteCount
     }
     private func stringPage(_ document: LeafValueDocument) -> LeafValueDocument.StringPage? {
+        if showingTextMatch, let range = search?.matchByteRange {
+            return document.stringPage(onPage: navigation.index, matching: range)
+        }
         if let position = scalarNavigation.position {
             return document.stringDifferencePage(onPage: navigation.index, byteOffset: position.byteOffset,
                                                  scalarByteCount: position.byteCount)
@@ -384,6 +401,7 @@ private struct LeafValuePane: View {
         return document.stringPage(onPage: navigation.index, matching: search?.matchByteRange)
     }
     private func revealDifference() {
+        showingTextMatch = false
         scalarNavigation.reset()
         guard let document, let position = differencePosition else { return }
         showingDifference = true

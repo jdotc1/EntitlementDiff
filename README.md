@@ -432,3 +432,5 @@ Find Previous Hex revisits earlier exact byte matches using bounded reverse port
 Reveal Hex Match returns to the last successful match page without searching again, preserving cursor, direction, manual navigation and selected-difference state. See docs/HEX_MATCH_REVEAL.md.
 
 Copy Hex Match Details copies the complete captured match, exact range/length/side and bounded context in path-free output. Query and current-selection guards prevent stale copies. See docs/COPY_HEX_MATCH_DETAILS.md.
+
+Reveal Text Match restores a captured original UTF-8 match page and highlight without searching again. Saved manual scalar details and search/navigation/difference state are preserved. See docs/TEXT_MATCH_REVEAL.md.

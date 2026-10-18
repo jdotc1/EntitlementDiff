@@ -11,12 +11,20 @@ final class FocusedStringSearch {
     private(set) var direction: StringValueSearch.Direction = .forward
     private(set) var match: StringValueSearch.Match?
     private(set) var matchRevision = UUID()
+    private(set) var revealRevision = UUID()
     private let source: String
     @ObservationIgnored private let runner: Runner
     @ObservationIgnored private var cursor: StringValueSearch?
     @ObservationIgnored private var generation = UUID()
     @ObservationIgnored private var work: Task<Void, Never>?
     var canAdvance: Bool { phase == .paused || phase == .matched }
+    var canReveal: Bool { phase != .running && match != nil }
+    /// Reveal the captured match without replacing the search cursor or manual navigation.
+    @discardableResult func reveal() -> Bool {
+        guard canReveal else { return false }
+        revealRevision = UUID()
+        return true
+    }
     func canSearch(_ direction: StringValueSearch.Direction) -> Bool {
         guard let cursor else { return false }
         if direction != cursor.direction { return match != nil }

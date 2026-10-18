@@ -394,3 +394,8 @@ Copy Hex Match Details uses the last successful captured match, including all
 matched bytes (up to128), exact range/length/side and8+8 context in at most1024
 UTF-8 bytes. Current focused-selection and search-state guards reject stale copies;
 cursor/navigation/difference state is preserved. See COPY_HEX_MATCH_DETAILS.md.
+
+Reveal Text Match restores the captured original UTF-8 match page/highlight using
+a separate display revision, without searching or changing cursor/direction. Saved
+manual scalar/copy state remains intact; explicit Go/step returns to manual display.
+Running/query/dismissal guards reject stale reveal. See TEXT_MATCH_REVEAL.md.

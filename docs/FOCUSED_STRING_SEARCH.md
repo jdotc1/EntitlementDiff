@@ -391,3 +391,8 @@ Previous Scalar and Next Scalar move from the last successfully viewed original
 scalar through bounded prepared-page lookup, updating highlight/UTF-8 details/copy
 together. First/EOF stop without wrap; pending input and search/difference state
 remain independent. See SCALAR_STEPPING.md for evidence779–790.
+
+Reveal Text Match restores the captured original UTF-8 match page/highlight using
+a separate display revision, without searching or changing cursor/direction. Saved
+manual scalar/copy state remains intact; explicit Go/step returns to manual display.
+Running/query/dismissal guards reject stale reveal. See TEXT_MATCH_REVEAL.md.
