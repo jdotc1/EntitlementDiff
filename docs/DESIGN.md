@@ -469,3 +469,8 @@ Selected tree result copy serializes complete typed paths/scalar escapes and exa
 match bytes incrementally within64KiB; overflow rejects before clipboard mutation.
 Current comparison/entitlement/query authority guards preserve selection and search.
 Schema1 unchanged; see COPY_TREE_RESULT_DETAILS.md.
+
+Clear Tree Search invalidates request generation/cancels work and resets only query,
+results, selection and progress. It never scans or changes comparison/clipboard.
+Clear remains enabled during search; stale completion cannot republish results.
+See CLEAR_TREE_SEARCH.md.

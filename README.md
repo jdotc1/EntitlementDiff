@@ -448,3 +448,5 @@ Find Tree Text searches string leaves inside the selected entitlement with bound
 Find Tree Text now includes Previous/Next Result navigation, retained selection across continuation and Open Selected Match. Navigation walks found results without wrapping or searching further. See docs/TREE_RESULT_NAVIGATION.md.
 
 Copy Selected Result Details captures the complete typed tree path and exact UTF-8 match within64KiB. Oversized records are rejected without changing the clipboard. See docs/COPY_TREE_RESULT_DETAILS.md.
+
+Clear Tree Search resets query/results/selection and cancels work without changing comparison selection or clipboard contents. See docs/CLEAR_TREE_SEARCH.md.

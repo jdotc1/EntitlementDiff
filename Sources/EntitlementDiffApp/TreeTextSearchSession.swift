@@ -55,6 +55,14 @@ import EntitlementDiffCore
         guard input != bounded else { return }
         cancel(); selectedHitID = nil; input = bounded; cursor = nil; message = "Query changed. Use Search Tree."
     }
+    var canClear: Bool { running || cursor != nil || selectedHitID != nil || !input.value.isEmpty }
+    func clear() {
+        cancel()
+        input = ExactKeyInput()
+        cursor = nil
+        selectedHitID = nil
+        message = "Search cleared. Enter text and use Search Tree."
+    }
     func cancel() { generation = UUID(); task?.cancel(); task = nil; running = false }
     @discardableResult func search() -> Task<Void, Never>? {
         cancel(); selectedHitID = nil

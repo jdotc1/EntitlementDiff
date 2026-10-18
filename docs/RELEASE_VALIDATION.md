@@ -1,3 +1,7 @@
+v0.1.47 (48) — Clear Tree Search
+
+Two focused development methods and native Clear/state acceptance reused. Arm64 app includes comparison CLI. Distribution checks recorded separately.
+
 v0.1.46 (47) — Copy Selected Tree Result Details
 
 Two focused development methods and native copy/state acceptance reused. Arm64 app includes comparison CLI. Distribution checks recorded separately.

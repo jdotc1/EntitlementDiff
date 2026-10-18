@@ -6,6 +6,49 @@ import EntitlementDiffCore
 @testable import EntitlementDiffApp
 
 @MainActor final class TreeTextSearchTests: XCTestCase {
+    func testClearTreeCompletedAndPartialPreservesComparisonAndClipboard() async throws {
+        let model = ComparisonModel(reader: TreeUnusedReader()); model.loadExample()
+        _ = model.browser.findExactKey("example.feature-labels", revealHidden: true)
+        let change = try XCTUnwrap(model.browser.selectedRow)
+        let revision = model.reportRevision, selection = model.browser.selection
+        let session = TreeTextSearchSession(change: change, revision: revision)
+        let actions = AppActions(model: model)
+        let clipboard = NSPasteboard.withUniqueName(); defer { clipboard.releaseGlobally() }
+        clipboard.setString("sentinel", forType: .string)
+        XCTAssertFalse(session.canClear)
+        session.setQuery(.init(value: "local")); await session.search()?.value
+        XCTAssertTrue(session.canClear); XCTAssertFalse(session.cursor?.complete == true)
+        session.clear()
+        XCTAssertNil(session.cursor); XCTAssertNil(session.selectedHitID)
+        XCTAssertEqual(session.input.value, ""); XCTAssertFalse(session.canClear)
+        session.setQuery(.init(value: "local")); await session.search()?.value
+        while session.cursor?.complete == false { await session.advance()?.value }
+        session.nextResult(); let oldHit = try XCTUnwrap(session.selectedHit)
+        session.clear(); actions.copyTreeResultDetails(session, to: clipboard)
+        actions.openTreeHit(session, hit: oldHit)
+        XCTAssertNil(actions.focusedValue); XCTAssertNil(session.selectedHit)
+        XCTAssertFalse(session.canSelectNext); XCTAssertFalse(session.canSelectPrevious)
+        XCTAssertEqual(clipboard.string(forType: .string), "sentinel")
+        XCTAssertEqual(model.browser.selection, selection); XCTAssertEqual(model.reportRevision, revision)
+        session.setQuery(.init(value: "research")); await session.search()?.value
+        while session.cursor?.complete == false { await session.advance()?.value }
+        session.nextResult(); XCTAssertNotNil(session.selectedHit)
+        XCTAssertEqual(model.browser.selection, selection)
+    }
+    func testClearTreeRejectsCancellationInsensitiveLateCompletion() async throws {
+        let change = EntitlementComparison(previous: .init(["key": .string("x")]), current: .init()).changes[0]
+        let session = TreeTextSearchSession(change: change, revision: UUID(), runner: { cursor in
+            let work = Task.detached { try await Task.sleep(for: .milliseconds(20)); var result = cursor; try result.step(); return result }
+            return try await work.value
+        })
+        session.setQuery(.init(value: "x")); let work = try XCTUnwrap(session.search())
+        XCTAssertTrue(session.running); XCTAssertTrue(session.canClear)
+        session.clear(); let message = session.message
+        await work.value
+        XCTAssertFalse(session.running); XCTAssertNil(session.cursor); XCTAssertNil(session.selectedHitID)
+        XCTAssertEqual(session.input.value, ""); XCTAssertEqual(session.message, message)
+        XCTAssertFalse(session.canClear)
+    }
     func testSelectedTreeCopyExactPathBytesAndBounds() async throws {
         let nested = try EntitlementDictionary(entries: [.init(key: "e\u{301}\n", value: .array([.string("🙂e\u{301}")]))])
         var cursor = try EntitlementTreeSearch(previous: .dictionary(nested), current: nil, query: "e\u{301}")
