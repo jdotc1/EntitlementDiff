@@ -1,3 +1,7 @@
+v0.1.39 (40) — Copy Current Hex Match Details
+
+Complete captured-match copying preserves original bytes, bounded output and current-selection behavior. Four focused development tests and native clipboard acceptance are reused; distribution checks are recorded separately.
+
 v0.1.38 (39) — Reveal Current Hex Match
 
 Captured-match reveal restores the matching page without searching or changing cursor/direction/manual/difference state. Four focused development tests and native acceptance are reused; distribution checks are recorded separately.

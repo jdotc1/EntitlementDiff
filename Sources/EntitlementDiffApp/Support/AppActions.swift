@@ -68,6 +68,18 @@ final class AppActions {
         }
     }
 
+    func copyHexMatchDetails(_ search: FocusedHexSearch, side: ComparisonSide,
+                             selectionID: UUID, to clipboard: NSPasteboard = .general) {
+        guard focusedValue?.id == selectionID, !isWritingReport,
+              let text = search.copyText(side: side), text.utf8.count <= FocusedHexSearch.copyByteLimit else { return }
+        clipboard.clearContents()
+        if clipboard.setData(Data(text.utf8), forType: .string) {
+            statusMessage = "\(side.label) hex match details copied. Includes all matched original bytes."
+        } else {
+            errorMessage = "The system clipboard did not accept the hex match details."
+        }
+    }
+
     func copyDifferenceDetails(_ text: String?, selectionID: UUID, to clipboard: NSPasteboard = .general) {
         guard focusedValue?.id == selectionID, !isWritingReport,
               let text, text.utf8.count <= CurrentDifferenceDetails.byteLimit else { return }

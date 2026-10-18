@@ -1,5 +1,6 @@
 import Foundation
 import Observation
+import EntitlementDiffModel
 
 /// KMP cursor retains partial matches across bounded portions, including overlapping matches.
 struct HexByteCursor: Sendable {
@@ -104,6 +105,8 @@ final class FocusedHexSearch {
     private(set) var matchOffset: Int?
     private(set) var revision = UUID()
     private(set) var context: String?
+    private var matchDetails: String?
+    static let copyByteLimit = 1024
     private let source: Data
     @ObservationIgnored private let runner: Runner
     @ObservationIgnored private var cursor: HexByteCursor?
@@ -111,6 +114,11 @@ final class FocusedHexSearch {
     @ObservationIgnored private var work: Task<Void, Never>?
     var canAdvance: Bool { phase == .paused || phase == .matched }
     var canReveal: Bool { phase != .running && matchOffset != nil }
+    func copyText(side: ComparisonSide) -> String? {
+        guard canReveal, let matchDetails else { return nil }
+        let text = "\(side.label) hex match details\n" + matchDetails
+        return text.utf8.count <= Self.copyByteLimit ? text : nil
+    }
     /// Publish only a new reveal identity; retain the cursor, direction and captured context.
     @discardableResult func reveal() -> Bool {
         guard canReveal else { return false }
@@ -151,7 +159,7 @@ final class FocusedHexSearch {
     }
     func cancel() {
         generation = UUID(); work?.cancel(); work = nil; cursor = nil
-        matchOffset = nil; context = nil; phase = .ready; direction = .forward
+        matchOffset = nil; context = nil; matchDetails = nil; phase = .ready; direction = .forward
     }
     @discardableResult func find() -> Task<Void, Never>? {
         cancel()
@@ -185,6 +193,10 @@ final class FocusedHexSearch {
                     func hex(_ range: Range<Int>) -> String {
                         range.map { String(format: "%02X", source[source.startIndex + $0]) }.joined(separator: " ")
                     }
+                    matchDetails = "Byte range: \(offset + 1)–\(end) (1-based, inclusive)\n" +
+                        "Match length: \(next.pattern.count) bytes\nMatched bytes: " + hex(offset..<end) +
+                        "\nContext before (up to 8 bytes): " + hex(lower..<offset) +
+                        "\nContext after (up to 8 bytes): " + hex(end..<upper) + "\n"
                     let previewEnd = min(end, offset + 16)
                     context = "Bytes \(offset + 1)–\(end): " + hex(lower..<offset) + " [" + hex(offset..<previewEnd) +
                         (previewEnd < end ? " …" : "") + "] " + hex(end..<upper)

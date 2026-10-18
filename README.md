@@ -430,3 +430,5 @@ Find Hex Bytes locates exact sequences in focused data values using bounded expl
 Find Previous Hex revisits earlier exact byte matches using bounded reverse portions. Continue Backward distinguishes incomplete search from reaching the beginning; direction switches retain overlaps. See docs/HEX_PREVIOUS_MATCH.md.
 
 Reveal Hex Match returns to the last successful match page without searching again, preserving cursor, direction, manual navigation and selected-difference state. See docs/HEX_MATCH_REVEAL.md.
+
+Copy Hex Match Details copies the complete captured match, exact range/length/side and bounded context in path-free output. Query and current-selection guards prevent stale copies. See docs/COPY_HEX_MATCH_DETAILS.md.

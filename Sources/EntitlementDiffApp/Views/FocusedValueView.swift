@@ -79,6 +79,7 @@ struct FocusedValueView: View {
                     LeafValuePane(side: side, value: selection.value(for: side),
                                   copyScalarDetails: { actions.copyScalarDetails($0, side: side, selectionID: selection.id) },
                                   copyByteContext: { actions.copyByteContext($0, side: side, selectionID: selection.id) },
+                                  copyHexMatch: { actions.copyHexMatchDetails($0, side: side, selectionID: selection.id) },
                                   copying: actions.isWritingReport, copy: { actions.copyLeaf(side) },
                                   differencePosition: difference?.position, differenceRevision: difference?.revision,
                                   dataDifferencePosition: dataDifference?.position, dataDifferenceRevision: dataDifference?.revision,
@@ -117,6 +118,7 @@ private struct LeafValuePane: View {
     let value: EntitlementValue?
     let copyScalarDetails: (StringScalarNavigation) -> Void
     let copyByteContext: (DataByteNavigation) -> Void
+    let copyHexMatch: (FocusedHexSearch) -> Void
     let copying: Bool
     let copy: () -> Void
     let differencePosition: StringFirstDifference.Position?
@@ -289,7 +291,7 @@ private struct LeafValuePane: View {
                 Text(search.message).font(.caption).foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
-            if let hexSearch { HexSearchControls(search: hexSearch) }
+            if let hexSearch { HexSearchControls(search: hexSearch, copying: copying, copy: { copyHexMatch(hexSearch) }) }
             Button("Copy \(side.label) Leaf JSON", action: copy)
                 .disabled(InspectorLeaf(value) == nil || copying)
         }
@@ -449,6 +451,8 @@ private struct FoundDifferenceJumpView: View {
 
 private struct HexSearchControls: View {
     @Bindable var search: FocusedHexSearch
+    let copying: Bool
+    let copy: () -> Void
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             HStack {
@@ -470,7 +474,10 @@ private struct HexSearchControls: View {
             Text(search.message).font(.caption).foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
             if let context = search.context {
-                Button("Reveal Hex Match") { search.reveal() }.disabled(!search.canReveal)
+                HStack {
+                    Button("Reveal Hex Match") { search.reveal() }.disabled(!search.canReveal)
+                    Button("Copy Hex Match Details", action: copy).disabled(copying || !search.canReveal)
+                }
                 Text(verbatim: context).font(.system(.caption, design: .monospaced))
                     .textSelection(.enabled).fixedSize(horizontal: false, vertical: true)
             }
