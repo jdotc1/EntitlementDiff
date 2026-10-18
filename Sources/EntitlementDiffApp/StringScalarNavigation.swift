@@ -34,6 +34,13 @@ struct StringScalarNavigation {
         self.position = found; input = String(found.scalarOffset + 1); error = nil; revision = UUID()
         return true
     }
+    /// Reuses the captured position without parsing pending input or rescanning.
+    @discardableResult
+    mutating func reveal() -> Bool {
+        guard let position else { return false }
+        input = String(position.scalarOffset + 1); error = nil; revision = UUID()
+        return true
+    }
     static let copyByteLimit = 1024
     /// Captured original scalar/EOF only; never pending or rejected field text.
     func copyText(side: ComparisonSide) -> String? {

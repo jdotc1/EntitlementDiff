@@ -13,10 +13,15 @@ STAGE="$ROOT/dist/app-release-$VERSION-$BUILD-arm64"
 # Different optimization/architecture/path-mapping inputs from accepted development builds.
 swift build -c release --arch arm64 --product EntitlementDiff \
   -Xswiftc -debug-prefix-map -Xswiftc "$ROOT=."
+swift build -c release --arch arm64 --product entitlementdiff-cli \
+  -Xswiftc -debug-prefix-map -Xswiftc "$ROOT=."
 BIN_DIR="$(swift build -c release --arch arm64 --show-bin-path)"
 APP="$STAGE/EntitlementDiff.app"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp -X "$BIN_DIR/EntitlementDiff" "$APP/Contents/MacOS/EntitlementDiff"
+cp -X "$BIN_DIR/entitlementdiff-cli" "$APP/Contents/MacOS/entitlementdiff-cli"
+/usr/bin/strip -S -x "$APP/Contents/MacOS/entitlementdiff-cli"
+chmod 755 "$APP/Contents/MacOS/entitlementdiff-cli"
 # Strip debug and local symbol records from the staged copy only.
 /usr/bin/strip -S -x "$APP/Contents/MacOS/EntitlementDiff"
 chmod 755 "$APP/Contents/MacOS/EntitlementDiff"

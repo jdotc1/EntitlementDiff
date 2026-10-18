@@ -443,3 +443,13 @@ Focused string/data panes expose explicit per-pane Clear Search actions. These
 empty query and cancel/reset search using generation guards, without scanning or
 mutating page/manual navigation/difference state. Late results cannot restore
 cleared matches. Existing type fidelity, rendering and schema-1 reports remain.
+
+Manual scalar/byte Reveal uses the last successful captured position, never
+pending or rejected input. It restores that page and field, clears input errors,
+and refreshes scalar highlighting without rescanning source values. Captured byte
+context is reused. Search/difference state and other pane remain independent.
+
+Command-line comparison uses a separate macOS executable and dependency-free
+CLIKit runner. Explicit input pair/architecture, unchanged schema1 report and
+native reader, protected exclusive output; failures remain distinct from equality.
+See docs/CLI.md for exit0/1/2 and output failure semantics.

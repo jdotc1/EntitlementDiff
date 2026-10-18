@@ -40,6 +40,13 @@ struct DataByteNavigation {
         self.byteOffset = offset; context = next; input = String(offset + 1); error = nil
         return true
     }
+    /// Reuses the captured context without reading data or parsing pending input.
+    @discardableResult
+    mutating func reveal() -> Bool {
+        guard let byteOffset, context != nil else { return false }
+        input = String(byteOffset + 1); error = nil
+        return true
+    }
     /// Uses the last successful position, never pending or rejected field input.
     func copyText(side: ComparisonSide) -> String? {
         guard let context, let byteOffset else { return nil }

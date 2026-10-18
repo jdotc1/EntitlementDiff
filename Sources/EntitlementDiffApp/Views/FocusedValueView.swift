@@ -166,6 +166,7 @@ private struct LeafValuePane: View {
                         .textFieldStyle(.roundedBorder).frame(width: 90)
                         .onSubmit { goToByte(data) }
                     Button("Go to Byte") { goToByte(data) }
+                    if byteNavigation.byteOffset != nil { Button("Reveal Byte") { revealByte() } }
                 }
                 if let error = byteNavigation.error {
                     Text(verbatim: error).font(.caption).foregroundStyle(.secondary)
@@ -193,6 +194,7 @@ private struct LeafValuePane: View {
                             .textFieldStyle(.roundedBorder).frame(width: 90)
                             .onSubmit { goToScalar(document) }
                         Button("Go to Scalar") { goToScalar(document) }
+                        if scalarNavigation.position != nil { Button("Reveal Scalar") { revealScalar(document) } }
                     }
                     .disabled(search?.phase == .running)
                     if let error = scalarNavigation.error {
@@ -367,6 +369,19 @@ private struct LeafValuePane: View {
               let position = scalarNavigation.position else { return }
         showingTextMatch = false; showingDifference = false
         navigation.select(position.pageIndex, pageCount: document.pageCount)
+    }
+
+    private func revealScalar(_ document: LeafValueDocument) {
+        guard search?.phase != .running, scalarNavigation.reveal(),
+              let position = scalarNavigation.position else { return }
+        showingTextMatch = false; showingDifference = false
+        navigation.select(position.pageIndex, pageCount: document.pageCount)
+    }
+
+    private func revealByte() {
+        guard let document, byteNavigation.reveal(), let offset = byteNavigation.byteOffset else { return }
+        navigation.select(min(offset / LeafValueDocument.dataBytesPerPage, document.pageCount - 1),
+                          pageCount: document.pageCount)
     }
 
     private func goToScalar(_ document: LeafValueDocument) {

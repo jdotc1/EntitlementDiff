@@ -6,6 +6,8 @@ var products: [Product] = [
     .library(name: "EntitlementDiffModel", targets: ["EntitlementDiffModel"])
 ]
 var targets: [Target] = [
+    .target(name: "EntitlementDiffCLIKit", dependencies: ["EntitlementDiffCore"]),
+    .testTarget(name: "EntitlementDiffCLITests", dependencies: ["EntitlementDiffCLIKit", "EntitlementDiffCore"]),
     .target(name: "EntitlementDiffCore"),
     .target(name: "EntitlementDiffModel", dependencies: ["EntitlementDiffCore"]),
     .testTarget(name: "EntitlementDiffCoreTests", dependencies: ["EntitlementDiffCore"]),
@@ -14,9 +16,11 @@ var targets: [Target] = [
 #if os(macOS)
 products += [
     .library(name: "EntitlementDiffSecurity", targets: ["EntitlementDiffSecurity"]),
-    .executable(name: "EntitlementDiff", targets: ["EntitlementDiffApp"])
+    .executable(name: "EntitlementDiff", targets: ["EntitlementDiffApp"]),
+    .executable(name: "entitlementdiff-cli", targets: ["EntitlementDiffCLI"])
 ]
 targets += [
+    .executableTarget(name: "EntitlementDiffCLI", dependencies: ["EntitlementDiffCLIKit", "EntitlementDiffSecurity"]),
     .target(name: "EntitlementDiffSecurity", dependencies: ["EntitlementDiffCore"],
             linkerSettings: [.linkedFramework("Security")]),
     .executableTarget(name: "EntitlementDiffApp", dependencies: [

@@ -438,3 +438,7 @@ Reveal Text Match restores a captured original UTF-8 match page and highlight wi
 Copy Text Match Details copies the complete literal UTF-8 match as scalar escapes and exact bytes, with its side, range, length and starting scalar position. Bounded output and current-selection guards prevent stale copies. See docs/COPY_TEXT_MATCH_DETAILS.md.
 
 Clear Text Search and Clear Hex Search reset only the chosen pane’s search, preserving navigation and difference history. Request generations reject late results. See docs/CLEAR_FIND.md.
+
+Reveal Scalar and Reveal Byte return to the last successful manual position, ignoring pending or rejected input while preserving search and difference state. See docs/MANUAL_POSITION_REVEAL.md.
+
+The app includes a comparison CLI at Contents/MacOS/entitlementdiff-cli. Use explicit --previous, --current and --architecture; schema-1 JSON goes to stdout or a protected new --output file. Exit0 equal,1 differences,2 failure. See docs/CLI.md.

@@ -1,3 +1,7 @@
+v0.1.43 (44) — Comparison CLI and Reveal Last Viewed Scalar or Byte
+
+Accepted focused model/CLI tests and native acceptance reused. The CLI is included inside the app bundle, with deterministic schema1 JSON and explicit architecture. Reveal uses captured scalar/byte positions without rescanning. Distribution checks recorded separately.
+
 v0.1.42 (43) — Clear Find in Focused Values
 
 Three focused development tests and native text/data clear acceptance are reused. Clearing preserves navigation and difference state and rejects stale results. Distribution checks are recorded separately.
