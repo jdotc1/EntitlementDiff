@@ -442,3 +442,5 @@ Clear Text Search and Clear Hex Search reset only the chosen pane’s search, pr
 Reveal Scalar and Reveal Byte return to the last successful manual position, ignoring pending or rejected input while preserving search and difference state. See docs/MANUAL_POSITION_REVEAL.md.
 
 The app includes a comparison CLI at Contents/MacOS/entitlementdiff-cli. Use explicit --previous, --current and --architecture; schema-1 JSON goes to stdout or a protected new --output file. Exit0 equal,1 differences,2 failure. See docs/CLI.md.
+
+Find Tree Text searches string leaves inside the selected entitlement with bounded Search/Continue actions, exact UTF-8 paths and side-qualified results. Open Match reveals the captured original range. First occurrence per leaf;200-result/depth128 ceilings remain explicitly incomplete. See docs/TREE_TEXT_SEARCH.md.

@@ -453,3 +453,9 @@ Command-line comparison uses a separate macOS executable and dependency-free
 CLIKit runner. Explicit input pair/architecture, unchanged schema1 report and
 native reader, protected exclusive output; failures remain distinct from equality.
 See docs/CLI.md for exit0/1/2 and output failure semantics.
+
+Selected-entitlement tree text search uses a Model cursor with64 traversal steps
+and one32KiB string portion/action, first hit per leaf,200 hits/depth128 ceiling.
+Query/source/selection generations fence publication; result open captures exact
+side/value/range. Typed paths preserve UTF-8 key identity and array slots. Display
+limits never narrow report/equality. See docs/TREE_TEXT_SEARCH.md.

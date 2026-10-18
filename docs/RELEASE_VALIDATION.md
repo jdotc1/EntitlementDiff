@@ -1,3 +1,7 @@
+v0.1.44 (45) — Find Text Across the Selected Entitlement Tree
+
+Four focused development tests and native continuation/open-match acceptance are reused. UTF-8 fidelity, bounded work and request generations preserved. Arm64 app includes comparison CLI. Distribution checks recorded separately.
+
 v0.1.43 (44) — Comparison CLI and Reveal Last Viewed Scalar or Byte
 
 Accepted focused model/CLI tests and native acceptance reused. The CLI is included inside the app bundle, with deterministic schema1 JSON and explicit architecture. Reveal uses captured scalar/byte positions without rescanning. Distribution checks recorded separately.

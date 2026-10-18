@@ -283,6 +283,18 @@ final class AppActions {
         model.loadExample()
     }
 
+    func openTreeHit(_ session: TreeTextSearchSession, hit: EntitlementTreeSearch.Hit) {
+        guard !isBusy, !session.running, session.comparisonRevision == model.reportRevision,
+              session.selectionID == model.browser.selectedRow?.id,
+              session.cursor?.hits.contains(where: { $0.id == hit.id }) == true else { return }
+        focusedValue = .init(entitlementKey: model.browser.selectedRow?.key ?? "",
+                             pathPreview: hit.pathPreview,
+                             previous: hit.side == .previous ? .string(hit.value) : nil,
+                             current: hit.side == .current ? .string(hit.value) : nil,
+                             initialSide: hit.side, initialScalar: hit.match.scalarOffset + 1,
+                             initialMatchRange: hit.match.byteOffset..<(hit.match.byteOffset + hit.queryByteCount))
+    }
+
     func inspectValue(_ change: EntitlementChange, row: InspectorRow) {
         guard !isBusy, row.hasLeafValue else { return }
         statusMessage = ""

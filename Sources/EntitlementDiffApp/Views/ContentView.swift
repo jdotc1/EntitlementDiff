@@ -155,7 +155,7 @@ struct ContentView: View {
                 ChangeDetailView(change: browser.selectedRow, comparisonRevision: model.reportRevision, copy: actions.copySelected, copyKey: actions.copyExactKey,
                                  inspect: actions.inspectValue, copyBranch: { side, row, id, revision in
                                      actions.copyBranch(side, row: row, entitlementID: id, comparisonRevision: revision)
-                                 }, busy: actions.isBusy)
+                                 }, openTreeHit: actions.openTreeHit, busy: actions.isBusy)
                     .id(model.reportRevision).id(browser.selectedRow?.id)
                     .frame(minHeight: 155, idealHeight: 205)
             }

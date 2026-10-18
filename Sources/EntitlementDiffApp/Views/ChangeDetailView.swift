@@ -9,7 +9,10 @@ struct ChangeDetailView: View {
     let copyKey: () -> Void
     let inspect: (EntitlementChange, InspectorRow) -> Void
     let copyBranch: (ComparisonSide, InspectorRow, String, UUID) -> Void
+    let openTreeHit: (TreeTextSearchSession, EntitlementTreeSearch.Hit) -> Void
     let busy: Bool
+    @State private var searchingTree = false
+    @State private var treeSession: TreeTextSearchSession?
     @State private var browsingBranch = false
     @State private var session: InspectorProjectionSession?
 
@@ -25,7 +28,10 @@ struct ChangeDetailView: View {
                     Button("Browse Branches") { browsingBranch = true }.disabled(busy || browsingBranch)
                     Button("Collapse") { browsingBranch = false; session?.collapse() }.disabled(busy)
                 }
-                if browsingBranch {
+                Button(searchingTree ? "Show Inspector" : "Find Tree Text…") { searchingTree.toggle() }.disabled(busy)
+                if searchingTree, let treeSession {
+                    TreeTextSearchView(session: treeSession, open: { openTreeHit(treeSession, $0) }, busy: busy)
+                } else if browsingBranch {
                     InspectorBranchView(change: change, inspect: inspect,
                                         copyBranch: { side, row in copyBranch(side, row, change.id, comparisonRevision) },
                                         close: { browsingBranch = false }, busy: busy)
@@ -46,6 +52,8 @@ struct ChangeDetailView: View {
     }
 
     private func replaceSession() {
+        treeSession?.cancel(); searchingTree = false
+        treeSession = change.map { TreeTextSearchSession(change: $0, revision: comparisonRevision) }
         browsingBranch = false
         session = change.map { InspectorProjectionSession(change: $0, comparisonRevision: comparisonRevision) }
     }

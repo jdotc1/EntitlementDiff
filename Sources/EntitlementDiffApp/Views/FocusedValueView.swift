@@ -9,6 +9,9 @@ struct FocusedValueSelection: Identifiable {
     let pathPreview: String
     let previous: EntitlementValue?
     let current: EntitlementValue?
+    var initialSide: ComparisonSide? = nil
+    var initialScalar: Int? = nil
+    var initialMatchRange: Range<Int>? = nil
 
     func value(for side: ComparisonSide) -> EntitlementValue? {
         side == .previous ? previous : current
@@ -77,6 +80,9 @@ struct FocusedValueView: View {
             HStack(alignment: .top, spacing: 16) {
                 ForEach(ComparisonSide.allCases, id: \.self) { side in
                     LeafValuePane(side: side, value: selection.value(for: side),
+                                  excludedBySearch: selection.initialSide != nil && selection.initialSide != side,
+                                  initialScalar: selection.initialSide == side ? selection.initialScalar : nil,
+                                  initialMatchRange: selection.initialSide == side ? selection.initialMatchRange : nil,
                                   copyScalarDetails: { actions.copyScalarDetails($0, side: side, selectionID: selection.id) },
                                   copyByteContext: { actions.copyByteContext($0, side: side, selectionID: selection.id) },
                                   copyHexMatch: { actions.copyHexMatchDetails($0, side: side, selectionID: selection.id) },
@@ -117,6 +123,10 @@ struct FocusedValueView: View {
 private struct LeafValuePane: View {
     let side: ComparisonSide
     let value: EntitlementValue?
+    let excludedBySearch: Bool
+    let initialScalar: Int?
+    let initialMatchRange: Range<Int>?
+    @State private var showingTreeMatch = true
     let copyScalarDetails: (StringScalarNavigation) -> Void
     let copyByteContext: (DataByteNavigation) -> Void
     let copyHexMatch: (FocusedHexSearch) -> Void
@@ -141,7 +151,7 @@ private struct LeafValuePane: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(side.label).font(.headline)
-            Text(value?.typeName ?? "Absent").foregroundStyle(.secondary)
+            Text(excludedBySearch ? "Not captured" : value?.typeName ?? "Absent").foregroundStyle(.secondary)
             if let position = differencePosition {
                 let detail = side == .previous ? position.previousDetail : position.currentDetail
                 VStack(alignment: .leading, spacing: 2) {
@@ -272,7 +282,7 @@ private struct LeafValuePane: View {
                 }
                 Spacer()
             } else {
-                Text(value == nil ? "No value on this side." : "This side is a container. Choose one of its nested values in the inspector.")
+                Text(excludedBySearch ? "This result captures the other side only. Open a separate result to inspect this side." : value == nil ? "No value on this side." : "This side is a container. Choose one of its nested values in the inspector.")
                     .foregroundStyle(.secondary)
                 Spacer()
             }
@@ -319,11 +329,11 @@ private struct LeafValuePane: View {
             if position == nil { showingDifference = false }
         }
         .onChange(of: search?.phase) { _, phase in
-            if phase == .running { showingTextMatch = false; showingDifference = false; scalarNavigation.reset() }
+            if phase == .running { showingTreeMatch = false; showingTextMatch = false; showingDifference = false; scalarNavigation.reset() }
         }
         .onChange(of: search?.matchRevision) { _, _ in
             if let page = search?.match?.pageIndex, let document {
-                showingTextMatch = false; showingDifference = false; scalarNavigation.reset()
+                showingTreeMatch = false; showingTextMatch = false; showingDifference = false; scalarNavigation.reset()
                 navigation.select(page, pageCount: document.pageCount)
             }
         }
@@ -356,6 +366,11 @@ private struct LeafValuePane: View {
                 revealDifference(); revealDataDifference()
                 if case .string(let text) = leaf.value { search = FocusedStringSearch(source: text) }
                 if case .data(let bytes) = leaf.value { hexSearch = FocusedHexSearch(source: bytes) }
+                if let initialScalar {
+                    scalarNavigation.setInput(String(initialScalar))
+                    goToScalar(prepared)
+                    showingTreeMatch = true
+                }
             } catch is CancellationError {
                 // The sheet was dismissed; never publish a late preparation result.
             } catch {
@@ -367,14 +382,14 @@ private struct LeafValuePane: View {
     private func stepScalar(_ direction: StringScalarNavigation.Direction, _ document: LeafValueDocument) {
         guard search?.phase != .running, scalarNavigation.step(direction, document: document),
               let position = scalarNavigation.position else { return }
-        showingTextMatch = false; showingDifference = false
+        showingTreeMatch = false; showingTextMatch = false; showingDifference = false
         navigation.select(position.pageIndex, pageCount: document.pageCount)
     }
 
     private func revealScalar(_ document: LeafValueDocument) {
         guard search?.phase != .running, scalarNavigation.reveal(),
               let position = scalarNavigation.position else { return }
-        showingTextMatch = false; showingDifference = false
+        showingTreeMatch = false; showingTextMatch = false; showingDifference = false
         navigation.select(position.pageIndex, pageCount: document.pageCount)
     }
 
@@ -387,7 +402,7 @@ private struct LeafValuePane: View {
     private func goToScalar(_ document: LeafValueDocument) {
         guard search?.phase != .running, scalarNavigation.go(document: document),
               let position = scalarNavigation.position else { return }
-        showingTextMatch = false; showingDifference = false
+        showingTreeMatch = false; showingTextMatch = false; showingDifference = false
         navigation.select(position.pageIndex, pageCount: document.pageCount)
     }
 
@@ -409,6 +424,9 @@ private struct LeafValuePane: View {
         side == .previous ? position.previousByteCount : position.currentByteCount
     }
     private func stringPage(_ document: LeafValueDocument) -> LeafValueDocument.StringPage? {
+        if showingTreeMatch, let initialMatchRange {
+            return document.stringPage(onPage: navigation.index, matching: initialMatchRange)
+        }
         if showingTextMatch, let range = search?.matchByteRange {
             return document.stringPage(onPage: navigation.index, matching: range)
         }
@@ -423,6 +441,7 @@ private struct LeafValuePane: View {
         return document.stringPage(onPage: navigation.index, matching: search?.matchByteRange)
     }
     private func revealDifference() {
+        showingTreeMatch = false
         showingTextMatch = false
         scalarNavigation.reset()
         guard let document, let position = differencePosition else { return }
