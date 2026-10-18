@@ -396,3 +396,8 @@ Reveal Text Match restores the captured original UTF-8 match page/highlight usin
 a separate display revision, without searching or changing cursor/direction. Saved
 manual scalar/copy state remains intact; explicit Go/step returns to manual display.
 Running/query/dismissal guards reject stale reveal. See TEXT_MATCH_REVEAL.md.
+
+Copy Text Match Details records the last successful exact UTF-8 match with side,
+byte range/length, scalar start, complete scalar escapes and bytes in at most16384
+UTF-8 output bytes. Query/running/current-selection guards reject stale copies;
+search/navigation/difference state remains intact. See COPY_TEXT_MATCH_DETAILS.md.

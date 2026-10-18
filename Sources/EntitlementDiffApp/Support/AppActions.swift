@@ -68,6 +68,18 @@ final class AppActions {
         }
     }
 
+    func copyTextMatchDetails(_ search: FocusedStringSearch, side: ComparisonSide,
+                              selectionID: UUID, to clipboard: NSPasteboard = .general) {
+        guard focusedValue?.id == selectionID, !isWritingReport,
+              let text = search.copyText(side: side), text.utf8.count <= FocusedStringSearch.copyByteLimit else { return }
+        clipboard.clearContents()
+        if clipboard.setData(Data(text.utf8), forType: .string) {
+            statusMessage = "\(side.label) text match details copied. Includes complete scalar escapes and UTF-8 bytes."
+        } else {
+            errorMessage = "The system clipboard did not accept the text match details."
+        }
+    }
+
     func copyHexMatchDetails(_ search: FocusedHexSearch, side: ComparisonSide,
                              selectionID: UUID, to clipboard: NSPasteboard = .general) {
         guard focusedValue?.id == selectionID, !isWritingReport,

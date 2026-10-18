@@ -1,3 +1,7 @@
+v0.1.41 (42) — Copy Current Text Match Details
+
+Complete text-match copying preserves exact UTF-8 spelling, bounded output and current-selection behavior. Four focused development tests and native clipboard acceptance are reused; distribution checks are recorded separately.
+
 v0.1.40 (41) — Reveal Current Text Match
 
 Captured text-match reveal preserves exact UTF-8 highlighting, bounded rendering and independent search/navigation state. Four focused development tests and native acceptance are reused; distribution checks are recorded separately.

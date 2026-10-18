@@ -1,6 +1,7 @@
 import Foundation
 import Observation
 import EntitlementDiffCore
+import EntitlementDiffModel
 
 @MainActor @Observable
 final class FocusedStringSearch {
@@ -17,6 +18,22 @@ final class FocusedStringSearch {
     @ObservationIgnored private var cursor: StringValueSearch?
     @ObservationIgnored private var generation = UUID()
     @ObservationIgnored private var work: Task<Void, Never>?
+    static let copyByteLimit = 16_384
+    /// Literal UTF-8 matching guarantees these bounded query bytes equal the captured source match.
+    func copyText(side: ComparisonSide) -> String? {
+        guard canReveal, let match else { return nil }
+        let bytes = Array(input.value.utf8.prefix(1025))
+        guard !bytes.isEmpty, bytes.count <= 1024 else { return nil }
+        let escaped = input.value.unicodeScalars.map { "\\u{" + String(format: "%04X", $0.value) + "}" }.joined()
+        let hex = bytes.map { String(format: "%02X", $0) }.joined(separator: " ")
+        let text = "\(side.label) text match details\n" +
+            "UTF-8 byte range: \(match.byteOffset + 1)–\(match.byteOffset + bytes.count) (1-based, inclusive)\n" +
+            "Starting Unicode scalar position: \(match.scalarOffset + 1) (1-based)\n" +
+            "Match length: \(bytes.count) UTF-8 bytes\n" +
+            "Matched text (Unicode scalar escapes): \(escaped)\nUTF-8: \(hex)\n" +
+            "Positions and bytes refer to original text, without normalization.\n"
+        return text.utf8.count <= Self.copyByteLimit ? text : nil
+    }
     var canAdvance: Bool { phase == .paused || phase == .matched }
     var canReveal: Bool { phase != .running && match != nil }
     /// Reveal the captured match without replacing the search cursor or manual navigation.

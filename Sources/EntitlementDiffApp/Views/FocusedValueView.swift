@@ -80,6 +80,7 @@ struct FocusedValueView: View {
                                   copyScalarDetails: { actions.copyScalarDetails($0, side: side, selectionID: selection.id) },
                                   copyByteContext: { actions.copyByteContext($0, side: side, selectionID: selection.id) },
                                   copyHexMatch: { actions.copyHexMatchDetails($0, side: side, selectionID: selection.id) },
+                                  copyTextMatch: { actions.copyTextMatchDetails($0, side: side, selectionID: selection.id) },
                                   copying: actions.isWritingReport, copy: { actions.copyLeaf(side) },
                                   differencePosition: difference?.position, differenceRevision: difference?.revision,
                                   dataDifferencePosition: dataDifference?.position, dataDifferenceRevision: dataDifference?.revision,
@@ -119,6 +120,7 @@ private struct LeafValuePane: View {
     let copyScalarDetails: (StringScalarNavigation) -> Void
     let copyByteContext: (DataByteNavigation) -> Void
     let copyHexMatch: (FocusedHexSearch) -> Void
+    let copyTextMatch: (FocusedStringSearch) -> Void
     let copying: Bool
     let copy: () -> Void
     let differencePosition: StringFirstDifference.Position?
@@ -293,7 +295,11 @@ private struct LeafValuePane: View {
                 Text(search.message).font(.caption).foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
                 if search.match != nil {
-                    Button("Reveal Text Match") { search.reveal() }.disabled(!search.canReveal)
+                    HStack {
+                        Button("Reveal Text Match") { search.reveal() }.disabled(!search.canReveal)
+                        Button("Copy Text Match Details") { copyTextMatch(search) }
+                            .disabled(copying || !search.canReveal)
+                    }
                 }
             }
             if let hexSearch { HexSearchControls(search: hexSearch, copying: copying, copy: { copyHexMatch(hexSearch) }) }
