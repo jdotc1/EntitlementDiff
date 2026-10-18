@@ -374,3 +374,8 @@ Previous Byte and Next Byte step from the last successfully viewed original
 byte/EOF, updating fixed hex context, base64 page and copied context together.
 First/EOF stop without wrap. Pending/rejected input and selected-difference state
 remain independent. See BYTE_STEPPING.md for evidence803–813.
+
+Pane-local hex search reads original data with a retained KMP cursor, bounded
+32768-byte portions and128-byte patterns; generation/cancellation guards reject
+stale results. Exact range and bounded hex preview accompany page reveal,
+independent of manual navigation and comparison history. See HEX_BYTE_SEARCH.md.

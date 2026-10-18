@@ -131,6 +131,7 @@ private struct LeafValuePane: View {
     @State private var navigation = LeafPageNavigation()
     @State private var preparationError: String?
     @State private var search: FocusedStringSearch?
+    @State private var hexSearch: FocusedHexSearch?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -288,6 +289,7 @@ private struct LeafValuePane: View {
                 Text(search.message).font(.caption).foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
+            if let hexSearch { HexSearchControls(search: hexSearch) }
             Button("Copy \(side.label) Leaf JSON", action: copy)
                 .disabled(InspectorLeaf(value) == nil || copying)
         }
@@ -309,7 +311,12 @@ private struct LeafValuePane: View {
                 navigation.select(page, pageCount: document.pageCount)
             }
         }
-        .onDisappear { search?.cancel() }
+        .onChange(of: hexSearch?.revision) { _, _ in
+            if let offset = hexSearch?.matchOffset, let document {
+                navigation.select(offset / LeafValueDocument.dataBytesPerPage, pageCount: document.pageCount)
+            }
+        }
+        .onDisappear { search?.cancel(); hexSearch?.cancel() }
         .task {
             guard let leaf = InspectorLeaf(value) else { return }
             let work = Task.detached(priority: .userInitiated) { try LeafValueDocument(leaf: leaf) }
@@ -323,6 +330,7 @@ private struct LeafValuePane: View {
                 document = prepared
                 revealDifference(); revealDataDifference()
                 if case .string(let text) = leaf.value { search = FocusedStringSearch(source: text) }
+                if case .data(let bytes) = leaf.value { hexSearch = FocusedHexSearch(source: bytes) }
             } catch is CancellationError {
                 // The sheet was dismissed; never publish a late preparation result.
             } catch {
@@ -435,6 +443,30 @@ private struct FoundDifferenceJumpView: View {
             }
             .disabled(!enabled)
             if let error { Text(verbatim: error).font(.caption).foregroundStyle(.secondary) }
+        }
+    }
+}
+
+private struct HexSearchControls: View {
+    @Bindable var search: FocusedHexSearch
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack {
+                TextField("Find hex bytes", text: Binding(get: { search.query }, set: { search.setQuery($0) }))
+                    .textFieldStyle(.roundedBorder).onSubmit { search.find() }
+                Button("Find Hex") { search.find() }.disabled(search.phase == .running)
+            }
+            HStack {
+                Button(search.phase == .paused ? "Continue Hex Search" : "Find Next Hex") { search.advance() }
+                    .disabled(!search.canAdvance)
+                if search.phase == .running { ProgressView().controlSize(.small) }
+            }
+            Text(search.message).font(.caption).foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+            if let context = search.context {
+                Text(verbatim: context).font(.system(.caption, design: .monospaced))
+                    .textSelection(.enabled).fixedSize(horizontal: false, vertical: true)
+            }
         }
     }
 }

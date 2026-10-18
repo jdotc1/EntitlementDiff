@@ -1,3 +1,7 @@
+v0.1.36 (37) — Find Hex Bytes
+
+Exact original-byte search uses bounded portions, pane-local cursors, cancellation and request generations. Four focused development tests and native acceptance are reused; distribution checks are recorded separately.
+
 v0.1.35 (36) — Previous/Next Byte
 
 Per-pane byte stepping preserves exact original bytes, bounded context and selected-difference state. Four focused development tests and native acceptance are reused; distribution checks are recorded separately.

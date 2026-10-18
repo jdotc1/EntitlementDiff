@@ -424,3 +424,5 @@ scalar content follow the step; search and selected-difference state stay separa
 Previous Byte and Next Byte inspect neighbors of a manually viewed data byte,
 crossing pages and reaching EOF without wrap. Original context and copying follow
 the step; selected differences and their copied details remain separate.
+
+Find Hex Bytes locates exact sequences in focused data values using bounded explicit portions, retaining overlapping matches across portions. Each pane preserves independent manual navigation and comparison state. See docs/HEX_BYTE_SEARCH.md.
