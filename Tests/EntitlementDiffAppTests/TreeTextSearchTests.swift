@@ -5,6 +5,41 @@ import EntitlementDiffCore
 @testable import EntitlementDiffApp
 
 @MainActor final class TreeTextSearchTests: XCTestCase {
+    func testResultNavigationRetainsSelectionAcrossContinuationAndStopsAtEnds() async throws {
+        let change = EntitlementComparison(previous: .init(["key": .array(Array(repeating: .string("x"), count: 80))]), current: .init()).changes[0]
+        let session = TreeTextSearchSession(change: change, revision: UUID())
+        session.setQuery(.init(value: "x")); await session.search()?.value
+        XCTAssertNil(session.selectedHit); XCTAssertFalse(session.canSelectPrevious)
+        while (session.cursor?.hits.count ?? 0) < 2 { await session.advance()?.value }
+        session.nextResult(); let first = try XCTUnwrap(session.selectedHit)
+        XCTAssertEqual(session.selectedIndex, 0)
+        session.previousResult(); XCTAssertEqual(session.selectedHitID, first.id)
+        session.nextResult(); let second = try XCTUnwrap(session.selectedHit)
+        XCTAssertEqual(session.selectedIndex, 1)
+        await session.advance()?.value
+        XCTAssertEqual(session.selectedHitID, second.id)
+        while session.cursor?.complete == false { await session.advance()?.value }
+        for _ in 0..<100 { session.nextResult() }
+        XCTAssertEqual(session.selectedIndex, 79); XCTAssertFalse(session.canSelectNext)
+        XCTAssertEqual(session.positionLabel, "Result 80 of 80 found.")
+        session.selectHit(first.id); XCTAssertEqual(session.selectedIndex, 0)
+        session.selectHit(UUID()); XCTAssertEqual(session.selectedHitID, first.id)
+        session.setQuery(.init(value: "y"))
+        XCTAssertNil(session.selectedHitID); XCTAssertNil(session.selectedHit)
+        XCTAssertFalse(session.canSelectNext); XCTAssertFalse(session.canSelectPrevious)
+        await session.search()?.value; XCTAssertNil(session.selectedHitID)
+    }
+    func testNavigationCannotSelectDuringWorkOrRestoreAfterQueryChange() async throws {
+        let change = EntitlementComparison(previous: .init(["key": .array(Array(repeating: .string("x"), count: 80))]), current: .init()).changes[0]
+        let session = TreeTextSearchSession(change: change, revision: UUID())
+        session.setQuery(.init(value: "x")); await session.search()?.value
+        session.nextResult(); let selected = session.selectedHitID
+        let work = session.advance()
+        session.nextResult(); session.previousResult(); session.selectHit(UUID())
+        XCTAssertEqual(session.selectedHitID, selected)
+        session.setQuery(.init(value: "z")); await work?.value
+        XCTAssertNil(session.selectedHitID); XCTAssertNil(session.cursor)
+    }
     func testContinuationExactKeysSidesAndLongString() throws {
         let dictionary = try EntitlementDictionary(entries: [.init(key: "é", value: .string("needle")), .init(key: "e\u{301}", value: .string("needle"))])
         var search = try EntitlementTreeSearch(previous: .array(Array(repeating: .integer(1), count: 100) + [.dictionary(dictionary)]), current: .string(String(repeating: "x", count: 40000) + "🙂needle"), query: "needle")

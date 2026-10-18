@@ -17,6 +17,17 @@ struct ChangeDetailView: View {
     @State private var session: InspectorProjectionSession?
 
     var body: some View {
+        Group {
+            if searchingTree {
+                ScrollView { detailContent }
+            } else { detailContent }
+        }
+        .onAppear { if session == nil { replaceSession() } }
+        .onChange(of: comparisonRevision) { _, _ in replaceSession() }
+        .onChange(of: change?.id) { _, _ in replaceSession() }
+    }
+
+    private var detailContent: some View {
         VStack(alignment: .leading, spacing: 8) {
             if let change {
                 HStack {
@@ -46,9 +57,6 @@ struct ChangeDetailView: View {
             }
         }
         .padding(12)
-        .onAppear { if session == nil { replaceSession() } }
-        .onChange(of: comparisonRevision) { _, _ in replaceSession() }
-        .onChange(of: change?.id) { _, _ in replaceSession() }
     }
 
     private func replaceSession() {

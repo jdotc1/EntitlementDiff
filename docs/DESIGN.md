@@ -459,3 +459,8 @@ and one32KiB string portion/action, first hit per leaf,200 hits/depth128 ceiling
 Query/source/selection generations fence publication; result open captures exact
 side/value/range. Typed paths preserve UTF-8 key identity and array slots. Display
 limits never narrow report/equality. See docs/TREE_TEXT_SEARCH.md.
+
+Tree text results retain stable selected hit identity across continuation. Previous/Next
+walk discovered hits without wrap or search. Query/restart clears selection; existing
+comparison/entitlement generation guards protect Open Selected Match. Search detail
+scrolls within split pane so controls remain reachable. See TREE_RESULT_NAVIGATION.md.

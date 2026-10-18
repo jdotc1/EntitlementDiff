@@ -444,3 +444,5 @@ Reveal Scalar and Reveal Byte return to the last successful manual position, ign
 The app includes a comparison CLI at Contents/MacOS/entitlementdiff-cli. Use explicit --previous, --current and --architecture; schema-1 JSON goes to stdout or a protected new --output file. Exit0 equal,1 differences,2 failure. See docs/CLI.md.
 
 Find Tree Text searches string leaves inside the selected entitlement with bounded Search/Continue actions, exact UTF-8 paths and side-qualified results. Open Match reveals the captured original range. First occurrence per leaf;200-result/depth128 ceilings remain explicitly incomplete. See docs/TREE_TEXT_SEARCH.md.
+
+Find Tree Text now includes Previous/Next Result navigation, retained selection across continuation and Open Selected Match. Navigation walks found results without wrapping or searching further. See docs/TREE_RESULT_NAVIGATION.md.

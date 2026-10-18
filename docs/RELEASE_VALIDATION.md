@@ -1,3 +1,7 @@
+v0.1.45 (46) — Previous/Next Result Navigation
+
+Two focused development methods and native navigation/continuity/open/reset/scroll acceptance reused. Arm64 app includes comparison CLI. Distribution checks recorded separately.
+
 v0.1.44 (45) — Find Text Across the Selected Entitlement Tree
 
 Four focused development tests and native continuation/open-match acceptance are reused. UTF-8 fidelity, bounded work and request generations preserved. Arm64 app includes comparison CLI. Distribution checks recorded separately.

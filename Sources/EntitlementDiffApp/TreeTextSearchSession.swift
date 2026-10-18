@@ -10,6 +10,32 @@ import EntitlementDiffCore
     private let current: EntitlementValue?
     private(set) var input = ExactKeyInput()
     private(set) var cursor: EntitlementTreeSearch?
+    private(set) var selectedHitID: UUID?
+    var selectedIndex: Int? { cursor?.hits.firstIndex { $0.id == selectedHitID } }
+    var selectedHit: EntitlementTreeSearch.Hit? {
+        guard let index = selectedIndex else { return nil }
+        return cursor?.hits[index]
+    }
+    var canSelectPrevious: Bool { !running && (selectedIndex ?? 0) > 0 }
+    var canSelectNext: Bool {
+        !running && (selectedIndex.map { $0 + 1 } ?? 0) < (cursor?.hits.count ?? 0)
+    }
+    var positionLabel: String {
+        guard let index = selectedIndex else { return "No result selected." }
+        return "Result \(index + 1) of \(cursor?.hits.count ?? 0) found."
+    }
+    func selectHit(_ id: UUID) {
+        guard !running, cursor?.hits.contains(where: { $0.id == id }) == true else { return }
+        selectedHitID = id
+    }
+    func previousResult() {
+        guard canSelectPrevious, let index = selectedIndex else { return }
+        selectedHitID = cursor?.hits[index - 1].id
+    }
+    func nextResult() {
+        guard canSelectNext else { return }
+        selectedHitID = cursor?.hits[selectedIndex.map { $0 + 1 } ?? 0].id
+    }
     private(set) var running = false
     private(set) var message = "Search string values. First occurrence per leaf; Previous then Current."
     @ObservationIgnored private var generation = UUID()
@@ -27,11 +53,11 @@ import EntitlementDiffCore
     func setQuery(_ value: ExactKeyInput) {
         let bounded = ExactKeyInput(value: String(decoding: value.value.utf8.prefix(1025), as: UTF8.self))
         guard input != bounded else { return }
-        cancel(); input = bounded; cursor = nil; message = "Query changed. Use Search Tree."
+        cancel(); selectedHitID = nil; input = bounded; cursor = nil; message = "Query changed. Use Search Tree."
     }
     func cancel() { generation = UUID(); task?.cancel(); task = nil; running = false }
     @discardableResult func search() -> Task<Void, Never>? {
-        cancel()
+        cancel(); selectedHitID = nil
         do { cursor = try EntitlementTreeSearch(previous: previous, current: current, query: input.value) }
         catch { cursor = nil; message = "Enter 1–1,024 UTF-8 query bytes."; return nil }
         return advance()

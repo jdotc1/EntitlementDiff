@@ -19,6 +19,18 @@ struct TreeTextSearchView: View {
             Text(session.message).font(.caption).foregroundStyle(.secondary)
             Text("Literal UTF-8 · first match per string leaf · 64 traversal operations and one 32 KiB string portion per action · up to 200 results. Data and other value types are excluded.")
                 .font(.caption).foregroundStyle(.secondary)
+            HStack {
+                Button("Previous Result") { session.previousResult() }
+                    .disabled(busy || !session.canSelectPrevious)
+                Button("Next Result") { session.nextResult() }
+                    .disabled(busy || !session.canSelectNext)
+                Text(session.positionLabel).font(.caption)
+                Spacer()
+                Button("Open Selected Match…") {
+                    if let hit = session.selectedHit { open(hit) }
+                }.disabled(busy || session.running || session.selectedHit == nil)
+            }
+            ScrollViewReader { proxy in
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 8) {
                     ForEach(session.cursor?.hits ?? []) { hit in
@@ -29,10 +41,20 @@ struct TreeTextSearchView: View {
                                     .font(.caption)
                             }
                             Spacer()
-                            Button("Open Match…") { open(hit) }.disabled(busy || session.running)
+                            Button(session.selectedHitID == hit.id ? "Selected" : "Select") { session.selectHit(hit.id) }
+                                .disabled(busy || session.running)
+                            Button("Open Match…") { session.selectHit(hit.id); open(hit) }.disabled(busy || session.running)
                         }
+                        .padding(6)
+                        .background(session.selectedHitID == hit.id ? Color.accentColor.opacity(0.12) : Color.clear)
+                        .clipShape(RoundedRectangle(cornerRadius: 5))
+                        .id(hit.id)
                     }
                 }
+            }
+            .onChange(of: session.selectedHitID) { _, id in
+                if let id { proxy.scrollTo(id, anchor: .center) }
+            }
             }
         }
         .frame(minHeight: 280)
