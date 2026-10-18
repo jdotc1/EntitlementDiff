@@ -1,3 +1,7 @@
+v0.1.38 (39) — Reveal Current Hex Match
+
+Captured-match reveal restores the matching page without searching or changing cursor/direction/manual/difference state. Four focused development tests and native acceptance are reused; distribution checks are recorded separately.
+
 v0.1.37 (38) — Find Previous Hex Match
 
 Bounded backward hex search preserves original bytes, overlapping matches and independent pane/navigation/difference state. Four focused development tests and native acceptance are reused; distribution checks are recorded separately.

@@ -110,6 +110,13 @@ final class FocusedHexSearch {
     @ObservationIgnored private var generation = UUID()
     @ObservationIgnored private var work: Task<Void, Never>?
     var canAdvance: Bool { phase == .paused || phase == .matched }
+    var canReveal: Bool { phase != .running && matchOffset != nil }
+    /// Publish only a new reveal identity; retain the cursor, direction and captured context.
+    @discardableResult func reveal() -> Bool {
+        guard canReveal else { return false }
+        revision = UUID()
+        return true
+    }
     func canSearch(_ requested: HexByteCursor.Direction) -> Bool {
         guard phase != .running, let cursor else { return false }
         return requested == cursor.direction ? canAdvance : matchOffset != nil

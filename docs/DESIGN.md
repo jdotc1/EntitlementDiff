@@ -418,3 +418,8 @@ Find Previous Hex / Continue Backward scans original bytes in bounded reverse
 portions with overlapping matches retained. Direction switches exclude the current
 match start and resume relative to it, preserving manual/difference state. Query
 edits and dismissal cancel/invalidate requests. See HEX_PREVIOUS_MATCH.md.
+
+Reveal Hex Match republishes the captured match identity to restore its base64
+page without searching or changing cursor/direction/manual/difference state. It
+is unavailable during work and after query reset; last successful matches remain
+revealable after pause/end. See HEX_MATCH_REVEAL.md.

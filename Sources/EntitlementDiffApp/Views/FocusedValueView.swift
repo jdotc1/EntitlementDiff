@@ -470,6 +470,7 @@ private struct HexSearchControls: View {
             Text(search.message).font(.caption).foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
             if let context = search.context {
+                Button("Reveal Hex Match") { search.reveal() }.disabled(!search.canReveal)
                 Text(verbatim: context).font(.system(.caption, design: .monospaced))
                     .textSelection(.enabled).fixedSize(horizontal: false, vertical: true)
             }
