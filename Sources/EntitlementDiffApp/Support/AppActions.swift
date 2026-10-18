@@ -290,7 +290,7 @@ final class AppActions {
               let cursor = session.cursor else { return }
         do {
             let text = try TreeResultDetails.text(key: key, hit: hit, query: session.input.value,
-                                                  complete: cursor.complete, limited: cursor.limited)
+                                                  complete: cursor.complete, limited: cursor.limited, scope: cursor.scope)
             clipboard.clearContents()
             if clipboard.setData(Data(text.utf8), forType: .string) {
                 statusMessage = "Selected tree result details copied. Includes complete typed path and exact UTF-8 match."

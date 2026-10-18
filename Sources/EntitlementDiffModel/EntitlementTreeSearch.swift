@@ -4,6 +4,10 @@ import Foundation
 /// Resumable depth-first search: 64 traversal operations and one 32KiB string
 /// portion per action. Captured values are immutable; child arrays are never flattened.
 public struct EntitlementTreeSearch: Sendable {
+    public enum Scope: String, Sendable, CaseIterable {
+        case both = "Both", previous = "Previous", current = "Current"
+    }
+    public let scope: Scope
     public enum Segment: Sendable, Equatable {
         case key(String), index(Int)
         public static func == (a: Self, b: Self) -> Bool {
@@ -45,12 +49,13 @@ public struct EntitlementTreeSearch: Sendable {
     public static let resultLimit = 200
     public static let depthLimit = 128
 
-    public init(previous: EntitlementValue?, current: EntitlementValue?, query: String) throws {
+    public init(previous: EntitlementValue?, current: EntitlementValue?, query: String, scope: Scope = .both) throws {
         _ = try StringValueSearch(source: "", query: query)
+        self.scope = scope
         self.query = query; queryByteCount = query.utf8.count
         roots = []
-        if let previous { roots.append((.previous, previous)) }
-        if let current { roots.append((.current, current)) }
+        if scope != .current, let previous { roots.append((.previous, previous)) }
+        if scope != .previous, let current { roots.append((.current, current)) }
     }
     public mutating func step() throws {
         guard !complete, !limited else { return }

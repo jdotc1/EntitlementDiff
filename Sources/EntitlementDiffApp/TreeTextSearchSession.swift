@@ -8,6 +8,7 @@ import EntitlementDiffCore
     let comparisonRevision: UUID
     private let previous: EntitlementValue?
     private let current: EntitlementValue?
+    private(set) var scope: EntitlementTreeSearch.Scope = .both
     private(set) var input = ExactKeyInput()
     private(set) var cursor: EntitlementTreeSearch?
     private(set) var selectedHitID: UUID?
@@ -50,6 +51,11 @@ import EntitlementDiffCore
             return try await withTaskCancellationHandler { try await work.value } onCancel: { work.cancel() }
         }
     }
+    func setScope(_ value: EntitlementTreeSearch.Scope) {
+        guard value != scope else { return }
+        cancel(); scope = value; cursor = nil; selectedHitID = nil
+        message = "Scope changed to \(value.rawValue). Use Search Tree."
+    }
     func setQuery(_ value: ExactKeyInput) {
         let bounded = ExactKeyInput(value: String(decoding: value.value.utf8.prefix(1025), as: UTF8.self))
         guard input != bounded else { return }
@@ -66,7 +72,7 @@ import EntitlementDiffCore
     func cancel() { generation = UUID(); task?.cancel(); task = nil; running = false }
     @discardableResult func search() -> Task<Void, Never>? {
         cancel(); selectedHitID = nil
-        do { cursor = try EntitlementTreeSearch(previous: previous, current: current, query: input.value) }
+        do { cursor = try EntitlementTreeSearch(previous: previous, current: current, query: input.value, scope: scope) }
         catch { cursor = nil; message = "Enter 1–1,024 UTF-8 query bytes."; return nil }
         return advance()
     }
@@ -78,7 +84,7 @@ import EntitlementDiffCore
                 let next = try await runner(cursor)
                 guard let self, !Task.isCancelled, request == self.generation else { return }
                 self.cursor = next; self.running = false
-                self.message = next.limited ? "Search incomplete: result limit 200 or path depth limit 128 reached. Narrow the query or browse branches." : next.complete ? "Search complete. \(next.hits.count) matching string leaves." : "Search incomplete. \(next.visited) nodes visited; \(next.hits.count) matching leaves. Continue to search further."
+                self.message = "\(next.scope.rawValue) scope · " + (next.limited ? "Search incomplete: result limit 200 or path depth limit 128 reached. Narrow the query or browse branches." : next.complete ? "Search complete. \(next.hits.count) matching string leaves." : "Search incomplete. \(next.visited) nodes visited; \(next.hits.count) matching leaves. Continue to search further.")
             } catch {
                 guard let self, request == self.generation else { return }
                 self.running = false; self.message = "Search did not complete. Use Search Tree to restart."

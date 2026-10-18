@@ -474,3 +474,8 @@ Clear Tree Search invalidates request generation/cancels work and resets only qu
 results, selection and progress. It never scans or changes comparison/clipboard.
 Clear remains enabled during search; stale completion cannot republish results.
 See CLEAR_TREE_SEARCH.md.
+
+Tree text search captures Both/Previous/Current scope before traversal; excluded
+roots are never visited. Scope change invalidates work/results while retaining query
+and requiring explicit Search. Clear retains scope. Copy/completion name scope;
+full comparison/schema1 remain unchanged. See TREE_SEARCH_SCOPE.md.

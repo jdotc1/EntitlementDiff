@@ -1,3 +1,7 @@
+v0.1.48 (49) — Search Side Scope
+
+Three focused development methods and native scope/state/copy acceptance reused. Arm64 app includes comparison CLI. Distribution checks recorded separately.
+
 v0.1.47 (48) — Clear Tree Search
 
 Two focused development methods and native Clear/state acceptance reused. Arm64 app includes comparison CLI. Distribution checks recorded separately.

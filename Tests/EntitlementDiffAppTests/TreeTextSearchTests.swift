@@ -6,6 +6,56 @@ import EntitlementDiffCore
 @testable import EntitlementDiffApp
 
 @MainActor final class TreeTextSearchTests: XCTestCase {
+    func testTreeScopeExcludesTraversalAndRetainsBothOrder() throws {
+        let huge = EntitlementValue.array(Array(repeating: .string("x"), count: 500))
+        var current = try EntitlementTreeSearch(previous: huge, current: .string("e\u{301}"), query: "e\u{301}", scope: .current)
+        try current.step(); XCTAssertEqual(current.visited, 1)
+        try current.step(); XCTAssertTrue(current.complete)
+        XCTAssertEqual(current.hits.count, 1); XCTAssertEqual(current.hits.first?.side, .current)
+        var previous = try EntitlementTreeSearch(previous: .string("x"), current: huge, query: "x", scope: .previous)
+        try previous.step(); try previous.step(); XCTAssertTrue(previous.complete)
+        XCTAssertEqual(previous.visited, 1); XCTAssertEqual(previous.hits.count, 1)
+        var both = try EntitlementTreeSearch(previous: .string("x"), current: .string("x"), query: "x")
+        while !both.complete { try both.step() }
+        XCTAssertEqual(both.hits.map(\.side), [.previous, .current])
+        var absent = try EntitlementTreeSearch(previous: .string("x"), current: nil, query: "x", scope: .current)
+        try absent.step(); XCTAssertTrue(absent.complete); XCTAssertTrue(absent.hits.isEmpty); XCTAssertEqual(absent.visited, 0)
+    }
+    func testScopeInvalidatesSelectionRetainsQueryAndClearScope() async throws {
+        let model = ComparisonModel(reader: TreeUnusedReader()); model.loadExample()
+        _ = model.browser.findExactKey("example.feature-labels", revealHidden: true)
+        let session = TreeTextSearchSession(change: try XCTUnwrap(model.browser.selectedRow), revision: model.reportRevision)
+        session.setQuery(.init(value: "local")); await session.search()?.value
+        while session.cursor?.complete == false { await session.advance()?.value }
+        session.nextResult(); let old = try XCTUnwrap(session.selectedHit)
+        let selection = model.browser.selection, revision = model.reportRevision
+        session.setScope(.current)
+        XCTAssertNil(session.cursor); XCTAssertNil(session.selectedHitID); XCTAssertEqual(session.input.value, "local")
+        let actions = AppActions(model: model); actions.openTreeHit(session, hit: old); XCTAssertNil(actions.focusedValue)
+        let clipboard = NSPasteboard.withUniqueName(); defer { clipboard.releaseGlobally() }
+        clipboard.setString("sentinel", forType: .string); actions.copyTreeResultDetails(session, to: clipboard)
+        XCTAssertEqual(clipboard.string(forType: .string), "sentinel")
+        await session.search()?.value
+        while session.cursor?.complete == false { await session.advance()?.value }
+        session.nextResult(); XCTAssertEqual(session.selectedHit?.side, .current)
+        XCTAssertTrue(session.message.contains("Current scope"))
+        actions.copyTreeResultDetails(session, to: clipboard)
+        XCTAssertTrue(clipboard.string(forType: .string)?.contains("Search scope: Current") == true)
+        session.clear(); XCTAssertEqual(session.scope, .current); XCTAssertEqual(session.input.value, "")
+        XCTAssertEqual(model.browser.selection, selection); XCTAssertEqual(model.reportRevision, revision)
+    }
+    func testScopeChangeRejectsLateWorker() async throws {
+        let change = EntitlementComparison(previous: .init(["key": .string("x")]), current: .init()).changes[0]
+        let session = TreeTextSearchSession(change: change, revision: UUID(), runner: { cursor in
+            let work = Task.detached { try await Task.sleep(for: .milliseconds(20)); var next = cursor; try next.step(); return next }
+            return try await work.value
+        })
+        session.setQuery(.init(value: "x")); let work = try XCTUnwrap(session.search())
+        session.setScope(.current); let message = session.message
+        await work.value
+        XCTAssertNil(session.cursor); XCTAssertNil(session.selectedHitID); XCTAssertFalse(session.running)
+        XCTAssertEqual(session.scope, .current); XCTAssertEqual(session.input.value, "x"); XCTAssertEqual(session.message, message)
+    }
     func testClearTreeCompletedAndPartialPreservesComparisonAndClipboard() async throws {
         let model = ComparisonModel(reader: TreeUnusedReader()); model.loadExample()
         _ = model.browser.findExactKey("example.feature-labels", revealHidden: true)

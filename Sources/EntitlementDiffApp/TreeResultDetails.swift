@@ -6,7 +6,7 @@ enum TreeResultDetails {
     static let byteLimit = 65_536
     enum Failure: Error { case outputLimit }
     static func text(key: String, hit: EntitlementTreeSearch.Hit, query: String,
-                     complete: Bool, limited: Bool) throws -> String {
+                     complete: Bool, limited: Bool, scope: EntitlementTreeSearch.Scope = .both) throws -> String {
         var output = ""
         var byteCount = 0
         func append(_ text: String) throws {
@@ -34,7 +34,7 @@ enum TreeResultDetails {
         try escaped(query)
         try append("\nMatched UTF-8 bytes:")
         for byte in query.utf8 { try append(String(format: " %02X", byte)) }
-        try append("\nTree search status: \(limited ? "incomplete (limit reached)" : complete ? "complete" : "incomplete (continuation available)")\nFirst occurrence per string leaf; not all occurrences.\n")
+        try append("\nSearch scope: \(scope.rawValue)\nTree search status: \(limited ? "incomplete (limit reached)" : complete ? "complete" : "incomplete (continuation available)")\nFirst occurrence per string leaf; not all occurrences.\n")
         return output
     }
 }

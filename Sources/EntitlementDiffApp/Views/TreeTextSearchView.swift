@@ -17,8 +17,15 @@ struct TreeTextSearchView: View {
                 Button("Continue Tree Search") { session.advance() }
                     .disabled(session.running || busy || session.cursor == nil || session.cursor?.complete == true || session.cursor?.limited == true)
             }
-            Button("Clear Tree Search") { session.clear() }
-                .disabled(busy || !session.canClear)
+            HStack {
+                Picker("Search in", selection: Binding(get: { session.scope }, set: { session.setScope($0) })) {
+                    ForEach(EntitlementTreeSearch.Scope.allCases, id: \.self) { scope in
+                        Text(scope.rawValue).tag(scope)
+                    }
+                }.frame(maxWidth: 260).disabled(busy)
+                Button("Clear Tree Search") { session.clear() }
+                    .disabled(busy || !session.canClear)
+            }
             Text(session.message).font(.caption).foregroundStyle(.secondary)
             Text("Literal UTF-8 · first match per string leaf · 64 traversal operations and one 32 KiB string portion per action · up to 200 results. Data and other value types are excluded.")
                 .font(.caption).foregroundStyle(.secondary)
