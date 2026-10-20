@@ -4,16 +4,17 @@
 
 # EntitlementDiff
 
-**See what changed in a macOS app's declared entitlements.**
+**Read-only entitlement comparison for macOS application security review.**
 
-EntitlementDiff is a native SwiftUI app and a set of Swift libraries for comparing
-embedded entitlements between two builds. Choose a Previous and Current `.app`,
-select **arm64** or **x86_64**, and review added, removed, changed, and unchanged
-keys with their exact typed values. The inspected apps are never launched.
+EntitlementDiff is a native SwiftUI app and a set of Swift libraries for reviewing
+changes in the entitlements embedded in a macOS app's main executable. Choose
+Previous and Current `.app` builds, select **arm64** or **x86_64**, and inspect
+added, removed, changed, and unchanged declarations with their exact typed
+values. The inspected apps are never launched.
 
-Use it to review signing-configuration changes, check your builds before a
-release, or share a comparison that a colleague can reopen without the original
-apps.
+Use it to spot changes in declared capabilities during security review, inspect
+signing-configuration changes before a release, or share a saved comparison that
+a colleague can reopen without the original apps.
 
 **[Download the app](https://github.com/jdotc1/EntitlementDiff/releases/latest)** ·
 **[Build from source](#build-from-source)** ·
