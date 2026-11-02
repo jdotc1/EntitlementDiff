@@ -36,12 +36,12 @@ checks; see [validation and limits](#validation-and-limits).
 Both applications are read for declared entitlements only; neither inspected application is launched.
 
 ```mermaid
-flowchart LR
-  A["Previous .app"] --> C["Read entitlements for selected architecture"]
+flowchart TB
+  A["Previous .app"] --> C["Entitlements"]
   B["Current .app"] --> C
-  C --> D["Exact typed comparison"]
-  D --> E["Filter and inspect changes"]
-  E --> F["Save or export a report"]
+  C --> D["Typed diff"]
+  D --> E["Review diff"]
+  E --> F["Export report"]
 ```
 
 ## Try a comparison
