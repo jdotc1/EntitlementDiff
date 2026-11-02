@@ -31,6 +31,19 @@ checks; see [validation and limits](#validation-and-limits).
 > permissions, verify signatures, assess Gatekeeper/notarization, audit nested
 > code, or assign a security verdict. Unknown entitlement keys remain visible.
 
+## Visual workflow
+
+Both applications are read for declared entitlements only; neither inspected application is launched.
+
+```mermaid
+flowchart LR
+  A["Previous .app"] --> C["Read entitlements for selected architecture"]
+  B["Current .app"] --> C
+  C --> D["Exact typed comparison"]
+  D --> E["Filter and inspect changes"]
+  E --> F["Save or export a report"]
+```
+
 ## Try a comparison
 
 1. Open EntitlementDiff and choose **Load Synthetic Example** to explore the
